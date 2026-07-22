@@ -31,7 +31,7 @@ export function insertGradesInTransaction(db, { classId, topicId, date, entries 
         throw new Error("INVALID_STUDENT");
       }
       const score = Number(e.score);
-      if (!Number.isInteger(score) || score < 0 || score > 100) {
+      if (!Number.isInteger(score) || score < 0 || score > 110) {
         throw new Error("INVALID_SCORE");
       }
       const notes =

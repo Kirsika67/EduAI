@@ -216,7 +216,7 @@ export function mapImportRowsToEntries(rawRows, students, startRowNumber = 2) {
       return;
     }
     const score = Math.round(Number(scoreStr));
-    if (!Number.isInteger(score) || Number.isNaN(score) || score < 0 || score > 100) {
+    if (!Number.isInteger(score) || Number.isNaN(score) || score < 0 || score > 110) {
       skipped.push({
         row: rowNum,
         reason: `Kehtetu hinne: ${scoreRaw}`,

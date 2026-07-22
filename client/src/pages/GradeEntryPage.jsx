@@ -124,7 +124,7 @@ export default function GradeEntryPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Õpilane</th>
-                <th className="text-center text-xs font-medium text-gray-500 px-5 py-3">Hinne (0–100)</th>
+                <th className="text-center text-xs font-medium text-gray-500 px-5 py-3">Hinne (0–110)</th>
                 <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Märkus (valikuline)</th>
               </tr>
             </thead>
@@ -135,7 +135,7 @@ export default function GradeEntryPage() {
                     <span className="text-sm font-medium text-gray-900">{student.name}</span>
                   </td>
                   <td className="px-5 py-3 text-center">
-                    <input type="number" min={0} max={100} placeholder="—"
+                    <input type="number" min={0} max={110} placeholder="—"
                       value={grades[student.id] ?? ''}
                       onChange={e => setGrades(p => ({ ...p, [student.id]: e.target.value }))}
                       className="w-20 text-center border border-gray-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#7F77DD]" />

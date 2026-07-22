@@ -38,7 +38,6 @@ export default function OverviewPage() {
   const [students, setStudents] = useState([])
   const [allGrades, setAllGrades] = useState([])
   const [topics, setTopics] = useState([])
-  const [allClassesStudentsCount, setAllClassesStudentsCount] = useState(0)
   const [aiText, setAiText] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(false)
@@ -52,17 +51,6 @@ export default function OverviewPage() {
 
   const loadData = async () => {
     setDataLoading(true)
-    let totalAcrossClasses = 0
-    for (const c of classes) {
-      try {
-        const classStudents = await apiCall(`/api/classes/${c.id}/students`)
-        const classCount = classStudents.students?.length || 0
-        totalAcrossClasses += classCount
-      } catch {
-        // ignore class-level fetch failures when computing totals
-      }
-    }
-    setAllClassesStudentsCount(totalAcrossClasses)
 
     try {
       const s = await apiCall(`/api/classes/${selectedClassId}/students`)
@@ -78,6 +66,9 @@ export default function OverviewPage() {
       setAllGrades([])
     }
     finally { setDataLoading(false) }
+
+    // Lae AI ülevaade automaatselt peale andmete laadimist
+    loadAI()
   }
 
   const loadAI = async () => {
@@ -85,9 +76,11 @@ export default function OverviewPage() {
     setAiLoading(true)
     try {
       const data = await apiCall(`/api/dashboard/overview?classId=${selectedClassId}`)
-      setAiText(data.aiSummary || data.aiSummaryFallback || 'AI ülevaade pole hetkel saadaval.')
-    } catch {
-      setAiText('AI ülevaade pole hetkel saadaval.')
+      const text = (data.aiSummary || data.aiSummaryFallback || '').trim()
+      setAiText(text || 'AI ülevaade pole hetkel saadaval.')
+    } catch (err) {
+      console.error('AI ülevaade ebaõnnestus', err)
+      setAiText(err?.message || 'AI ülevaade pole hetkel saadaval. Proovi lehte värskendada.')
     }
     finally { setAiLoading(false) }
   }
@@ -98,7 +91,7 @@ export default function OverviewPage() {
   )
 
   const alerts = computeAlerts(students, allGrades)
-  const totalStudents = allClassesStudentsCount
+  const totalStudents = students.length
   const needsAttention = alerts.filter(a => a.type === 'red' || a.type === 'yellow').length
   const classAvg = allGrades.length > 0
     ? Math.round(allGrades.reduce((s, g) => s + Number(g.score), 0) / allGrades.length) : 0
@@ -119,7 +112,7 @@ export default function OverviewPage() {
       key: 'total',
       label: 'Kokku õpilasi jälgitakse',
       value: totalStudents,
-      sub: 'kõik sinu klassid kokku',
+      sub: 'valitud klass: ' + (selectedClass?.name || ''),
       color: 'text-gray-900',
       onClick: () => navigate('/opilased'),
     },

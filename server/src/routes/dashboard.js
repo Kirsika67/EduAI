@@ -25,11 +25,6 @@ router.get("/overview", async (req, res) => {
     )
     .all(req.teacherId);
 
-  const totalStudentsTracked = classes.reduce(
-    (acc, c) => acc + (c.student_count || 0),
-    0
-  );
-
   let scopeClass = null;
 
   if (classIdParam !== undefined && classIdParam !== "") {
@@ -45,11 +40,15 @@ router.get("/overview", async (req, res) => {
     scopeClass = classes[0];
   }
 
+  const totalStudentsTracked = scopeClass
+    ? scopeClass.student_count || 0
+    : classes.reduce((acc, c) => acc + (c.student_count || 0), 0);
+
   if (!scopeClass) {
     return res.json({
       scope: null,
       metrics: {
-        totalStudentsTracked: totalStudentsTracked,
+        totalStudentsTracked,
         needAttentionCount: 0,
         classAveragePercent: null,
         ungradedWorkCount: 0,

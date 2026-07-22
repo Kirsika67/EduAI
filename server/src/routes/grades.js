@@ -78,7 +78,7 @@ router.post("/classes/:classId/grades", async (req, res) => {
     if (err.message === "INVALID_SCORE") {
       return res
         .status(400)
-        .json({ error: "Hinne peab olema täisarv 0–100." });
+        .json({ error: "Hinne peab olema täisarv 0–110 (lisaülesanded lubatud)." });
     }
     throw err;
   }
@@ -188,7 +188,7 @@ router.post(
       if (err.message === "INVALID_SCORE") {
         return res
           .status(400)
-          .json({ error: "Hinne peab olema täisarv 0–100." });
+          .json({ error: "Hinne peab olema täisarv 0–110 (lisaülesanded lubatud)." });
       }
       throw err;
     }

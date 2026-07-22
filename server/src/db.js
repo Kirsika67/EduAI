@@ -52,7 +52,7 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     topic_id INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
-    score INTEGER NOT NULL CHECK (score >= 0 AND score <= 100),
+    score INTEGER NOT NULL CHECK (score >= 0 AND score <= 110),
     date TEXT NOT NULL,
     notes TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -104,6 +104,38 @@ if (!lpCols.some((c) => c.name === "analysis_json")) {
 const gradeCols = db.prepare(`PRAGMA table_info(grades)`).all();
 if (!gradeCols.some((c) => c.name === "ai_feedback")) {
   db.exec(`ALTER TABLE grades ADD COLUMN ai_feedback TEXT`);
+}
+
+/** Vanemad andmebaasid: score CHECK võib olla <= 100 või <= 200; limiit on 110 (lisaülesanded). */
+const gradesSql = db
+  .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'grades'`)
+  .get()?.sql;
+if (
+  gradesSql &&
+  (gradesSql.includes("score <= 100") || gradesSql.includes("score <= 200")) &&
+  !gradesSql.includes("score <= 110")
+) {
+  db.exec(`
+    BEGIN;
+    CREATE TABLE grades__migrated (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+      topic_id INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+      score INTEGER NOT NULL CHECK (score >= 0 AND score <= 110),
+      date TEXT NOT NULL,
+      notes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      ai_feedback TEXT
+    );
+    INSERT INTO grades__migrated (id, student_id, topic_id, score, date, notes, created_at, ai_feedback)
+    SELECT id, student_id, topic_id, score, date, notes, created_at, ai_feedback FROM grades;
+    DROP TABLE grades;
+    ALTER TABLE grades__migrated RENAME TO grades;
+    CREATE INDEX IF NOT EXISTS idx_grades_student ON grades(student_id);
+    CREATE INDEX IF NOT EXISTS idx_grades_topic ON grades(topic_id);
+    CREATE INDEX IF NOT EXISTS idx_grades_date ON grades(date);
+    COMMIT;
+  `);
 }
 
 export default db;
