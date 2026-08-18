@@ -93,14 +93,29 @@ dubleerida — Faas 3 kolib selle loogika ümber, mitte ei kirjuta teist koopiat
 
 EduAI teeb alaealiste kohta riskihinnanguid. See ei ole "lisaks mõelda" teema, vaid määrab andmemudeli.
 
-**EL AI-määrus (AI Act):**
-- Lisa III punkt 3 loeb haridusvaldkonna AI **kõrge riskiga** süsteemiks, sh õpitulemuste hindamine,
-  eriti kui seda kasutatakse õppeprotsessi suunamiseks. EduAI riskiskoor + AI-soovitused langevad
-  tõenäoliselt sinna, kui need mõjutavad seda, kuidas last koheldakse.
-- Emotsioonide tuletamine haridusasutuses on **keelatud praktika** (välja arvatud meditsiini- ja
-  ohutuspõhjused).
-- ⚠️ *Kontrollimata:* täpne kohaldamise ajakava (Lisa III kohustused, 2026 vs edasilükkamine) tuleb
-  enne pilooti üle kontrollida — seda ei tohi kirjutada mälu järgi.
+**EL AI-määrus (AI Act) — kontrollitud 18.08.2026:**
+
+- **Emotsioonide tuletamine haridusasutuses on keelatud praktika** ja see keeld **kehtib juba
+  praegu** — keelatud praktikad hakkasid kohalduma 2. veebruaril 2025. Erand on ainult
+  meditsiini- ja ohutuspõhjustel. Põhjendus: selliste süsteemide teaduslik alus on nõrk ja
+  koolis on võimusuhe ebavõrdne.
+- **Haridusvaldkonna AI on Lisa III järgi kõrge riskiga**: vastuvõtt, õpitulemuste hindamine
+  (sh kui seda kasutatakse õppeprotsessi suunamiseks), sobiva haridustaseme määramine ja
+  eksamite jälgimine. EduAI riskiskoor + AI-soovitused langevad sinna, kui need mõjutavad
+  seda, kuidas last koheldakse.
+- **Kõrge riski kohustuste tähtaeg lükkus edasi**: määrusega (EL) 2026/1744 (nn digitaalne
+  omnibus, avaldatud 24.07.2026, jõustus 27.07.2026) nihkus eraldiseisvate Lisa III süsteemide
+  nõuete kohaldamine 2. augustilt 2026 **2. detsembrile 2027**. Läbipaistvusnõuded ja
+  AI-pädevuse kohustus jäid esialgsesse ajakavasse.
+
+**Mida see praktikas tähendab:** emotsioonikeeld on juba täna siduv, seega heaolu-check-in'i
+disaini ei tohi valesti teha. Kõrge riski nõuete (riskijuhtimine, andmekvaliteet, logimine,
+inimjärelevalve, tehniline dokumentatsioon) täitmiseks on aega detsembrini 2027 — aga need
+määravad andmemudeli, mistõttu need otsused tuleb teha nüüd, mitte 2027. aastal.
+
+*Allikad:* [AI Act Lisa III](https://artificialintelligenceact.eu/annex/3/) ·
+[FPF: emotsioonituvastuse keeld haridusasutustes](https://fpf.org/blog/red-lines-under-eu-ai-act-unpacking-the-prohibition-of-emotion-recognition-in-the-workplace-and-education-institutions/) ·
+[Gibson Dunn: omnibus ja edasilükatud tähtajad](https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/)
 
 **Sellest tulenevad läbivad reeglid (kehtivad igale faasile):**
 
