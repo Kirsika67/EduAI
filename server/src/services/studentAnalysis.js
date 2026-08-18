@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL } from "../constants/ai.js";
+import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
 
 /**
  * Eemaldab võimaliku ```json ... ``` ümbrise.
@@ -65,6 +65,7 @@ ${payload}`;
   try {
     const msg = await client.messages.create({
       model: ANTHROPIC_MODEL,
+      thinking: ANTHROPIC_THINKING,
       max_tokens: 4096,
       messages: [{ role: "user", content: instruction }],
     });

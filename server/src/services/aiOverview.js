@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL as MODEL } from "../constants/ai.js";
+import { ANTHROPIC_MODEL as MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
 
 /**
  * @param {object} ctx
@@ -31,7 +31,8 @@ export async function generateDashboardSummary(ctx, apiKey) {
   try {
     const msg = await client.messages.create({
       model: MODEL,
-      max_tokens: 400,
+      thinking: ANTHROPIC_THINKING,
+      max_tokens: 600,
       messages: [
         {
           role: "user",
