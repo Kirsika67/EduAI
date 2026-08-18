@@ -14,6 +14,8 @@ import FeedbackPage from './pages/FeedbackPage'
 import PlanningPage from './pages/PlanningPage'
 import InvitePage from './pages/InvitePage'
 import SettingsPage from './pages/SettingsPage'
+import TimetablePage from './pages/TimetablePage'
+import ParentMeetingsPage from './pages/ParentMeetingsPage'
 import MyChildPage from './pages/MyChildPage'
 import { isStaff, canInvite, landingPathForRole } from './constants/roles'
 
@@ -79,6 +81,10 @@ export default function App() {
         <Route element={<RoleGate allow={canInvite} />}>
           <Route path="kutsu" element={<InvitePage />} />
         </Route>
+
+        {/* Tunniplaan — vaatavad kõik rollid, muudavad ainult töötajad (backend valvab) */}
+        <Route path="tunniplaan" element={<TimetablePage />} />
+        <Route path="tunniplaan/vanemapaev" element={<ParentMeetingsPage />} />
 
         {/* Vanema ja õpilase vaade */}
         <Route path="minu-laps" element={<MyChildPage />} />

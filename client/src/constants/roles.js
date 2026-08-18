@@ -46,26 +46,28 @@ export const roleLabel = role => ROLE_LABELS[role] || role
  */
 const STAFF_NAV = [
   { to: '/ulevaade', label: 'Ülevaade' },
+  { to: '/tunniplaan', label: 'Tunniplaan' },
   { to: '/opilased', label: 'Õpilased' },
   { to: '/hinded', label: 'Hinded' },
   { to: '/klassid', label: 'Klassid' },
   { to: '/materjalid', label: 'Materjalid' },
   { to: '/tagasiside', label: 'Tagasiside' },
   { to: '/planeerimine', label: 'Planeerimine' },
-  { label: 'Tunniplaan', soon: 'Faas 2' },
   { label: 'Kohalolek', soon: 'Faas 3' },
   { label: 'Sõnumid', soon: 'Faas 4' },
 ]
 
 const PARENT_NAV = [
   { to: '/minu-laps', label: 'Minu laps' },
+  { to: '/tunniplaan', label: 'Tunniplaan' },
+  { to: '/tunniplaan/vanemapaev', label: 'Vanemate päev' },
   { label: 'Sõnumid', soon: 'Faas 4' },
-  { label: 'Tunniplaan', soon: 'Faas 2' },
 ]
 
 const STUDENT_NAV = [
   { to: '/minu-laps', label: 'Minu profiil' },
-  { label: 'Kodutööd', soon: 'Faas 2' },
+  { to: '/tunniplaan', label: 'Tunniplaan' },
+  { label: 'Kodutööd', soon: 'Faas 3' },
   { label: 'Sõnumid', soon: 'Faas 4' },
 ]
 

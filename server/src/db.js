@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { newJoinCode } from "./utils/codes.js";
 import { runFaas1bMigration } from "./migrations/faas1b.js";
+import { runFaas2Migration } from "./migrations/faas2.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -409,5 +410,8 @@ if (faas1b.changed) {
     console.log(`[EduAI migratsioon 1b] ${note}`);
   }
 }
+
+/* FAAS 2 — tunniplaan, asendused, eksamid, lapsevanema päev (ainult uued tabelid). */
+runFaas2Migration(db);
 
 export default db;

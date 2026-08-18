@@ -17,6 +17,8 @@ import weeklyPlansRoutes from "./routes/weeklyPlans.js";
 import invitationsRoutes from "./routes/invitations.js";
 import accountRoutes from "./routes/account.js";
 import competenciesRoutes from "./routes/competencies.js";
+import timetableRoutes from "./routes/timetable.js";
+import parentMeetingsRoutes from "./routes/parentMeetings.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(__dirname, "..", "..", "client", "dist");
@@ -44,6 +46,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/invitations", invitationsRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/competencies", competenciesRoutes);
+app.use("/api/timetable", timetableRoutes);
+app.use("/api/parent-meetings", parentMeetingsRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api", studentRoutes);
 app.use("/api", studentDetailRoutes);
