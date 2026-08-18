@@ -2,11 +2,8 @@ import { Router } from "express";
 import db from "../db.js";
 import { SERVER_DOTENV_PATH } from "../loadEnv.js";
 import { requireAuth } from "../middleware/auth.js";
-import {
-  classTopicWeakAlerts,
-  hasRedStreak,
-  monthWindowTrend,
-} from "../services/alerts.js";
+import { classTopicWeakAlerts } from "../services/alerts.js";
+import { abcForStudent } from "../services/abcRisk.js";
 import { generateDashboardSummary } from "../services/aiOverview.js";
 
 const router = Router();
@@ -115,54 +112,27 @@ router.get("/overview", async (req, res) => {
     )
     .all(cid);
 
-  const gradeStmt = db.prepare(
-    `SELECT score, date FROM grades WHERE student_id = ? ORDER BY date ASC, id ASC`
-  );
-
   const studentAlerts = [];
   let needAttentionCount = 0;
 
   for (const st of students) {
-    const rows = gradeStmt.all(st.id).map((r) => ({
-      score: r.score,
-      date: r.date,
-    }));
-
-    const red = rows.length >= 3 && hasRedStreak(rows);
-    const trend = monthWindowTrend(rows);
-
-    let level = null;
-    let message = "";
-    let detail = "";
-
-    if (red) {
-      level = "red";
-      message = "Järelevastamine vajalik";
-      detail = "Kolm järjestikust hindeid alla 50%.";
-    } else if (trend === "yellow") {
-      level = "amber";
-      message = "Tugi vajalik";
-      detail = "Keskmine on viimase kuu jooksul langenud üle 15%.";
-    } else if (trend === "green") {
-      level = "green";
-      message = "Valmis raskemateks ülesanneteks";
-      detail = "Keskmine on viimase kuu jooksul tõusnud üle 15%.";
-    }
-
-    if (level === "red" || level === "amber") {
+    const abc = abcForStudent(db, st.id);
+    if (abc.level === "red" || abc.level === "yellow") {
       needAttentionCount += 1;
     }
+    if (abc.level === "blue") continue;
 
-    if (level) {
-      studentAlerts.push({
-        level,
-        kind: "student",
-        studentId: st.id,
-        studentName: st.name,
-        message,
-        detail,
-      });
-    }
+    studentAlerts.push({
+      level: abc.level === "yellow" ? "amber" : abc.level,
+      kind: "student",
+      studentId: st.id,
+      studentName: st.name,
+      message: abc.label,
+      detail: abc.reasons.join(" · ") || abc.label,
+      reasons: abc.reasons,
+      score: abc.score,
+      components: abc.components,
+    });
   }
 
   const severity = { red: 0, amber: 1, green: 2 };

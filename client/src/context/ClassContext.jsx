@@ -15,9 +15,10 @@ export function ClassProvider({ children }) {
       const data = await apiCall('/api/classes')
       const list = data.classes || []
       setClasses(list)
-      if (list.length > 0 && !selectedClassId) {
-        setSelectedClassId(Number(list[0].id))
-      }
+      setSelectedClassId((prev) => {
+        if (prev && list.some((c) => Number(c.id) === Number(prev))) return Number(prev)
+        return list.length ? Number(list[0].id) : null
+      })
     } catch (err) {
       console.error('Klasside laadimine ebaõnnestus:', err)
     } finally {

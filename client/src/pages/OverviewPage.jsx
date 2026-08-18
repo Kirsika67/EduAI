@@ -3,33 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 
-function computeAlerts(students, allGrades) {
-  const alerts = []
-  students.forEach(student => {
-    const sg = allGrades.filter(g => Number(g.student_id) === Number(student.id))
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-    if (sg.length >= 3 && sg.slice(0, 3).every(g => Number(g.score) < 50))
-      alerts.push({ type: 'red', studentName: student.name })
-    const now = new Date()
-    const last30 = sg.filter(g => (now - new Date(g.date)) / 86400000 <= 30)
-    const prev30 = sg.filter(g => { const d = (now - new Date(g.date)) / 86400000; return d > 30 && d <= 60 })
-    if (last30.length > 0 && prev30.length > 0) {
-      const a1 = last30.reduce((s, g) => s + Number(g.score), 0) / last30.length
-      const a2 = prev30.reduce((s, g) => s + Number(g.score), 0) / prev30.length
-      if (a1 - a2 > 15) alerts.push({ type: 'green', studentName: student.name })
-    }
-  })
+function topicAlerts(allGrades) {
   const topicMap = {}
   allGrades.forEach(g => {
     const topicName = g.topic_name || g.topic || 'Teema puudub'
     if (!topicMap[topicName]) topicMap[topicName] = []
     topicMap[topicName].push(Number(g.score))
   })
-  Object.entries(topicMap).forEach(([topic, scores]) => {
+  return Object.entries(topicMap).flatMap(([topic, scores]) => {
     const avg = scores.reduce((s, v) => s + v, 0) / scores.length
-    if (avg < 65) alerts.push({ type: 'yellow', topic, avg: Math.round(avg) })
+    if (avg < 65) return [{ kind: 'topic', type: 'yellow', topic, avg: Math.round(avg) }]
+    return []
   })
-  return alerts
 }
 
 export default function OverviewPage() {
@@ -38,6 +23,7 @@ export default function OverviewPage() {
   const [students, setStudents] = useState([])
   const [allGrades, setAllGrades] = useState([])
   const [topics, setTopics] = useState([])
+  const [risks, setRisks] = useState([])
   const [aiText, setAiText] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(false)
@@ -59,15 +45,17 @@ export default function OverviewPage() {
       setTopics(t.topics || [])
       const g = await apiCall(`/api/classes/${selectedClassId}/grades`)
       setAllGrades(g.grades || [])
+      const r = await apiCall(`/api/classes/${selectedClassId}/abc-risks`)
+      setRisks(r.students || [])
     } catch (err) {
       console.error(err)
       setStudents([])
       setTopics([])
       setAllGrades([])
+      setRisks([])
     }
     finally { setDataLoading(false) }
 
-    // Lae AI ülevaade automaatselt peale andmete laadimist
     loadAI()
   }
 
@@ -90,9 +78,19 @@ export default function OverviewPage() {
     <div className="p-8 text-center text-gray-500">Ühtegi klassi pole. Lisa klass vasakul külgribal.</div>
   )
 
-  const alerts = computeAlerts(students, allGrades)
+  const studentAlerts = risks
+    .filter(r => r.level !== 'blue')
+    .map(r => ({
+      kind: 'student',
+      type: r.level,
+      studentName: r.studentName,
+      studentId: r.studentId,
+      detail: (r.reasons || []).join(' · '),
+      label: r.label,
+    }))
+  const alerts = [...studentAlerts, ...topicAlerts(allGrades)]
   const totalStudents = students.length
-  const needsAttention = alerts.filter(a => a.type === 'red' || a.type === 'yellow').length
+  const needsAttention = risks.filter(r => r.level === 'red' || r.level === 'yellow').length
   const classAvg = allGrades.length > 0
     ? Math.round(allGrades.reduce((s, g) => s + Number(g.score), 0) / allGrades.length) : 0
   let ungradedWork = 0
@@ -120,7 +118,7 @@ export default function OverviewPage() {
       key: 'attention',
       label: 'Vajavad tähelepanu',
       value: needsAttention,
-      sub: 'punane või kollane hoiatus',
+      sub: 'ABC-risk: hinded, kohalolek, käitumine',
       color: 'text-[#E24B4A]',
       onClick: () => setActiveDrilldown(prev => prev === 'attention' ? '' : 'attention'),
     },
@@ -145,7 +143,69 @@ export default function OverviewPage() {
   return (
     <div className="max-w-5xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Ülevaade</h1>
-      <p className="text-gray-500 text-sm mb-8">Peamised näitajad, hoiatused ja lühike AI ülevaade valitud klassi kohta.</p>
+      <p className="text-gray-500 text-sm mb-4">Peamised näitajad, hoiatused ja lühike AI ülevaade valitud klassi kohta.</p>
+
+      <div className="bg-[#7F77DD] text-white rounded-xl p-5 mb-6">
+        <p className="text-sm font-semibold mb-1">Uus: personaalne jälgimine (ABC)</p>
+        <p className="text-sm text-white/90">
+          Iga õpilast jälgitakse kolmes kihis — kohalolek, käitumine ja kursusehinded.
+          Hoiatus näitab alati põhjuse, mitte ainult värvi.
+        </p>
+      </div>
+
+      <div className="bg-white rounded-[10px] border border-black/10 p-5 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">Õpilaste ABC-profiil</h2>
+            <p className="text-xs text-gray-400">A = kohalolek · B = käitumine · C = hinded</p>
+          </div>
+          <button onClick={() => navigate('/opilased')}
+            className="text-xs border border-[#AFA9EC] text-[#534AB7] rounded-full px-3 py-1 hover:bg-[#EEEDFE]">
+            Märgi kohalolek
+          </button>
+        </div>
+        {!risks.length && (
+          <p className="text-sm text-gray-400">Lisa õpilased, et näha personaalset profiili.</p>
+        )}
+        {!!risks.length && (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-[11px] text-gray-400 border-b border-gray-100">
+                  <th className="py-2 font-medium">Õpilane</th>
+                  <th className="py-2 font-medium">Tase</th>
+                  <th className="py-2 font-medium">A</th>
+                  <th className="py-2 font-medium">B</th>
+                  <th className="py-2 font-medium">C</th>
+                  <th className="py-2 font-medium">Miks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {risks.map(r => (
+                  <tr
+                    key={r.studentId}
+                    onClick={() => navigate(`/opilased/${r.studentId}`)}
+                    className="border-b border-gray-50 last:border-0 cursor-pointer hover:bg-[#EEEDFE]/50"
+                  >
+                    <td className="py-2.5 text-sm font-medium text-gray-900">{r.studentName}</td>
+                    <td className="py-2.5 text-sm">
+                      <span className={
+                        r.level === 'red' ? 'text-[#E24B4A] font-semibold' :
+                        r.level === 'yellow' ? 'text-[#EF9F27] font-semibold' :
+                        r.level === 'green' ? 'text-[#639922] font-semibold' : 'text-gray-600'
+                      }>{r.label}</span>
+                    </td>
+                    <td className="py-2.5 text-xs text-gray-600">{r.components?.attendance === 'ok' ? 'korras' : r.components?.attendance === 'high' ? 'kõrge' : r.components?.attendance === 'medium' ? 'keskmine' : '—'}</td>
+                    <td className="py-2.5 text-xs text-gray-600">{r.components?.behavior === 'ok' ? 'korras' : r.components?.behavior === 'high' ? 'kõrge' : r.components?.behavior === 'medium' ? 'keskmine' : '—'}</td>
+                    <td className="py-2.5 text-xs text-gray-600">{r.components?.course === 'ok' ? 'korras' : r.components?.course === 'high' ? 'kõrge' : r.components?.course === 'medium' ? 'keskmine' : r.components?.course === 'improving' ? 'tõus' : '—'}</td>
+                    <td className="py-2.5 text-xs text-gray-500">{(r.reasons || []).join(' · ') || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
         {cards.map(card => (
@@ -164,14 +224,16 @@ export default function OverviewPage() {
       {activeDrilldown === 'attention' && (
         <div className="bg-white rounded-[10px] border border-black/10 p-5 mb-6">
           <h2 className="text-sm font-semibold text-gray-900 mb-3">Vajavad tähelepanu (detail)</h2>
-          {!alerts.length && <p className="text-sm text-gray-400">Hetkel pole hoiatusi.</p>}
+          {!alerts.filter(a => a.type === 'red' || a.type === 'yellow').length && (
+            <p className="text-sm text-gray-400">Hetkel pole hoiatusi.</p>
+          )}
           <div className="space-y-2">
             {alerts
               .filter(a => a.type === 'red' || a.type === 'yellow')
               .map((a, i) => (
                 <p key={i} className="text-sm text-gray-700">
-                  {a.type === 'red'
-                    ? `${a.studentName}: 3 järjestikust hinnet alla 50%`
+                  {a.kind === 'student'
+                    ? `${a.studentName}: ${a.detail || a.label}`
                     : `${a.topic}: klassi keskmine ${a.avg}%`}
                 </p>
               ))}
@@ -214,7 +276,8 @@ export default function OverviewPage() {
       </div>
 
       <div className="bg-white rounded-[10px] border border-black/10 p-5 mb-6">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Viimased hoiatused</h2>
+        <h2 className="text-sm font-semibold text-gray-900 mb-1">Viimased hoiatused</h2>
+        <p className="text-xs text-gray-400 mb-4">ABC-mudel: Attendance · Behavior · Course — alati näha, miks hoiatus tekkis.</p>
         {alerts.length === 0 && <p className="text-sm text-gray-400">Hetkel pole automaatseid hoiatusi.</p>}
         {alerts.map((alert, i) => (
           <div key={i} className="flex items-start gap-3 py-2.5 border-b border-gray-50 last:border-0">
@@ -222,17 +285,21 @@ export default function OverviewPage() {
               alert.type === 'red' ? 'bg-[#E24B4A]' : alert.type === 'yellow' ? 'bg-[#EF9F27]' : 'bg-[#639922]'
             }`} />
             <div>
-              {alert.type === 'red' && <>
-                <p className="text-sm font-semibold text-gray-900">{alert.studentName} — Järelevastamine vajalik</p>
-                <p className="text-xs text-gray-400">Kolm järjestikust hinnet alla 50%.</p>
+              {alert.kind === 'student' && alert.type === 'red' && <>
+                <p className="text-sm font-semibold text-gray-900">{alert.studentName} — {alert.label || 'Tähelepanu'}</p>
+                <p className="text-xs text-gray-400">{alert.detail || 'ABC-risk on kõrge.'}</p>
               </>}
-              {alert.type === 'yellow' && <>
+              {alert.kind === 'student' && alert.type === 'yellow' && <>
+                <p className="text-sm font-semibold text-gray-900">{alert.studentName} — {alert.label || 'Tugi vajalik'}</p>
+                <p className="text-xs text-gray-400">{alert.detail}</p>
+              </>}
+              {alert.kind === 'student' && alert.type === 'green' && <>
+                <p className="text-sm font-semibold text-gray-900">{alert.studentName} — Edasijõudnud</p>
+                <p className="text-xs text-gray-400">{alert.detail || 'Kiire areng viimase 30 päevaga.'}</p>
+              </>}
+              {alert.kind === 'topic' && <>
                 <p className="text-sm font-semibold text-gray-900">{alert.topic} — Klass vajab kordamist</p>
                 <p className="text-xs text-gray-400">Klassi keskmine teemas: {alert.avg}%</p>
-              </>}
-              {alert.type === 'green' && <>
-                <p className="text-sm font-semibold text-gray-900">{alert.studentName} — Edasijõudnud</p>
-                <p className="text-xs text-gray-400">Kiire areng viimase 30 päevaga.</p>
               </>}
             </div>
           </div>

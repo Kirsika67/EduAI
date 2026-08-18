@@ -1,40 +1,27 @@
-# EduAI – avaliku lingi tegemine (tasuta)
+# EduAI – püsiv link õpetajale (tasuta)
 
-Õpetaja saab avada lingi, vajutada **Registreeru**, luua oma konto ja lisada klassid/õpilased ise.
+Repo: https://github.com/Kirsika67/EduAI
 
-## Samm 1: GitHub (üks kord)
+## Render (üks kord)
 
-Cursoris: **Source Control** (vasakul) → **Publish Branch** või **Sync/Push**.
+1. Ava https://dashboard.render.com ja logi sisse **GitHubiga** (konto Kirsika67).
+2. Kui küsib, luba Renderil näha repo’t **EduAI**.
+3. **New +** → **Blueprint**
+4. Vali repo **EduAI**
+5. Vajuta **Apply** ja oota ~5 min (staatus **Live**)
+6. Kopeeri URL, nt `https://eduai.onrender.com` või `https://eduai-xxxx.onrender.com`
 
-Või terminalis (peale GitHubi sisselogimist):
+## Saada õpetajale
 
-```bash
-cd /Users/kirsikavaidla/Documents/EduAI
-git push -u origin main
-```
+Saada **Renderi link** (mitte localhost / 127.0.0.1).
 
-Repo: https://github.com/Kirsika67/teacher-ai
-
-## Samm 2: Render (üks kord, tasuta)
-
-1. Ava https://render.com ja logi sisse **GitHubiga**.
-2. **New +** → **Blueprint**.
-3. Vali repo **teacher-ai**.
-4. Vajuta **Apply** ja oota ~5 min (staatus **Live**).
-
-## Samm 3: Saada õpetajale link
-
-Renderi lehelt kopeeri URL, nt `https://eduai-xxxx.onrender.com`.
-
-Õpetaja teeb:
+Õpetaja:
 1. Avab lingi
-2. Vajutab **Registreeru**
-3. Loob konto (e-post + parool, min 8 tähemärki)
-4. Lisab klassid ja õpilased menüüst
-
-Sinu konto ja andmed on eraldi – ta ei näe sinu klasse.
+2. **Registreeru**
+3. E-post + parool (min 8 tähemärki)
+4. Lisab klassid ja õpilased ise
 
 ## Märkused
 
-- **Tasuta:** esimene avamine pärast pausi võib võtta ~30 s.
-- **Andmed:** tasuta paketil võivad andmed deploy uuendamisel kaduda; õpetaja saab uuesti registreeruda.
+- Tasuta paketil võib esimene avamine pärast pausi võtta ~30 s (server „ärkab“).
+- Valikuline: Renderis lisa keskkonnamuutuja `ANTHROPIC_API_KEY`, et AI ülevaade töötaks ka pilves.

@@ -7,24 +7,7 @@ import ProgressBar from '../components/ProgressBar'
 
 const getInitials = name => name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
 const avatarBg = { red: 'bg-[#FCEBEB] text-[#A32D2D]', yellow: 'bg-[#FAEEDA] text-[#854F0B]', green: 'bg-[#EAF3DE] text-[#3B6D11]', blue: 'bg-[#E6F1FB] text-[#185FA5]' }
-const statusLabels = { red: 'Järelevastamine', yellow: 'Tugi vajalik', green: 'Edasijõudnud', blue: 'Hea tase' }
-
-function getStatus(grades) {
-  if (!grades.length) return 'blue'
-  const avg = grades.reduce((s, g) => s + Number(g.score), 0) / grades.length
-  const sorted = [...grades].sort((a, b) => new Date(b.date) - new Date(a.date))
-  if (sorted.length >= 3 && sorted.slice(0, 3).every(g => Number(g.score) < 50)) return 'red'
-  if (avg < 60) return 'yellow'
-  const now = new Date()
-  const l30 = grades.filter(g => (now - new Date(g.date)) / 86400000 <= 30)
-  const p30 = grades.filter(g => { const d = (now - new Date(g.date)) / 86400000; return d > 30 && d <= 60 })
-  if (l30.length && p30.length) {
-    const a1 = l30.reduce((s, g) => s + Number(g.score), 0) / l30.length
-    const a2 = p30.reduce((s, g) => s + Number(g.score), 0) / p30.length
-    if (a1 - a2 > 15) return 'green'
-  }
-  return 'blue'
-}
+const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function getTrend(grades) {
   if (grades.length < 2) return 'Liiga vähe andmeid'
@@ -40,6 +23,10 @@ export default function StudentsPage() {
   const navigate = useNavigate()
   const [students, setStudents] = useState([])
   const [gradesMap, setGradesMap] = useState({})
+  const [riskMap, setRiskMap] = useState({})
+  const [attDate, setAttDate] = useState(todayIso())
+  const [attMap, setAttMap] = useState({})
+  const [attSaving, setAttSaving] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [showAddMany, setShowAddMany] = useState(false)
@@ -59,6 +46,17 @@ export default function StudentsPage() {
     load()
   }, [classesLoading, selectedClassId])
 
+  useEffect(() => {
+    if (classesLoading || !selectedClassId) return
+    apiCall(`/api/classes/${selectedClassId}/attendance?date=${attDate}`)
+      .then(a => {
+        const am = {}
+        for (const row of (a.attendance || [])) am[row.student_id] = row.status
+        setAttMap(am)
+      })
+      .catch(() => {})
+  }, [attDate])
+
   const load = async () => {
     setLoading(true)
     try {
@@ -73,6 +71,14 @@ export default function StudentsPage() {
         map[studentId].push(grade)
       }
       setGradesMap(map)
+      const r = await apiCall(`/api/classes/${selectedClassId}/abc-risks`)
+      const rm = {}
+      for (const row of (r.students || [])) rm[row.studentId] = row
+      setRiskMap(rm)
+      const a = await apiCall(`/api/classes/${selectedClassId}/attendance?date=${attDate}`)
+      const am = {}
+      for (const row of (a.attendance || [])) am[row.student_id] = row.status
+      setAttMap(am)
     } catch (err) { console.error(err) }
     finally { setLoading(false) }
   }
@@ -111,6 +117,26 @@ export default function StudentsPage() {
       alert('Mitme õpilase lisamine ebaõnnestus: ' + err.message)
     } finally {
       setAddingMany(false)
+    }
+  }
+
+  const markAttendance = async (studentId, status) => {
+    if (!selectedClassId) return
+    setAttSaving(true)
+    try {
+      await apiCall(`/api/classes/${selectedClassId}/attendance`, {
+        method: 'POST',
+        body: JSON.stringify({ date: attDate, entries: [{ studentId, status }] }),
+      })
+      setAttMap(prev => ({ ...prev, [studentId]: status }))
+      const r = await apiCall(`/api/classes/${selectedClassId}/abc-risks`)
+      const rm = {}
+      for (const row of (r.students || [])) rm[row.studentId] = row
+      setRiskMap(rm)
+    } catch (err) {
+      alert('Kohaloleku salvestamine ebaõnnestus: ' + err.message)
+    } finally {
+      setAttSaving(false)
     }
   }
 
@@ -189,6 +215,47 @@ export default function StudentsPage() {
         </div>
       )}
 
+      <div className="bg-white rounded-xl border border-black/10 p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Tänane kohalolek</h2>
+              <p className="text-xs text-gray-400">Märgi kohal / hilines / puudus — läheb ABC-riski sisse.</p>
+            </div>
+            <input type="date" value={attDate} onChange={e => setAttDate(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#7F77DD]" />
+          </div>
+          <div className="space-y-2">
+            {students.map(student => (
+              <div key={student.id} className="flex items-center gap-3">
+                <span className="text-sm text-gray-800 w-40 truncate">{student.name}</span>
+                <div className="flex gap-1">
+                  {[
+                    ['present', 'Kohal'],
+                    ['late', 'Hilines'],
+                    ['absent', 'Puudus'],
+                  ].map(([value, label]) => (
+                    <button key={value} disabled={attSaving} onClick={() => markAttendance(student.id, value)}
+                      className={`text-xs rounded-full px-3 py-1 border transition-colors ${
+                        attMap[student.id] === value
+                          ? value === 'absent'
+                            ? 'bg-[#FCEBEB] border-[#E24B4A] text-[#A32D2D]'
+                            : value === 'late'
+                              ? 'bg-[#FAEEDA] border-[#EF9F27] text-[#854F0B]'
+                              : 'bg-[#EAF3DE] border-[#639922] text-[#3B6D11]'
+                          : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                      }`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          {!students.length && (
+            <p className="text-sm text-gray-400 mt-2">Lisa õpilased, et kohalolekut märkida.</p>
+          )}
+      </div>
+
       {loading && <div className="text-gray-400 text-sm">Laadin...</div>}
       {!loading && !students.length && (
         <div className="bg-white rounded-xl border border-black/10 p-8 text-center text-gray-400">
@@ -199,20 +266,23 @@ export default function StudentsPage() {
       <div className="space-y-3">
         {students.map(student => {
           const grades = gradesMap[student.id] || []
-          const status = getStatus(grades)
+          const risk = riskMap[student.id]
+          const status = risk?.level || 'blue'
           const avg = grades.length ? Math.round(grades.reduce((s, g) => s + Number(g.score), 0) / grades.length) : 0
           return (
             <div key={student.id} onClick={() => navigate(`/opilased/${student.id}`)}
               className="bg-white rounded-xl border border-black/10 p-4 flex items-center gap-4 cursor-pointer hover:shadow-sm transition-shadow">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${avatarBg[status]}`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${avatarBg[status] || avatarBg.blue}`}>
                 {getInitials(student.name)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[13px] font-bold text-gray-900 truncate">{student.name}</span>
-                  <Badge variant={status}>{statusLabels[status]}</Badge>
+                  <Badge variant={status}>{risk?.label || 'Hea tase'}</Badge>
                 </div>
-                <p className="text-[11px] text-gray-400 mb-1.5">{getTrend(grades)}</p>
+                <p className="text-[11px] text-gray-400 mb-1.5">
+                  {risk?.reasons?.length ? risk.reasons[0] : getTrend(grades)}
+                </p>
                 <ProgressBar value={avg} />
               </div>
               <div className="flex-shrink-0 text-right">
