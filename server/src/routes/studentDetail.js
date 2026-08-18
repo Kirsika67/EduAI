@@ -2,6 +2,8 @@ import { Router } from "express";
 import db from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { runStudentAiAnalysis } from "../services/studentAnalysis.js";
+import { abcForStudent } from "../services/abcRisk.js";
+import { audit } from "../services/audit.js";
 
 const router = Router();
 
@@ -162,9 +164,58 @@ router.get("/classes/:classId/students/:studentId/detail", (req, res) => {
     }
   }
 
+  const attendance = db
+    .prepare(
+      `SELECT id, date, status, notes, created_at
+       FROM attendance WHERE student_id = ?
+       ORDER BY date DESC, id DESC LIMIT 40`
+    )
+    .all(studentId);
+
+  const behavior = db
+    .prepare(
+      `SELECT id, date, kind, note, created_at
+       FROM behavior_notes WHERE student_id = ?
+       ORDER BY date DESC, id DESC LIMIT 40`
+    )
+    .all(studentId);
+
+  const wellbeing = db
+    .prepare(
+      `SELECT id, date, mood, note, created_at
+       FROM wellbeing_checkins WHERE student_id = ?
+       ORDER BY date DESC, id DESC LIMIT 20`
+    )
+    .all(studentId);
+
+  const goals = db
+    .prepare(
+      `SELECT id, title, kind, status, created_at
+       FROM student_goals WHERE student_id = ?
+       ORDER BY CASE status WHEN 'open' THEN 0 ELSE 1 END, id DESC`
+    )
+    .all(studentId);
+
+  const mentorNotes = db
+    .prepare(
+      `SELECT id, note, created_at
+       FROM mentor_notes WHERE student_id = ?
+       ORDER BY datetime(created_at) DESC, id DESC LIMIT 40`
+    )
+    .all(studentId);
+
+  /** RULE R3 — tundliku profiili vaatamine logitakse, mitte ainult muutmine. */
+  audit(req, { action: "student.view_detail", entityType: "student", entityId: studentId, studentId });
+
   res.json({
     student,
     class: klass,
+    abc: abcForStudent(db, studentId),
+    attendance,
+    behavior,
+    wellbeing,
+    goals,
+    mentorNotes,
     grades: gradeRows.map((r) => ({
       id: r.id,
       score: r.score,

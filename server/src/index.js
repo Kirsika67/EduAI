@@ -11,8 +11,12 @@ import studentRoutes from "./routes/students.js";
 import gradesRoutes from "./routes/grades.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import studentDetailRoutes from "./routes/studentDetail.js";
+import studentProfileRoutes from "./routes/studentProfile.js";
 import materialsRoutes from "./routes/materials.js";
 import weeklyPlansRoutes from "./routes/weeklyPlans.js";
+import invitationsRoutes from "./routes/invitations.js";
+import accountRoutes from "./routes/account.js";
+import competenciesRoutes from "./routes/competencies.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(__dirname, "..", "..", "client", "dist");
@@ -37,9 +41,13 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/invitations", invitationsRoutes);
+app.use("/api/account", accountRoutes);
+app.use("/api/competencies", competenciesRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api", studentRoutes);
 app.use("/api", studentDetailRoutes);
+app.use("/api", studentProfileRoutes);
 app.use("/api", materialsRoutes);
 app.use("/api", weeklyPlansRoutes);
 app.use("/api", gradesRoutes);
