@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 import Badge from '../components/Badge'
@@ -7,7 +7,6 @@ import ProgressBar from '../components/ProgressBar'
 
 const getInitials = name => name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
 const avatarBg = { red: 'bg-[#FCEBEB] text-[#A32D2D]', yellow: 'bg-[#FAEEDA] text-[#854F0B]', green: 'bg-[#EAF3DE] text-[#3B6D11]', blue: 'bg-[#E6F1FB] text-[#185FA5]' }
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function getTrend(grades) {
   if (grades.length < 2) return 'Liiga vähe andmeid'
@@ -24,9 +23,6 @@ export default function StudentsPage() {
   const [students, setStudents] = useState([])
   const [gradesMap, setGradesMap] = useState({})
   const [riskMap, setRiskMap] = useState({})
-  const [attDate, setAttDate] = useState(todayIso())
-  const [attMap, setAttMap] = useState({})
-  const [attSaving, setAttSaving] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [showAddMany, setShowAddMany] = useState(false)
@@ -46,17 +42,6 @@ export default function StudentsPage() {
     load()
   }, [classesLoading, selectedClassId])
 
-  useEffect(() => {
-    if (classesLoading || !selectedClassId) return
-    apiCall(`/api/classes/${selectedClassId}/attendance?date=${attDate}`)
-      .then(a => {
-        const am = {}
-        for (const row of (a.attendance || [])) am[row.student_id] = row.status
-        setAttMap(am)
-      })
-      .catch(() => {})
-  }, [attDate])
-
   const load = async () => {
     setLoading(true)
     try {
@@ -75,10 +60,6 @@ export default function StudentsPage() {
       const rm = {}
       for (const row of (r.students || [])) rm[row.studentId] = row
       setRiskMap(rm)
-      const a = await apiCall(`/api/classes/${selectedClassId}/attendance?date=${attDate}`)
-      const am = {}
-      for (const row of (a.attendance || [])) am[row.student_id] = row.status
-      setAttMap(am)
     } catch (err) { console.error(err) }
     finally { setLoading(false) }
   }
@@ -117,26 +98,6 @@ export default function StudentsPage() {
       alert('Mitme õpilase lisamine ebaõnnestus: ' + err.message)
     } finally {
       setAddingMany(false)
-    }
-  }
-
-  const markAttendance = async (studentId, status) => {
-    if (!selectedClassId) return
-    setAttSaving(true)
-    try {
-      await apiCall(`/api/classes/${selectedClassId}/attendance`, {
-        method: 'POST',
-        body: JSON.stringify({ date: attDate, entries: [{ studentId, status }] }),
-      })
-      setAttMap(prev => ({ ...prev, [studentId]: status }))
-      const r = await apiCall(`/api/classes/${selectedClassId}/abc-risks`)
-      const rm = {}
-      for (const row of (r.students || [])) rm[row.studentId] = row
-      setRiskMap(rm)
-    } catch (err) {
-      alert('Kohaloleku salvestamine ebaõnnestus: ' + err.message)
-    } finally {
-      setAttSaving(false)
     }
   }
 
@@ -215,45 +176,15 @@ export default function StudentsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-black/10 p-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-900">Tänane kohalolek</h2>
-              <p className="text-xs text-gray-400">Märgi kohal / hilines / puudus — läheb ABC-riski sisse.</p>
-            </div>
-            <input type="date" value={attDate} onChange={e => setAttDate(e.target.value)}
-              className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#7F77DD]" />
-          </div>
-          <div className="space-y-2">
-            {students.map(student => (
-              <div key={student.id} className="flex items-center gap-3">
-                <span className="text-sm text-gray-800 w-40 truncate">{student.name}</span>
-                <div className="flex gap-1">
-                  {[
-                    ['present', 'Kohal'],
-                    ['late', 'Hilines'],
-                    ['absent', 'Puudus'],
-                  ].map(([value, label]) => (
-                    <button key={value} disabled={attSaving} onClick={() => markAttendance(student.id, value)}
-                      className={`text-xs rounded-full px-3 py-1 border transition-colors ${
-                        attMap[student.id] === value
-                          ? value === 'absent'
-                            ? 'bg-[#FCEBEB] border-[#E24B4A] text-[#A32D2D]'
-                            : value === 'late'
-                              ? 'bg-[#FAEEDA] border-[#EF9F27] text-[#854F0B]'
-                              : 'bg-[#EAF3DE] border-[#639922] text-[#3B6D11]'
-                          : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                      }`}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          {!students.length && (
-            <p className="text-sm text-gray-400 mt-2">Lisa õpilased, et kohalolekut märkida.</p>
-          )}
+      <div className="bg-white rounded-xl border border-black/10 p-4 mb-6 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-900">Kohalolek ja käitumine</h2>
+          <p className="text-xs text-gray-400">Kohaloleku märkimine ja käitumismärkused on nüüd omal lehel.</p>
+        </div>
+        <Link to="/kohalolek"
+          className="text-sm bg-[#7F77DD] text-white rounded-lg px-4 py-2 hover:bg-[#534AB7] whitespace-nowrap">
+          Ava kohaloleku leht
+        </Link>
       </div>
 
       {loading && <div className="text-gray-400 text-sm">Laadin...</div>}

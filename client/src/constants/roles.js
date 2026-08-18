@@ -53,7 +53,7 @@ const STAFF_NAV = [
   { to: '/materjalid', label: 'Materjalid' },
   { to: '/tagasiside', label: 'Tagasiside' },
   { to: '/planeerimine', label: 'Planeerimine' },
-  { label: 'Kohalolek', soon: 'Faas 3' },
+  { to: '/kohalolek', label: 'Kohalolek' },
   { label: 'Sõnumid', soon: 'Faas 4' },
 ]
 
@@ -67,7 +67,7 @@ const PARENT_NAV = [
 const STUDENT_NAV = [
   { to: '/minu-laps', label: 'Minu profiil' },
   { to: '/tunniplaan', label: 'Tunniplaan' },
-  { label: 'Kodutööd', soon: 'Faas 3' },
+  { label: 'Kodutööd', soon: 'Faas 8' },
   { label: 'Sõnumid', soon: 'Faas 4' },
 ]
 

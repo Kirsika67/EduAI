@@ -16,6 +16,7 @@ import InvitePage from './pages/InvitePage'
 import SettingsPage from './pages/SettingsPage'
 import TimetablePage from './pages/TimetablePage'
 import ParentMeetingsPage from './pages/ParentMeetingsPage'
+import AttendancePage from './pages/AttendancePage'
 import MyChildPage from './pages/MyChildPage'
 import { isStaff, canInvite, landingPathForRole } from './constants/roles'
 
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="ulevaade" element={<OverviewPage />} />
           <Route path="opilased" element={<StudentsPage />} />
           <Route path="opilased/:studentId" element={<StudentDetailPage />} />
+          <Route path="kohalolek" element={<AttendancePage />} />
           <Route path="hinded" element={<GradeEntryPage />} />
           <Route path="klassid" element={<ClassesPage />} />
           <Route path="materjalid" element={<MaterialsPage />} />

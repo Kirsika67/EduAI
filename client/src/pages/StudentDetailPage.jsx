@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { apiCall } from '../api/client'
 import { useClasses } from '../context/ClassContext'
 import Badge from '../components/Badge'
+import AttendanceBehaviorPanel from '../components/AttendanceBehaviorPanel'
 
 const attLabels = { present: 'Kohal', late: 'Hilines', absent: 'Puudus' }
 const behLabels = { positive: 'Tunnustus', concern: 'Mure', incident: 'Juhtum' }
@@ -202,6 +203,11 @@ export default function StudentDetailPage() {
             : <p className="text-sm text-gray-400">Hetkel pole hoiatuse põhjuseid.</p>}
         </div>
       )}
+
+      <div className="mb-8">
+        <h2 className="text-base font-semibold text-gray-900 mb-3">Kohalolek ja käitumine</h2>
+        <AttendanceBehaviorPanel studentId={studentId} />
+      </div>
 
       <div className="mb-8">
         <h2 className="text-base font-semibold text-gray-900 mb-3">Hinded teemade kaupa</h2>
