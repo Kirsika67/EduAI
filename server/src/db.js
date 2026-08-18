@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { newJoinCode } from "./utils/codes.js";
+import { runFaas1bMigration } from "./migrations/faas1b.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -393,5 +394,20 @@ const insertCore = db.prepare(
 db.transaction(() => {
   for (const name of CORE_COMPETENCIES) insertCore.run(name);
 })();
+
+/* ------------------------------------------------------------------ *
+ * FAAS 1b — kohalolek, käitumine, heaolu
+ *
+ * Eraldi moodulis, sest see on ainus migratsioon, mis ehitab ümber tabeli,
+ * kus on päris andmeid. Ridade arvu kontroll on migratsiooni sees: kui
+ * kopeeritud ridu on vähem kui algseid, katkeb transaktsioon ja vana tabel
+ * jääb puutumata.
+ * ------------------------------------------------------------------ */
+const faas1b = runFaas1bMigration(db);
+if (faas1b.changed) {
+  for (const note of faas1b.notes) {
+    console.log(`[EduAI migratsioon 1b] ${note}`);
+  }
+}
 
 export default db;

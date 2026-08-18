@@ -142,7 +142,7 @@ määravad andmemudeli, mistõttu need otsused tuleb teha nüüd, mitte 2027. aa
 | Faas | Juhendis | Tegelik töö |
 |---|---|---|
 | **0** | Rollid, audit log | Rollid `teachers` tabelile + **`schools` (K5)** + `parent_student_links` + `audit_log` + `invitations` + `requireRole` + rollipõhine navigatsioon |
-| **1** | Uued tabelid + riskiskoor | **Migratsioon**, mitte loomine (K2). Riskiskoor: `riskScore`/`riskLabel` lisandub ABC-mudelile (K3). Uus: `competencies` |
+| **1** | Uued tabelid + riskiskoor | ✅ **Tehtud.** Riskiskoor: `riskScore`/`riskLabel` lisandus ABC-mudelile (K3). 1a: `competencies` + 8 üldpädevust. 1b: `attendance` ümber ehitatud (`UNIQUE(student_id, date, lesson_number)`, + `class_id`, `subject`, `reason`, `reported_by`, `confirmed`, staatus `excused`), `behavior_notes` + `category`/`teacher_id`/`is_private`, `wellbeing_checkins` + `mood_value` |
 | 1.5 | — | *Uus:* pseudonümiseerimine AI-päringutes (RULE A5) + säilitustähtajad |
 | **2** | Tunniplaan | Nagu juhendis (uus moodul, konflikte pole) |
 | **3** | Kohaloleku leht | Kolib `StudentsPage` loogika `/kohalolek` lehele (K6), ei dubleeri |

@@ -7,6 +7,9 @@ import { audit } from "../services/audit.js";
 const router = Router();
 router.use(requireAuth);
 
+/** 'excused' (vabastatud) lisandus Faas 1b-ga; ABC-risk ei loe seda puudumiseks. */
+const ATTENDANCE_STATUSES = new Set(["present", "late", "absent", "excused"]);
+
 function assertOwnClass(teacherId, classId) {
   return db
     .prepare(`SELECT id FROM classes WHERE id = ? AND teacher_id = ?`)
@@ -58,12 +61,20 @@ router.post("/classes/:classId/attendance", (req, res) => {
 
   const date = String(req.body?.date || todayIso()).slice(0, 10);
   const entries = Array.isArray(req.body?.entries) ? req.body.entries : [];
-  const allowed = new Set(["present", "late", "absent"]);
+  /** lesson_number 0 = terve päev. Ilma tunnita kutse käitub täpselt nagu enne. */
+  const lessonNumber = Number.isInteger(Number(req.body?.lessonNumber))
+    ? Number(req.body.lessonNumber)
+    : 0;
+  const subject = req.body?.subject ? String(req.body.subject).slice(0, 80) : null;
 
   const upsert = db.prepare(`
-    INSERT INTO attendance (student_id, date, status, notes)
-    VALUES (?, ?, ?, ?)
-    ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status, notes = excluded.notes
+    INSERT INTO attendance (student_id, class_id, date, lesson_number, subject, status, reason, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(student_id, date, lesson_number) DO UPDATE SET
+      status = excluded.status,
+      reason = excluded.reason,
+      notes = excluded.notes,
+      subject = excluded.subject
   `);
 
   const savedStudentIds = [];
@@ -71,12 +82,21 @@ router.post("/classes/:classId/attendance", (req, res) => {
     for (const row of entries) {
       const studentId = Number(row.studentId);
       const status = String(row.status || "");
-      if (!Number.isInteger(studentId) || !allowed.has(status)) continue;
+      if (!Number.isInteger(studentId) || !ATTENDANCE_STATUSES.has(status)) continue;
       const owned = db
         .prepare(`SELECT id FROM students WHERE id = ? AND class_id = ?`)
         .get(studentId, classId);
       if (!owned) continue;
-      upsert.run(studentId, date, status, row.notes ? String(row.notes).slice(0, 400) : null);
+      upsert.run(
+        studentId,
+        classId,
+        date,
+        lessonNumber,
+        subject,
+        status,
+        row.reason ? String(row.reason).slice(0, 400) : null,
+        row.notes ? String(row.notes).slice(0, 400) : null
+      );
       savedStudentIds.push(studentId);
     }
   });
@@ -88,13 +108,13 @@ router.post("/classes/:classId/attendance", (req, res) => {
 
   const saved = db
     .prepare(
-      `SELECT a.student_id, a.status FROM attendance a
+      `SELECT a.student_id, a.status, a.lesson_number FROM attendance a
        JOIN students s ON s.id = a.student_id
-       WHERE s.class_id = ? AND a.date = ?`
+       WHERE s.class_id = ? AND a.date = ? AND a.lesson_number = ?`
     )
-    .all(classId, date);
+    .all(classId, date, lessonNumber);
 
-  res.json({ date, attendance: saved });
+  res.json({ date, lessonNumber, attendance: saved });
 });
 
 router.get("/classes/:classId/attendance", (req, res) => {
@@ -104,15 +124,20 @@ router.get("/classes/:classId/attendance", (req, res) => {
     return res.status(404).json({ error: "Klassi ei leitud." });
   }
 
+  /** Vaikimisi terve päev (0) — nii käitub olemasolev UI täpselt nagu enne. */
+  const lessonNumber = Number.isInteger(Number(req.query.lessonNumber))
+    ? Number(req.query.lessonNumber)
+    : 0;
+
   const rows = db
     .prepare(
-      `SELECT a.student_id, a.status FROM attendance a
+      `SELECT a.student_id, a.status, a.lesson_number FROM attendance a
        JOIN students s ON s.id = a.student_id
-       WHERE s.class_id = ? AND a.date = ?`
+       WHERE s.class_id = ? AND a.date = ? AND a.lesson_number = ?`
     )
-    .all(classId, date);
+    .all(classId, date, lessonNumber);
 
-  res.json({ date, attendance: rows });
+  res.json({ date, lessonNumber, attendance: rows });
 });
 
 router.post("/classes/:classId/students/:studentId/attendance", (req, res) => {
@@ -124,16 +149,33 @@ router.post("/classes/:classId/students/:studentId/attendance", (req, res) => {
 
   const date = String(req.body?.date || todayIso()).slice(0, 10);
   const status = String(req.body?.status || "");
-  if (!["present", "late", "absent"].includes(status)) {
-    return res.status(400).json({ error: "Vali kohal / hilines / puudus." });
+  if (!ATTENDANCE_STATUSES.has(status)) {
+    return res
+      .status(400)
+      .json({ error: "Vali kohal / hilines / puudus / vabastatud." });
   }
+  const lessonNumber = Number.isInteger(Number(req.body?.lessonNumber))
+    ? Number(req.body.lessonNumber)
+    : 0;
 
   db.prepare(
-    `INSERT INTO attendance (student_id, date, status, notes)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status, notes = excluded.notes`
-  ).run(studentId, date, status, req.body?.notes ? String(req.body.notes).slice(0, 400) : null);
+    `INSERT INTO attendance (student_id, class_id, date, lesson_number, status, reason, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(student_id, date, lesson_number) DO UPDATE SET
+       status = excluded.status,
+       reason = excluded.reason,
+       notes = excluded.notes`
+  ).run(
+    studentId,
+    classId,
+    date,
+    lessonNumber,
+    status,
+    req.body?.reason ? String(req.body.reason).slice(0, 400) : null,
+    req.body?.notes ? String(req.body.notes).slice(0, 400) : null
+  );
 
+  audit(req, { action: "attendance.save", entityType: "attendance", studentId });
   res.status(201).json({ ok: true, abc: abcForStudent(db, studentId) });
 });
 
