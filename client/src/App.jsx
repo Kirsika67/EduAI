@@ -17,6 +17,7 @@ import SettingsPage from './pages/SettingsPage'
 import TimetablePage from './pages/TimetablePage'
 import ParentMeetingsPage from './pages/ParentMeetingsPage'
 import AttendancePage from './pages/AttendancePage'
+import MessagesPage from './pages/MessagesPage'
 import MyChildPage from './pages/MyChildPage'
 import { isStaff, canInvite, landingPathForRole } from './constants/roles'
 
@@ -87,6 +88,7 @@ export default function App() {
         {/* Tunniplaan — vaatavad kõik rollid, muudavad ainult töötajad (backend valvab) */}
         <Route path="tunniplaan" element={<TimetablePage />} />
         <Route path="tunniplaan/vanemapaev" element={<ParentMeetingsPage />} />
+        <Route path="sonumid" element={<MessagesPage />} />
 
         {/* Vanema ja õpilase vaade */}
         <Route path="minu-laps" element={<MyChildPage />} />

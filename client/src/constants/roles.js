@@ -54,21 +54,21 @@ const STAFF_NAV = [
   { to: '/tagasiside', label: 'Tagasiside' },
   { to: '/planeerimine', label: 'Planeerimine' },
   { to: '/kohalolek', label: 'Kohalolek' },
-  { label: 'Sõnumid', soon: 'Faas 4' },
+  { to: '/sonumid', label: 'Sõnumid' },
 ]
 
 const PARENT_NAV = [
   { to: '/minu-laps', label: 'Minu laps' },
   { to: '/tunniplaan', label: 'Tunniplaan' },
   { to: '/tunniplaan/vanemapaev', label: 'Vanemate päev' },
-  { label: 'Sõnumid', soon: 'Faas 4' },
+  { to: '/sonumid', label: 'Sõnumid' },
 ]
 
 const STUDENT_NAV = [
   { to: '/minu-laps', label: 'Minu profiil' },
   { to: '/tunniplaan', label: 'Tunniplaan' },
   { label: 'Kodutööd', soon: 'Faas 8' },
-  { label: 'Sõnumid', soon: 'Faas 4' },
+  { to: '/sonumid', label: 'Sõnumid' },
 ]
 
 export function navForRole(role) {

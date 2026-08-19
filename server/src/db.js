@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { newJoinCode } from "./utils/codes.js";
 import { runFaas1bMigration } from "./migrations/faas1b.js";
 import { runFaas2Migration } from "./migrations/faas2.js";
+import { runFaas4Migration } from "./migrations/faas4.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -413,5 +414,8 @@ if (faas1b.changed) {
 
 /* FAAS 2 — tunniplaan, asendused, eksamid, lapsevanema päev (ainult uued tabelid). */
 runFaas2Migration(db);
+
+/* FAAS 4 — vestlused ja sõnumid (ainult uued tabelid). */
+runFaas4Migration(db);
 
 export default db;
