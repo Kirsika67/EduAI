@@ -6,6 +6,7 @@ import { newJoinCode } from "./utils/codes.js";
 import { runFaas1bMigration } from "./migrations/faas1b.js";
 import { runFaas2Migration } from "./migrations/faas2.js";
 import { runFaas4Migration } from "./migrations/faas4.js";
+import { runFaas5Migration } from "./migrations/faas5.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -417,5 +418,11 @@ runFaas2Migration(db);
 
 /* FAAS 4 — vestlused ja sõnumid (ainult uued tabelid). */
 runFaas4Migration(db);
+
+/* FAAS 5 — mentorlus: olemasolevate tabelite laiendus, mitte uued tabelid (K2). */
+const faas5 = runFaas5Migration(db);
+if (faas5.changed) {
+  for (const note of faas5.notes) console.log(`[EduAI migratsioon 5] ${note}`);
+}
 
 export default db;

@@ -18,6 +18,7 @@ import TimetablePage from './pages/TimetablePage'
 import ParentMeetingsPage from './pages/ParentMeetingsPage'
 import AttendancePage from './pages/AttendancePage'
 import MessagesPage from './pages/MessagesPage'
+import MentoringPage from './pages/MentoringPage'
 import MyChildPage from './pages/MyChildPage'
 import { isStaff, canInvite, landingPathForRole } from './constants/roles'
 
@@ -78,6 +79,7 @@ export default function App() {
           <Route path="tagasiside" element={<FeedbackPage />} />
           <Route path="planeerimine" element={<PlanningPage />} />
           <Route path="seaded" element={<SettingsPage />} />
+          <Route path="mentorlus" element={<MentoringPage />} />
         </Route>
 
         {/* Kutsete haldus — klassijuhataja, õppealajuhataja, direktor */}

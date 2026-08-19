@@ -147,7 +147,7 @@ määravad andmemudeli, mistõttu need otsused tuleb teha nüüd, mitte 2027. aa
 | **2** | Tunniplaan | ✅ **Tehtud.** timetable_entries, substitutions, exams, parent_meeting_slots + /tunniplaan (nädal/päev/eksamid) ja /tunniplaan/vanemapaev. Koormuse hoiatus on arvutatud, AI annab ainult soovituse (RULE A1). Vanem näeb teiste broneeringuid ilma nimeta |
 | **3** | Kohaloleku leht | ✅ **Tehtud.** Loogika kolis Õpilaste lehelt /kohalolek lehele (K6, ei dubleeritud). Kiirsisestus 4 staatusega + põhjus, käitumismärkused kategooriatega, krooniliste puudumiste hoiatus, õpilase detaillehel kohaloleku %, mini-graafik ja riskiring koos "Miks?" selgitusega |
 | **4** | Suhtlus | ✅ **Tehtud.** conversations/messages/participants/reads + /sonumid. Kaks tüüpi: isiklik vestlus (osalejad kirjas) ja klassi teade (nähtavus klassist, ühesuunaline). AI abi sõnastamisel — ei saada kunagi ise (RULE A1) |
-| **5** | Mentorlus | Laiendab `student_goals`/`mentor_notes`, ei loo `mentoring_*` dublette (K2) |
+| **5** | Mentorlus | ✅ **Tehtud.** Laiendatud `student_goals` (category, target_date, mentor_id, progress, detail) ja `mentor_notes` (mentor_id, kind, is_private, next_meeting_date, date) — `mentoring_*` dublette ei loodud (K2). /mentorlus: eesmärgid edenemisribaga, vestluse märkmed (vaikimisi privaatsed), "ootab vestlust" hoiatus, AI vahesammud |
 | **6** | Kooli tasand | Toimib alles siis, kui `schools` on olemas (K5) |
 | **7** | Huviringid + vanema vaade | Nagu juhendis + RULE A6 |
 | **8** | Läbiv AI | Nagu juhendis + RULE A1/A3 (kuumakaart mõõdab õppimist, mitte emotsiooni) |

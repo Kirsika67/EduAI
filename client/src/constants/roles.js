@@ -55,6 +55,7 @@ const STAFF_NAV = [
   { to: '/planeerimine', label: 'Planeerimine' },
   { to: '/kohalolek', label: 'Kohalolek' },
   { to: '/sonumid', label: 'Sõnumid' },
+  { to: '/mentorlus', label: 'Mentorlus' },
 ]
 
 const PARENT_NAV = [
