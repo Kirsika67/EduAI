@@ -148,7 +148,7 @@ määravad andmemudeli, mistõttu need otsused tuleb teha nüüd, mitte 2027. aa
 | **3** | Kohaloleku leht | ✅ **Tehtud.** Loogika kolis Õpilaste lehelt /kohalolek lehele (K6, ei dubleeritud). Kiirsisestus 4 staatusega + põhjus, käitumismärkused kategooriatega, krooniliste puudumiste hoiatus, õpilase detaillehel kohaloleku %, mini-graafik ja riskiring koos "Miks?" selgitusega |
 | **4** | Suhtlus | ✅ **Tehtud.** conversations/messages/participants/reads + /sonumid. Kaks tüüpi: isiklik vestlus (osalejad kirjas) ja klassi teade (nähtavus klassist, ühesuunaline). AI abi sõnastamisel — ei saada kunagi ise (RULE A1) |
 | **5** | Mentorlus | ✅ **Tehtud.** Laiendatud `student_goals` (category, target_date, mentor_id, progress, detail) ja `mentor_notes` (mentor_id, kind, is_private, next_meeting_date, date) — `mentoring_*` dublette ei loodud (K2). /mentorlus: eesmärgid edenemisribaga, vestluse märkmed (vaikimisi privaatsed), "ootab vestlust" hoiatus, AI vahesammud |
-| **6** | Kooli tasand | Toimib alles siis, kui `schools` on olemas (K5) |
+| **6** | Kooli tasand | ✅ **Tehtud.** /kool ainult juhtkonnale: koondnäitajad, riskijaotus, klasside tabel (tähestikus, mitte pingereas), "vajavad tähelepanu" nimekiri, AI kokkuvõte ainult koondarvudest. Alla 3 õpilasega klasside numbrid peidetud |
 | **7** | Huviringid + vanema vaade | Nagu juhendis + RULE A6 |
 | **8** | Läbiv AI | Nagu juhendis + RULE A1/A3 (kuumakaart mõõdab õppimist, mitte emotsiooni) |
 
