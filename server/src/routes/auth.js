@@ -119,9 +119,16 @@ router.post("/register", (req, res) => {
     });
   }
 
-  /** Kas liitub olemasoleva kooliga (kood) või loob uue. */
+  /**
+   * Kas liitub olemasoleva kooliga (kood) või loob uue.
+   *
+   * `joinCode` on alias, sest vastuses kannab sama väli nime `school.joinCode`.
+   * Vale nimega kutse ei anna viga, vaid loob vaikselt eraldi kooli — seega
+   * võtame mõlemat vastu, et see lõks ei jääks ootama.
+   */
   let schoolId;
-  const code = schoolCode ? String(schoolCode).trim().toUpperCase() : "";
+  const rawCode = schoolCode ?? req.body?.joinCode;
+  const code = rawCode ? String(rawCode).trim().toUpperCase() : "";
   if (code) {
     const school = db
       .prepare(`SELECT id FROM schools WHERE join_code = ? COLLATE NOCASE`)

@@ -19,8 +19,9 @@ import ParentMeetingsPage from './pages/ParentMeetingsPage'
 import AttendancePage from './pages/AttendancePage'
 import MessagesPage from './pages/MessagesPage'
 import MentoringPage from './pages/MentoringPage'
+import SchoolPage from './pages/SchoolPage'
 import MyChildPage from './pages/MyChildPage'
-import { isStaff, canInvite, landingPathForRole } from './constants/roles'
+import { isStaff, isLeadership, canInvite, landingPathForRole } from './constants/roles'
 
 function Loading() {
   return <div className="flex items-center justify-center h-screen text-gray-500">Laadin...</div>
@@ -80,6 +81,11 @@ export default function App() {
           <Route path="planeerimine" element={<PlanningPage />} />
           <Route path="seaded" element={<SettingsPage />} />
           <Route path="mentorlus" element={<MentoringPage />} />
+        </Route>
+
+        {/* Kogu kooli vaade — ainult juhtkond */}
+        <Route element={<RoleGate allow={isLeadership} />}>
+          <Route path="kool" element={<SchoolPage />} />
         </Route>
 
         {/* Kutsete haldus — klassijuhataja, õppealajuhataja, direktor */}

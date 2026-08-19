@@ -72,9 +72,17 @@ const STUDENT_NAV = [
   { to: '/sonumid', label: 'Sõnumid' },
 ]
 
+/** Juhtkond näeb sama menüüd + kogu kooli vaadet kohe Ülevaate järel. */
+const LEADERSHIP_NAV = [
+  STAFF_NAV[0],
+  { to: '/kool', label: 'Kool' },
+  ...STAFF_NAV.slice(1),
+]
+
 export function navForRole(role) {
   if (role === ROLES.PARENT) return PARENT_NAV
   if (role === ROLES.STUDENT) return STUDENT_NAV
+  if (isLeadership(role)) return LEADERSHIP_NAV
   return STAFF_NAV
 }
 
