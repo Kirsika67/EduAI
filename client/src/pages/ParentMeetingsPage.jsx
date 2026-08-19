@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 import { ROLES, isStaff } from '../constants/roles'
+import TimeField from '../components/TimeField'
 
 const todayIso = () => new Date().toISOString().slice(0, 10)
 const shift = (iso, n) => {
@@ -131,7 +132,7 @@ export default function ParentMeetingsPage() {
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">Algus</label>
-              <input type="time" value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })}
+              <TimeField value={form.startTime} onChange={v => setForm({ ...form, startTime: v })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
             </div>
             <div>

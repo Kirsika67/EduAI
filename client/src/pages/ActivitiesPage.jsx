@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { apiCall } from '../api/client'
 import Badge from '../components/Badge'
+import TimeField from '../components/TimeField'
 import { isStaff } from '../constants/roles'
 
 const DAYS = ['', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev', 'Pühapäev']
@@ -123,8 +124,8 @@ export default function ActivitiesPage() {
               <option value="">Päev…</option>
               {DAYS.slice(1).map((d, i) => <option key={i + 1} value={i + 1}>{d}</option>)}
             </select>
-            <input type="time" value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })}
-              className="border border-gray-200 rounded-lg px-2 py-2 text-xs outline-none" />
+            <TimeField value={form.startTime} onChange={v => setForm({ ...form, startTime: v })}
+              className="border border-gray-200 rounded-lg px-2 py-2 text-xs outline-none focus:border-[#7F77DD]" />
             <input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })}
               placeholder="Ruum"
               className="border border-gray-200 rounded-lg px-2 py-2 text-xs outline-none" />
