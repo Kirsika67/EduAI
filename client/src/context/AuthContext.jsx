@@ -21,6 +21,22 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false))
   }, [])
 
+  /**
+   * Väljalogimine ühes sakis peab jõudma ka teistesse. localStorage on sakkide
+   * vahel jagatud, aga Reacti olek mitte: ilma selleta näitab teine sakk edasi
+   * sisselogitud liidest, kuni järgmine päring ootamatult 401 annab.
+   */
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'eduai_token' && !e.newValue) {
+        setTeacher(null)
+        if (window.location.pathname !== '/login') window.location.href = '/login'
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   const login = async (email, password) => {
     const data = await apiCall('/api/auth/login', {
       method: 'POST',

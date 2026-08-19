@@ -17,9 +17,18 @@ export async function apiCall(path, options = {}) {
     throw err
   }
 
-  if (response.status === 401 && token && path !== '/api/auth/login') {
+  /**
+   * 401 tähendab alati sama asja: seanssi pole. Varem nõudis see haru, et
+   * token oleks olemas — aga kui token on vahepeal kadunud (nt teine sakk
+   * logis välja, sest localStorage on sakkide vahel jagatud), jäi kasutaja
+   * tööle lehele arusaamatu teatega "Autentimine on vajalik" ja ilma
+   * väljapääsuta. Nüüd suuname alati sisselogimisse.
+   */
+  if (response.status === 401 && !path.startsWith('/api/auth/login')) {
     localStorage.removeItem('eduai_token')
-    window.location.href = '/login'
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login'
+    }
     throw new Error('Sessioon on aegunud. Palun logi uuesti sisse.')
   }
 
