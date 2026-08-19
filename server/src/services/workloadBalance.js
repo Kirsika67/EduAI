@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaude } from "./aiEngine.js";
 
 /**
  * Õpikoormuse tasakaal.
@@ -57,50 +56,23 @@ export function analyseWeekLoad(exams) {
  * AI soovitus ümberplaneerimiseks. Tagastab `{ text, fallback }` nagu teised
  * AI-teenused, et leht töötaks ka ilma võtmeta.
  */
-export async function suggestRebalance({ className, weekRange, exams }, apiKey) {
-  if (!apiKey || !String(apiKey).trim()) {
-    return {
-      text: null,
-      fallback:
-        "Lisa ANTHROPIC_API_KEY, et näha siin AI soovitust töökoormuse ümberjagamiseks.",
-    };
-  }
-  if (!exams.length) {
-    return { text: null, fallback: null };
-  }
+export async function suggestRebalance({ className, weekRange, exams }, user) {
+  if (!exams.length) return { text: null, fallback: null };
 
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
   const payload = JSON.stringify(
-    exams.map((e) => ({ kuupaev: e.date, aine: e.subject, teema: e.title || null })),
-    null,
-    0
+    exams.map((e) => ({ kuupaev: e.date, aine: e.subject, teema: e.title || null }))
   );
 
-  try {
-    const msg = await client.messages.create({
-      model: ANTHROPIC_MODEL,
-      thinking: ANTHROPIC_THINKING,
-      max_tokens: 400,
-      messages: [
-        {
-          role: "user",
-          content:
-            "Sa oled õppetöö planeerimise assistent. Analüüsi selle nädala kontrolltööde nimekirja " +
-            `klassi ${className} kohta (nädal ${weekRange}) ja hinda, kas õpikoormus on ebaühtlaselt ` +
-            "jaotunud. Kui jah, kirjelda 1-2 lausega, millised päevad on ülekoormatud, ja anna üks " +
-            "konkreetne ümberplaneerimise soovitus. Kui koormus on tasakaalus, ütle seda lühidalt. " +
-            `Vasta eesti keeles. Andmed (JSON): ${payload}`,
-        },
-      ],
-    });
-
-    const block = msg.content?.find((b) => b.type === "text");
-    return { text: block ? block.text.trim() : null, fallback: null };
-  } catch (err) {
-    console.error("[EduAI õpikoormus] AI viga:", err?.status, err?.message);
-    return {
-      text: null,
-      fallback: "AI soovitust ei saanud laadida. Hoiatus arvutatakse ka ilma selleta.",
-    };
-  }
+  return askClaude({
+    purpose: "workload_balance",
+    user,
+    maxTokens: 400,
+    fallback: "AI soovitust ei saanud laadida. Hoiatus arvutatakse ka ilma selleta.",
+    prompt:
+      "Sa oled õppetöö planeerimise assistent. Analüüsi selle nädala kontrolltööde nimekirja " +
+      `klassi ${className} kohta (nädal ${weekRange}) ja hinda, kas õpikoormus on ebaühtlaselt ` +
+      "jaotunud. Kui jah, kirjelda 1-2 lausega, millised päevad on ülekoormatud, ja anna üks " +
+      "konkreetne ümberplaneerimise soovitus. Kui koormus on tasakaalus, ütle seda lühidalt. " +
+      `Vasta eesti keeles. Andmed (JSON): ${payload}`,
+  });
 }

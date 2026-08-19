@@ -149,7 +149,7 @@ määravad andmemudeli, mistõttu need otsused tuleb teha nüüd, mitte 2027. aa
 | **4** | Suhtlus | ✅ **Tehtud.** conversations/messages/participants/reads + /sonumid. Kaks tüüpi: isiklik vestlus (osalejad kirjas) ja klassi teade (nähtavus klassist, ühesuunaline). AI abi sõnastamisel — ei saada kunagi ise (RULE A1) |
 | **5** | Mentorlus | ✅ **Tehtud.** Laiendatud `student_goals` (category, target_date, mentor_id, progress, detail) ja `mentor_notes` (mentor_id, kind, is_private, next_meeting_date, date) — `mentoring_*` dublette ei loodud (K2). /mentorlus: eesmärgid edenemisribaga, vestluse märkmed (vaikimisi privaatsed), "ootab vestlust" hoiatus, AI vahesammud |
 | **6** | Kooli tasand | ✅ **Tehtud.** /kool ainult juhtkonnale: koondnäitajad, riskijaotus, klasside tabel (tähestikus, mitte pingereas), "vajavad tähelepanu" nimekiri, AI kokkuvõte ainult koondarvudest. Alla 3 õpilasega klasside numbrid peidetud |
-| **7** | Huviringid + vanema vaade | Nagu juhendis + RULE A6 |
-| **8** | Läbiv AI | Nagu juhendis + RULE A1/A3 (kuumakaart mõõdab õppimist, mitte emotsiooni) |
+| **7** | Huviringid + vanema vaade | ✅ **Tehtud.** activities + activity_participants, /huviringid. Kohtade piirang tingimusliku lisamisega, pere näeb osalejate ARVU ja oma lapsi — nimesid näeb ainult koolitöötaja |
+| **8** | Läbiv AI | ✅ **Tehtud.** `services/aiEngine.js` — kõik AI-kutsed käivad ühest kohast: üks mudeli ID, üks timeout, üks veakäsitlus, üks kasutuslogi. `ai_usage` logib iga kutse (AI-määruse logimisnõue), aga MITTE prompti ega vastust. Juhtkond näeb logi /kool lehel |
 
 Iga faasi lõpus: `npm run dev`, käsitsi test, git commit. Üks faas korraga.

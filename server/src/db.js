@@ -7,6 +7,8 @@ import { runFaas1bMigration } from "./migrations/faas1b.js";
 import { runFaas2Migration } from "./migrations/faas2.js";
 import { runFaas4Migration } from "./migrations/faas4.js";
 import { runFaas5Migration } from "./migrations/faas5.js";
+import { runFaas7Migration } from "./migrations/faas7.js";
+import { runFaas8Migration } from "./migrations/faas8.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -424,5 +426,9 @@ const faas5 = runFaas5Migration(db);
 if (faas5.changed) {
   for (const note of faas5.notes) console.log(`[EduAI migratsioon 5] ${note}`);
 }
+
+/* FAAS 7 — huviringid. FAAS 8 — AI kasutuslogi. Mõlemad ainult uued tabelid. */
+runFaas7Migration(db);
+runFaas8Migration(db);
 
 export default db;

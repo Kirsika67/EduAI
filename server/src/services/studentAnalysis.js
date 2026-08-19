@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaudeOrThrow } from "./aiEngine.js";
 
 /**
  * Eemaldab võimaliku ```json ... ``` ümbrise.
@@ -19,7 +18,7 @@ export function extractJsonObject(raw) {
 
 /**
  * @param {object} input
- * @param {string|null} apiKey
+ * @param {object} [user] req.user — AI kasutuslogi jaoks
  * @returns {Promise<{
  *   mainProblem: string,
  *   hypothesis: string,
@@ -29,13 +28,7 @@ export function extractJsonObject(raw) {
  *   parentSms: string
  * }>}
  */
-export async function runStudentAiAnalysis(input, apiKey) {
-  if (!apiKey || !String(apiKey).trim()) {
-    throw new Error("ANTHROPIC_API_KEY puudub.");
-  }
-
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
-
+export async function runStudentAiAnalysis(input, user) {
   const payload = JSON.stringify(
     {
       opilane: input.studentName,
@@ -63,14 +56,18 @@ ${payload}`;
 
   let text = "";
   try {
-    const msg = await client.messages.create({
-      model: ANTHROPIC_MODEL,
-      thinking: ANTHROPIC_THINKING,
-      max_tokens: 4096,
-      messages: [{ role: "user", content: instruction }],
+    const responseText = await askClaudeOrThrow({
+
+      prompt: instruction,
+
+      purpose: "student_analysis",
+
+      user,
+
+      maxTokens: 4096,
+
     });
-    const block = msg.content?.[0];
-    text = block && block.type === "text" ? block.text.trim() : "";
+    text = responseText;
   } catch (err) {
     console.error("[EduAI õpilase analüüs] Anthropic", {
       model: ANTHROPIC_MODEL,

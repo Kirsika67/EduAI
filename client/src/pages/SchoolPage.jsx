@@ -29,12 +29,18 @@ export default function SchoolPage() {
   const [summaryNote, setSummaryNote] = useState('')
   const [summarising, setSummarising] = useState(false)
 
+  const [aiUsage, setAiUsage] = useState(null)
+
   useEffect(() => {
     let cancelled = false
     const load = async () => {
       try {
         const d = await apiCall('/api/school/overview')
-        if (!cancelled) setData(d)
+        if (cancelled) return
+        setData(d)
+        const u = await apiCall('/api/school/ai-usage')
+        if (cancelled) return
+        setAiUsage(u)
       } catch (err) {
         if (!cancelled) setError(err.message)
       } finally {
@@ -130,6 +136,58 @@ export default function SchoolPage() {
           <p className="text-sm text-gray-400">Vajuta nuppu, et saada 3–4 lauseline hinnang.</p>
         )}
       </div>
+
+      {aiUsage && (
+        <div className="bg-white rounded-xl border border-black/10 p-5 mb-5">
+          <h2 className="text-sm font-semibold text-gray-900 mb-1">
+            AI kasutus ({aiUsage.days} päeva)
+          </h2>
+          <p className="text-xs text-gray-400 mb-3">
+            AI-määrus nõuab, et AI kasutamine oleks tagantjärele nähtav. Logi näitab,
+            <strong className="font-medium"> et</strong> AI-d kasutati ja mis otstarbel —
+            mitte seda, mida kellegi kohta kirjutati. Prompte ega vastuseid ei salvestata.
+          </p>
+
+          {!aiUsage.apiKeyPresent && (
+            <div className="bg-[#FAEEDA] text-[#854F0B] text-xs px-3 py-2 rounded-lg mb-3">
+              API võti puudub — AI-funktsioonid näitavad selgitust, mitte viga.
+            </div>
+          )}
+
+          <div className="flex gap-6 mb-3">
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{aiUsage.totals.calls}</p>
+              <p className="text-[11px] text-gray-400">kutset</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{aiUsage.totals.okCalls}</p>
+              <p className="text-[11px] text-gray-400">õnnestus</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{aiUsage.totals.users}</p>
+              <p className="text-[11px] text-gray-400">kasutajat</p>
+            </div>
+          </div>
+
+          {aiUsage.byPurpose.length === 0 ? (
+            <p className="text-sm text-gray-400">AI-d pole selle aja jooksul kasutatud.</p>
+          ) : (
+            <div className="space-y-1.5">
+              {aiUsage.byPurpose.map(p => (
+                <div key={p.purpose} className="flex items-center gap-3">
+                  <span className="text-[13px] text-gray-700 flex-1 truncate">{p.label}</span>
+                  <span className="text-[11px] text-gray-400">
+                    {p.avgMs ? `${Math.round(p.avgMs / 100) / 10}s` : ''}
+                  </span>
+                  <span className="text-[13px] font-semibold text-gray-900 w-10 text-right">
+                    {p.calls}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <h2 className="text-sm font-semibold text-gray-900 mb-2">Klassid</h2>
       <p className="text-xs text-gray-400 mb-3">

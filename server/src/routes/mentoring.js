@@ -338,10 +338,7 @@ router.post("/goals/suggest", requireStaff, async (req, res) => {
   }
 
   const student = db.prepare(`SELECT name FROM students WHERE id = ?`).get(studentId);
-  const result = await suggestGoalSteps(
-    { studentName: student?.name || "", goalTitle },
-    process.env.ANTHROPIC_API_KEY
-  );
+  const result = await suggestGoalSteps({ studentName: student?.name || "", goalTitle }, req.user);
 
   audit(req, {
     action: "mentoring.ai_goal_suggest",

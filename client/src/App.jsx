@@ -20,6 +20,7 @@ import AttendancePage from './pages/AttendancePage'
 import MessagesPage from './pages/MessagesPage'
 import MentoringPage from './pages/MentoringPage'
 import SchoolPage from './pages/SchoolPage'
+import ActivitiesPage from './pages/ActivitiesPage'
 import MyChildPage from './pages/MyChildPage'
 import { isStaff, isLeadership, canInvite, landingPathForRole } from './constants/roles'
 
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="tunniplaan" element={<TimetablePage />} />
         <Route path="tunniplaan/vanemapaev" element={<ParentMeetingsPage />} />
         <Route path="sonumid" element={<MessagesPage />} />
+        <Route path="huviringid" element={<ActivitiesPage />} />
 
         {/* Vanema ja õpilase vaade */}
         <Route path="minu-laps" element={<MyChildPage />} />

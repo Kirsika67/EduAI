@@ -339,7 +339,7 @@ router.post("/assist", requireStaff, async (req, res) => {
   if (!text) return res.status(400).json({ error: "Kirjuta esmalt sõnum." });
   if (text.length > 4000) return res.status(400).json({ error: "Sõnum on liiga pikk." });
 
-  const result = await assistMessage(text, mode, process.env.ANTHROPIC_API_KEY);
+  const result = await assistMessage(text, mode, req.user);
   if (result.error) return res.status(400).json({ error: result.error });
 
   audit(req, { action: `message.ai_assist:${mode}`, entityType: "message" });

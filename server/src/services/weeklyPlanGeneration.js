@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaudeOrThrow } from "./aiEngine.js";
 import { extractJsonObject } from "./studentAnalysis.js";
 
 /**
@@ -10,16 +9,10 @@ import { extractJsonObject } from "./studentAnalysis.js";
  * @param {string[]} ctx.topicNames
  * @param {number} ctx.studentCount
  * @param {string|null} ctx.focusNotes
- * @param {string|null} apiKey
+ * @param {object} [user] req.user — AI kasutuslogi jaoks
  * @returns {Promise<{ title: string, planText: string, reminders: Array<{ dayLabel: string, text: string }> }>}
  */
-export async function generateWeeklyClassPlan(ctx, apiKey) {
-  if (!apiKey || !String(apiKey).trim()) {
-    throw new Error("ANTHROPIC_API_KEY puudub.");
-  }
-
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
-
+export async function generateWeeklyClassPlan(ctx, user) {
   const payload = JSON.stringify(
     {
       klass: ctx.className,
@@ -51,16 +44,24 @@ Meeldetuletusi peaks olema 4–8, kattuvad nädala jooksul. Päevasildid peavad 
 Kontekst:
 ${payload}`;
 
-  const msg = await client.messages.create({
-    model: ANTHROPIC_MODEL,
-    thinking: ANTHROPIC_THINKING,
-    max_tokens: 6144,
-    messages: [{ role: "user", content: instruction }],
+  const responseText = await askClaudeOrThrow({
+
+
+    prompt: instruction,
+
+
+    purpose: "weekly_plan",
+
+
+    user,
+
+
+    maxTokens: 6144,
+
+
   });
 
-  const block = msg.content?.[0];
-  const raw =
-    block && block.type === "text" ? block.text.trim() : "";
+  const raw = responseText;
   if (!raw) throw new Error("AI ei tagastanud teksti.");
 
   const parsed = extractJsonObject(raw);

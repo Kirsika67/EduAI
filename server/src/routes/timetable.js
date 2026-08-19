@@ -322,7 +322,7 @@ router.get("/workload", requireStaff, async (req, res) => {
   if (load.level === "warning") {
     ai = await suggestRebalance(
       { className: klass?.name || "", weekRange: `${monday} – ${sunday}`, exams },
-      process.env.ANTHROPIC_API_KEY
+      req.user
     );
   }
 

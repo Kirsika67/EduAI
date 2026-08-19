@@ -1,18 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaudeOrThrow } from "./aiEngine.js";
 import { extractJsonObject } from "./studentAnalysis.js";
 
 /**
  * Genereerib iga õpilase jaoks lühikese (1–2 lauset) sõbraliku tagasiside eesti keeles.
  * @returns {Promise<Array<{ studentId: number, text: string }>>}
  */
-export async function generateBatchGradeFeedback(ctx, apiKey) {
-  if (!apiKey || !String(apiKey).trim()) {
-    return [];
-  }
-
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
-
+export async function generateBatchGradeFeedback(ctx, user) {
   const payload = JSON.stringify(
     {
       klass: ctx.className,
@@ -40,16 +33,24 @@ Vasta AINULT ühe kehtiva JSON objektina (ilma markdown):
 Andmed:
 ${payload}`;
 
-  const msg = await client.messages.create({
-    model: ANTHROPIC_MODEL,
-    thinking: ANTHROPIC_THINKING,
-    max_tokens: 2048,
-    messages: [{ role: "user", content: instruction }],
+  const responseText = await askClaudeOrThrow({
+
+
+    prompt: instruction,
+
+
+    purpose: "grade_feedback",
+
+
+    user,
+
+
+    maxTokens: 2048,
+
+
   });
 
-  const block = msg.content?.[0];
-  const raw =
-    block && block.type === "text" ? block.text.trim() : "";
+  const raw = responseText;
   if (!raw) return [];
 
   let parsed;

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import db from "../db.js";
-import { SERVER_DOTENV_PATH } from "../loadEnv.js";
 import { requireAuth } from "../middleware/auth.js";
 import { classTopicWeakAlerts } from "../services/alerts.js";
 import { abcForStudent } from "../services/abcRisk.js";
@@ -153,23 +152,11 @@ router.get("/overview", async (req, res) => {
   let aiSummaryFallback = null;
 
   try {
-    const rawKey = process.env.ANTHROPIC_API_KEY;
-    const keyStr = rawKey != null ? String(rawKey) : "";
-    const trimmed = keyStr.trim();
-
-    console.log("[EduAI AI ülevaade] kutse algas", {
-      cwd: process.cwd(),
-      envFile: SERVER_DOTENV_PATH,
-      keyLength: keyStr.length,
-      keyTrimmedLength: trimmed.length,
-      keyLooksEmpty: trimmed.length === 0,
-      keyIsPlaceholder: trimmed === "your-key-here",
-      keyPrefix:
-        trimmed.length > 0
-          ? `${trimmed.slice(0, Math.min(8, trimmed.length))}…`
-          : null,
-    });
-
+    /**
+     * Võtme käsitlus on `aiEngine` sees. Varasem versioon logis siin võtme
+     * pikkuse ja esimesed märgid — saladuse jälgi ei kuulu logisse, ka
+     * silumise ajal mitte.
+     */
     const ai = await generateDashboardSummary(
       {
         className: scopeClass.name,
@@ -188,29 +175,12 @@ router.get("/overview", async (req, res) => {
           average: Math.round(Number(r.avg_score) * 10) / 10,
         })),
       },
-      rawKey
+      req.user
     );
     aiSummary = ai.text;
     aiSummaryFallback = ai.fallback;
-    console.log("[EduAI AI ülevaade] vastus OK", {
-      hasText: Boolean(aiSummary),
-      hasFallback: Boolean(aiSummaryFallback),
-    });
   } catch (e) {
-    console.error("[EduAI AI ülevaade] VIGA", {
-      name: e?.name,
-      message: e?.message,
-      stack: e?.stack,
-      status: e?.status,
-      statusCode: e?.statusCode,
-      code: e?.code,
-      type: e?.type,
-      error: e?.error,
-      body: e?.body,
-      response: e?.response
-        ? { status: e.response.status, data: e.response.data }
-        : undefined,
-    });
+    console.error("[EduAI AI ülevaade]", e?.message || e);
     aiSummaryFallback =
       "AI ülevaadet ei saanud praegu laadida. Kontrolli ANTHROPIC_API_KEY või proovi hiljem uuesti.";
   }

@@ -56,6 +56,7 @@ const STAFF_NAV = [
   { to: '/kohalolek', label: 'Kohalolek' },
   { to: '/sonumid', label: 'Sõnumid' },
   { to: '/mentorlus', label: 'Mentorlus' },
+  { to: '/huviringid', label: 'Huviringid' },
 ]
 
 const PARENT_NAV = [
@@ -63,12 +64,13 @@ const PARENT_NAV = [
   { to: '/tunniplaan', label: 'Tunniplaan' },
   { to: '/tunniplaan/vanemapaev', label: 'Vanemate päev' },
   { to: '/sonumid', label: 'Sõnumid' },
+  { to: '/huviringid', label: 'Huviringid' },
 ]
 
 const STUDENT_NAV = [
   { to: '/minu-laps', label: 'Minu profiil' },
   { to: '/tunniplaan', label: 'Tunniplaan' },
-  { label: 'Kodutööd', soon: 'Faas 8' },
+  { to: '/huviringid', label: 'Huviringid' },
   { to: '/sonumid', label: 'Sõnumid' },
 ]
 

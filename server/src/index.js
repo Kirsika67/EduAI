@@ -23,6 +23,7 @@ import attendanceBoardRoutes from "./routes/attendanceBoard.js";
 import messagesRoutes from "./routes/messages.js";
 import mentoringRoutes from "./routes/mentoring.js";
 import schoolRoutes from "./routes/school.js";
+import activitiesRoutes from "./routes/activities.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(__dirname, "..", "..", "client", "dist");
@@ -56,6 +57,7 @@ app.use("/api/attendance", attendanceBoardRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/mentoring", mentoringRoutes);
 app.use("/api/school", schoolRoutes);
+app.use("/api/activities", activitiesRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api", studentRoutes);
 app.use("/api", studentDetailRoutes);

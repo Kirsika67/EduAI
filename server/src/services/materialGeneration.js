@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaudeOrThrow } from "./aiEngine.js";
 import { extractJsonObject } from "./studentAnalysis.js";
 
 const TYPE_LABELS = {
@@ -23,16 +22,10 @@ const DIFF_LABELS = {
  * @param {'light'|'medium'|'hard'} ctx.difficulty
  * @param {number|null} ctx.durationMinutes
  * @param {string|null} ctx.extraNotes
- * @param {string|null} apiKey
+ * @param {object} [user] req.user — AI kasutuslogi jaoks
  * @returns {Promise<{ title: string, content: string }>}
  */
-export async function generateMaterial(ctx, apiKey) {
-  if (!apiKey || !String(apiKey).trim()) {
-    throw new Error("ANTHROPIC_API_KEY puudub.");
-  }
-
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
-
+export async function generateMaterial(ctx, user) {
   const t = TYPE_LABELS[ctx.type] || ctx.type;
   const d = DIFF_LABELS[ctx.difficulty] || ctx.difficulty;
 
@@ -95,16 +88,24 @@ Vasta AINULT ühe kehtiva JSON objektina (ilma markdown):
 Kontekst (JSON):
 ${userBlock}`;
 
-  const msg = await client.messages.create({
-    model: ANTHROPIC_MODEL,
-    thinking: ANTHROPIC_THINKING,
-    max_tokens: 8192,
-    messages: [{ role: "user", content: instruction }],
+  const responseText = await askClaudeOrThrow({
+
+
+    prompt: instruction,
+
+
+    purpose: "material",
+
+
+    user,
+
+
+    maxTokens: 8192,
+
+
   });
 
-  const block = msg.content?.[0];
-  const raw =
-    block && block.type === "text" ? block.text.trim() : "";
+  const raw = responseText;
   if (!raw) throw new Error("AI ei tagastanud teksti.");
 
   const parsed = extractJsonObject(raw);

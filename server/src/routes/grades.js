@@ -89,7 +89,7 @@ router.post("/classes/:classId/grades", async (req, res) => {
     topic,
     date,
     saved,
-    process.env.ANTHROPIC_API_KEY
+      req.user
   );
 
   res.status(201).json({ grades: saved });
@@ -199,7 +199,7 @@ router.post(
       topic,
       date,
       saved,
-      process.env.ANTHROPIC_API_KEY
+      req.user
     );
 
     res.status(201).json({

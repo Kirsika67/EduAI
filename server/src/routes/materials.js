@@ -172,7 +172,7 @@ router.post("/classes/:classId/materials/generate", async (req, res) => {
         durationMinutes: type === "lesson_plan" ? dur : null,
         extraNotes: extra,
       },
-      process.env.ANTHROPIC_API_KEY
+      req.user
     );
 
     const info = db

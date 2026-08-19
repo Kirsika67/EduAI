@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaude } from "./aiEngine.js";
 
 /**
  * AI abi sõnumi kirjutamisel.
@@ -39,41 +38,23 @@ export const ASSIST_MODES = {
 /**
  * @param {string} text
  * @param {keyof typeof ASSIST_MODES} mode
- * @param {string|undefined} apiKey
+ * @param {object} user  req.user — kasutuslogi jaoks
  */
-export async function assistMessage(text, mode, apiKey) {
+export async function assistMessage(text, mode, user) {
   const config = ASSIST_MODES[mode];
   if (!config) return { text: null, error: "Tundmatu režiim." };
-  if (!apiKey || !String(apiKey).trim()) {
-    return {
-      text: null,
-      fallback: "Lisa ANTHROPIC_API_KEY, et AI saaks sõnumi sõnastamisel aidata.",
-    };
-  }
 
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
-  try {
-    const msg = await client.messages.create({
-      model: ANTHROPIC_MODEL,
-      thinking: ANTHROPIC_THINKING,
-      max_tokens: 1000,
-      messages: [
-        {
-          role: "user",
-          content:
-            "Sa aitad õpetajal sõnastada sõnumit lapsevanemale või õpilasele. " +
-            `${config.instruction} ` +
-            "Vasta AINULT ümbersõnastatud tekstiga, ilma selgituste, sissejuhatuse " +
-            "ega jutumärkideta. Ära lisa infot, mida algtekstis ei ole — eriti mitte " +
-            "väiteid lapse kohta.\n\n" +
-            `Algtekst:\n${text}`,
-        },
-      ],
-    });
-    const block = msg.content?.find((b) => b.type === "text");
-    return { text: block ? block.text.trim() : null };
-  } catch (err) {
-    console.error("[EduAI sõnumiabi] AI viga:", err?.status, err?.message);
-    return { text: null, fallback: "AI abi ei õnnestunud. Sõnumi saad ikka ise saata." };
-  }
+  return askClaude({
+    purpose: "message_assist",
+    user,
+    maxTokens: 1000,
+    fallback: "AI abi ei õnnestunud. Sõnumi saad ikka ise saata.",
+    prompt:
+      "Sa aitad õpetajal sõnastada sõnumit lapsevanemale või õpilasele. " +
+      `${config.instruction} ` +
+      "Vasta AINULT ümbersõnastatud tekstiga, ilma selgituste, sissejuhatuse " +
+      "ega jutumärkideta. Ära lisa infot, mida algtekstis ei ole — eriti mitte " +
+      "väiteid lapse kohta.\n\n" +
+      `Algtekst:\n${text}`,
+  });
 }

@@ -116,7 +116,7 @@ router.post("/classes/:classId/weekly-plans/generate", async (req, res) => {
         studentCount: Number(studentCount) || 0,
         focusNotes: focus,
       },
-      process.env.ANTHROPIC_API_KEY
+      req.user
     );
   } catch (e) {
     console.error("[EduAI nädala plaan]", e?.message || e);

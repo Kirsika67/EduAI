@@ -1,21 +1,15 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { ANTHROPIC_MODEL as MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { askClaude } from "./aiEngine.js";
 
 /**
+ * Klassi AI-ülevaade Ülevaate lehele.
+ *
+ * Käib läbi `aiEngine`, nagu kõik teised AI-kutsed: üks mudeli ID, üks
+ * veakäsitlus, üks kasutuslogi (Faas 8).
+ *
  * @param {object} ctx
- * @param {string|null} apiKey
+ * @param {object} [user] req.user — kasutuslogi jaoks
  */
-export async function generateDashboardSummary(ctx, apiKey) {
-  if (!apiKey || !String(apiKey).trim()) {
-    return {
-      text: null,
-      fallback:
-        "Lisa Anthropic API võti serveri keskkonnamuutujaks ANTHROPIC_API_KEY, et kuvada siin lühike AI ülevaade.",
-    };
-  }
-
-  const client = new Anthropic({ apiKey: String(apiKey).trim() });
-
+export async function generateDashboardSummary(ctx, user) {
   const userPayload = JSON.stringify(
     {
       klass: ctx.className,
@@ -28,34 +22,14 @@ export async function generateDashboardSummary(ctx, apiKey) {
     0
   );
 
-  try {
-    const msg = await client.messages.create({
-      model: MODEL,
-      thinking: ANTHROPIC_THINKING,
-      max_tokens: 600,
-      messages: [
-        {
-          role: "user",
-          content: `Oled õpetaja assistent. Kirjuta 3–4 lühikest lauset eesti keeles: kompaktne ülevaade klassi olukorrast ja 1–2 praktilist järgmist sammu. Ole sõbralik ja konkreetne. Andmed (JSON):\n${userPayload}`,
-        },
-      ],
-    });
-
-    const block = msg.content?.[0];
-    const text =
-      block && block.type === "text" ? block.text.trim() : "";
-
-    return { text: text || null, fallback: null };
-  } catch (err) {
-    console.error("[EduAI Anthropic messages.create] VIGA", {
-      model: MODEL,
-      name: err?.name,
-      message: err?.message,
-      status: err?.status,
-      headers: err?.headers,
-      error: err?.error,
-      stack: err?.stack,
-    });
-    throw err;
-  }
+  return askClaude({
+    purpose: "class_overview",
+    user,
+    maxTokens: 600,
+    fallback: "AI ülevaadet ei saanud laadida. Näitajad on ülal ka ilma selleta.",
+    prompt:
+      "Oled õpetaja assistent. Kirjuta 3–4 lühikest lauset eesti keeles: kompaktne " +
+      "ülevaade klassi olukorrast ja 1–2 praktilist järgmist sammu. Ole sõbralik ja " +
+      `konkreetne. Andmed (JSON):\n${userPayload}`,
+  });
 }

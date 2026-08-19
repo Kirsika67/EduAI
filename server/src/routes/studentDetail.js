@@ -309,7 +309,7 @@ router.post("/classes/:classId/students/:studentId/ai-analysis", async (req, res
         })),
         classTopicAverages,
       },
-      process.env.ANTHROPIC_API_KEY
+      req.user
     );
 
     const jsonStr = JSON.stringify(analysis);
