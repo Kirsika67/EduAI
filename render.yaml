@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: eduai
+    name: eduai-app
     runtime: node
     # Starter, mitte free: tasuta paketil on ketas ajutine — andmebaas kustuks
     # iga juurutuse ja iga uinaku järel. Starter ei uinu ka, seega link avaneb kohe.
