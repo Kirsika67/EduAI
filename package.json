@@ -9,9 +9,13 @@
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm run start -w server",
-    "share": "npm run build && concurrently \"npm run start -w server\" \"npx --yes localtunnel --port 3001\""
+    "share": "npm run build && concurrently \"npm run start -w server\" \"npx --yes localtunnel --port 3001\"",
+    "test": "npm run test -w server"
   },
-  "workspaces": ["server", "client"],
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "devDependencies": {
     "concurrently": "^9.1.2"
   }

@@ -39,8 +39,13 @@ export const ASSIST_MODES = {
  * @param {string} text
  * @param {keyof typeof ASSIST_MODES} mode
  * @param {object} user  req.user — kasutuslogi jaoks
+ * @param {string[]} [knownNames]
+ *        Nimed, mis selle õpetaja sõnumis esineda võivad (tema klasside
+ *        õpilased). Mootor asendab need enne saatmist märgistega ja paneb
+ *        vastuses tagasi — nii ei lahku lapse nimi majast ka siis, kui
+ *        õpetaja selle ise sõnumisse kirjutas.
  */
-export async function assistMessage(text, mode, user) {
+export async function assistMessage(text, mode, user, knownNames = []) {
   const config = ASSIST_MODES[mode];
   if (!config) return { text: null, error: "Tundmatu režiim." };
 
@@ -48,6 +53,7 @@ export async function assistMessage(text, mode, user) {
     purpose: "message_assist",
     user,
     maxTokens: 1000,
+    protectedNames: knownNames,
     fallback: "AI abi ei õnnestunud. Sõnumi saad ikka ise saata.",
     prompt:
       "Sa aitad õpetajal sõnastada sõnumit lapsevanemale või õpilasele. " +

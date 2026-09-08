@@ -7,6 +7,10 @@ import { askClaude } from "./aiEngine.js";
  * veakäsitlus, üks kasutuslogi (Faas 8).
  *
  * @param {object} ctx
+ * @param {string[]} [ctx.studentNames]
+ *        Klassi õpilaste nimed. Hoiatuste kokkuvõttes on nimed sees, seega
+ *        need tuleb pseudonümiseerida — mootor teeb selle ise, aga ainult
+ *        siis, kui talle öeldakse, millised nimed tekstis olla võivad.
  * @param {object} [user] req.user — kasutuslogi jaoks
  */
 export async function generateDashboardSummary(ctx, user) {
@@ -26,6 +30,7 @@ export async function generateDashboardSummary(ctx, user) {
     purpose: "class_overview",
     user,
     maxTokens: 600,
+    protectedNames: ctx.studentNames || [],
     fallback: "AI ülevaadet ei saanud laadida. Näitajad on ülal ka ilma selleta.",
     prompt:
       "Oled õpetaja assistent. Kirjuta 3–4 lühikest lauset eesti keeles: kompaktne " +

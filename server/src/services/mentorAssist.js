@@ -9,6 +9,9 @@ import { askClaude } from "./aiEngine.js";
  * selle kohta, kes see laps on. Andmete kokkukühveldamine "parema soovituse"
  * nimel oleks siin täpselt vale suund (RULE A3).
  *
+ * Ka eesnimi ise ei lahku majast: mootor asendab selle märgisega ja paneb
+ * vastuses tagasi.
+ *
  * Tagastab ettepaneku. Salvestamine on inimese kutse (RULE A1).
  */
 export async function suggestGoalSteps({ studentName, goalTitle }, user) {
@@ -18,6 +21,7 @@ export async function suggestGoalSteps({ studentName, goalTitle }, user) {
     purpose: "mentor_goal",
     user,
     maxTokens: 600,
+    protectedNames: [firstName],
     fallback: "AI ettepanekut ei saanud laadida. Eesmärgi saad ikka ise kirja panna.",
     prompt:
       "Sa aitad õpetajal mentorlusvestlust ette valmistada. Jaga allolev eesmärk " +

@@ -2,14 +2,35 @@ services:
   - type: web
     name: eduai
     runtime: node
-    plan: free
+    # Starter, mitte free: tasuta paketil on ketas ajutine — andmebaas kustuks
+    # iga juurutuse ja iga uinaku järel. Starter ei uinu ka, seega link avaneb kohe.
+    plan: starter
+    # EL-i piirkond: õpilasandmed ei lahku Euroopast.
+    region: frankfurt
     buildCommand: npm install && npm run build
     startCommand: npm run start -w server
     healthCheckPath: /api/health
+    # Püsiketas — SQLite fail elab siin üle juurutuste ja taaskäivituste.
+    disk:
+      name: eduai-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: NODE_VERSION
         value: "20"
+      - key: NODE_ENV
+        value: production
+      # Render genereerib juhusliku väärtuse ja hoiab seda salajas.
+      # Server keeldub käivitumast, kui see puudub.
       - key: JWT_SECRET
         generateValue: true
+      # Püsikettal, mitte koodikaustas.
       - key: DATABASE_PATH
-        value: /opt/render/project/src/server/data/eduai.db
+        value: /var/data/eduai.db
+      # sync: false = Render küsib väärtust sinult ega hoia seda Gitis.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Õpilaste nimed asendatakse enne Anthropicule saatmist märgistega.
+      # "off" lülitab välja — ära tee seda päris õpilasandmetega.
+      - key: AI_PSEUDONYMISE
+        value: "on"

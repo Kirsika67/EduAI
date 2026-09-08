@@ -174,6 +174,12 @@ router.get("/overview", async (req, res) => {
           topic: r.topic_name,
           average: Math.round(Number(r.avg_score) * 10) / 10,
         })),
+        /**
+         * Hoiatuste kokkuvõttes on õpilaste nimed. Anna need mootorile ette,
+         * et need asendataks märgistega enne Anthropicule saatmist — muidu
+         * läheks siit korraga välja kõigi tähelepanu vajavate laste nimed.
+         */
+        studentNames: studentAlerts.map((a) => a.studentName),
       },
       req.user
     );

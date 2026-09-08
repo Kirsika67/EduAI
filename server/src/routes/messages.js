@@ -339,7 +339,22 @@ router.post("/assist", requireStaff, async (req, res) => {
   if (!text) return res.status(400).json({ error: "Kirjuta esmalt sõnum." });
   if (text.length > 4000) return res.status(400).json({ error: "Sõnum on liiga pikk." });
 
-  const result = await assistMessage(text, mode, req.user);
+  /**
+   * Õpetaja kirjutab sõnumi oma sõnadega — seal on peaaegu alati lapse nimi.
+   * Anna mootorile ette kõik nimed, keda see õpetaja üldse näeb: nii ei sõltu
+   * pseudonümiseerimine sellest, kas keegi oskas nime kuskilt eraldi kaasa anda.
+   */
+  const classIds = visibleClassIds(req.user);
+  const knownNames = classIds.length
+    ? db
+        .prepare(
+          `SELECT name FROM students WHERE class_id IN (${classIds.map(() => "?").join(",")})`
+        )
+        .all(...classIds)
+        .map((r) => r.name)
+    : [];
+
+  const result = await assistMessage(text, mode, req.user, knownNames);
   if (result.error) return res.status(400).json({ error: result.error });
 
   audit(req, { action: `message.ai_assist:${mode}`, entityType: "message" });

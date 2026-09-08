@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import db from "../db.js";
 import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
+import { createNameShield, SHIELD_INSTRUCTION } from "./pseudonymise.js";
 
 /**
  * Läbiv AI-mootor — üks koht, kust kõik Claude'i kutsed läbi käivad.
@@ -9,6 +10,7 @@ import { ANTHROPIC_MODEL, ANTHROPIC_THINKING } from "../constants/ai.js";
  *  - Mudeli ID, timeout ja veakäsitlus on ühes failis, mitte laiali kaheksas
  *  - Iga kutse logitakse `ai_usage` tabelisse (AI-määruse logimisnõue)
  *  - Ilma API võtmeta käitub kogu rakendus ühtemoodi: `fallback` tekst, mitte viga
+ *  - Pseudonümiseerimine on ühes kohas: ükski teenus ei saa seda kogemata vahele jätta
  *
  * Mida see EI tee: ei salvesta prompti ega vastust. Logi ütleb, ET kutse tehti
  * ja mis otstarbel — mitte mida lapse kohta kirjutati.
@@ -65,6 +67,11 @@ export function hasApiKey() {
  * @param {object} [opts.user]        req.user — logimiseks (kool, konto)
  * @param {number} [opts.maxTokens]
  * @param {string} [opts.fallback]    Tekst, mis näidatakse ilma võtmeta
+ * @param {string[]} [opts.protectedNames]
+ *        Päris nimed, mis promptis esineda võivad. Need asendatakse enne
+ *        saatmist märgistega ja pannakse vastuses tagasi. Anna siia KÕIK
+ *        nimed, mis andmetes olla võivad — üleliigne nimi ei tee kahju,
+ *        puuduolev nimi lekib.
  * @returns {Promise<{ text: string|null, fallback: string|null }>}
  */
 export async function askClaude({
@@ -72,6 +79,7 @@ export async function askClaude({
   purpose,
   user,
   maxTokens = 800,
+  protectedNames = [],
   fallback = "AI vastust ei saanud laadida. Ülejäänud info on olemas ka ilma selleta.",
 }) {
   if (!hasApiKey()) {
@@ -81,6 +89,15 @@ export async function askClaude({
       fallback: "Lisa ANTHROPIC_API_KEY, et AI-funktsioonid tööle hakkaksid.",
     };
   }
+
+  /**
+   * Nimekilp. `mask` käib ainult prompti sisu peale — juhis ise lisatakse
+   * pärast maskimist, et mudel selle terviklikult kätte saaks.
+   */
+  const shield = createNameShield(protectedNames);
+  const outgoingPrompt = shield.active
+    ? `${SHIELD_INSTRUCTION}\n\n${shield.mask(prompt)}`
+    : prompt;
 
   const started = Date.now();
   const client = new Anthropic({
@@ -93,17 +110,18 @@ export async function askClaude({
       model: ANTHROPIC_MODEL,
       thinking: ANTHROPIC_THINKING,
       max_tokens: maxTokens,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: outgoingPrompt }],
     });
 
     const block = msg.content?.find((b) => b.type === "text");
-    const text = block ? block.text.trim() : null;
+    const masked = block ? block.text.trim() : null;
+    const text = masked === null ? null : shield.unmask(masked);
 
     logUsage({
       user,
       purpose,
       ok: true,
-      inputChars: prompt.length,
+      inputChars: outgoingPrompt.length,
       outputChars: text?.length ?? 0,
       durationMs: Date.now() - started,
     });
@@ -117,7 +135,7 @@ export async function askClaude({
       purpose,
       ok: false,
       errorKind,
-      inputChars: prompt.length,
+      inputChars: outgoingPrompt.length,
       durationMs: Date.now() - started,
     });
     return { text: null, fallback };
@@ -132,8 +150,8 @@ export async function askClaude({
  * mis kuvab oma varuvariandi. Kui muudaks selle vaikselt `null`-iks,
  * salvestaks marsruut tühja materjali.
  */
-export async function askClaudeOrThrow({ prompt, purpose, user, maxTokens }) {
-  const result = await askClaude({ prompt, purpose, user, maxTokens });
+export async function askClaudeOrThrow({ prompt, purpose, user, maxTokens, protectedNames }) {
+  const result = await askClaude({ prompt, purpose, user, maxTokens, protectedNames });
   if (!result.text) {
     throw new Error(result.fallback || "AI vastust ei saadud.");
   }

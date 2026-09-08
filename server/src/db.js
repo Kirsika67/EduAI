@@ -431,4 +431,7 @@ if (faas5.changed) {
 runFaas7Migration(db);
 runFaas8Migration(db);
 
+/** Andmebaasi absoluutne tee — varundus vajab seda. */
+export const DB_PATH = dbPath;
+
 export default db;

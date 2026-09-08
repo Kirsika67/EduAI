@@ -1,4 +1,5 @@
 import { askClaudeOrThrow } from "./aiEngine.js";
+import { ANTHROPIC_MODEL } from "../constants/ai.js";
 
 /**
  * Eemaldab võimaliku ```json ... ``` ümbrise.
@@ -56,18 +57,18 @@ ${payload}`;
 
   let text = "";
   try {
-    const responseText = await askClaudeOrThrow({
-
+    /**
+     * Nimi asendatakse märgisega enne saatmist ja pannakse vastuses tagasi
+     * (`aiEngine` → `pseudonymise`). Kiri lapsevanemale jõuab õpetajani
+     * päris nimega, aga Anthropicuni jõuab ainult "[Õ1]".
+     */
+    text = await askClaudeOrThrow({
       prompt: instruction,
-
       purpose: "student_analysis",
-
       user,
-
       maxTokens: 4096,
-
+      protectedNames: [input.studentName],
     });
-    text = responseText;
   } catch (err) {
     console.error("[EduAI õpilase analüüs] Anthropic", {
       model: ANTHROPIC_MODEL,

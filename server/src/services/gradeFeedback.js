@@ -3,6 +3,11 @@ import { extractJsonObject } from "./studentAnalysis.js";
 
 /**
  * Genereerib iga õpilase jaoks lühikese (1–2 lauset) sõbraliku tagasiside eesti keeles.
+ *
+ * Siin läheb korraga terve klassi nimekiri — see on ainus koht, kus AI-le
+ * jõuaks korraga kõigi laste nimed. Seepärast on pseudonümiseerimine siin
+ * kõige olulisem: vastendus käib `studentId` järgi, mis on niikuinii vajalik,
+ * ja nimi ise on mudeli jaoks ainult märgis.
  * @returns {Promise<Array<{ studentId: number, text: string }>>}
  */
 export async function generateBatchGradeFeedback(ctx, user) {
@@ -33,24 +38,14 @@ Vasta AINULT ühe kehtiva JSON objektina (ilma markdown):
 Andmed:
 ${payload}`;
 
-  const responseText = await askClaudeOrThrow({
-
-
+  const raw = await askClaudeOrThrow({
     prompt: instruction,
-
-
     purpose: "grade_feedback",
-
-
     user,
-
-
     maxTokens: 2048,
-
-
+    protectedNames: ctx.entries.map((e) => e.studentName),
   });
 
-  const raw = responseText;
   if (!raw) return [];
 
   let parsed;

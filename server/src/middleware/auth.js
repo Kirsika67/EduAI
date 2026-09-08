@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import db from "../db.js";
 import { STAFF_ROLES, LEADERSHIP_ROLES } from "../constants/roles.js";
+import { jwtSecret } from "../utils/jwt.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
+if (!process.env.JWT_SECRET && process.env.NODE_ENV !== "production") {
   console.warn(
-    "HOIATUS: JWT_SECRET puudub. Lisa server/.env faili muutuja JWT_SECRET."
+    "HOIATUS: JWT_SECRET puudub. Kohalikult kasutatakse arenduse varuvõtit. " +
+      "Lisa server/.env faili muutuja JWT_SECRET."
   );
 }
 
@@ -28,8 +29,7 @@ export function requireAuth(req, res, next) {
 
   let payload;
   try {
-    const secret = JWT_SECRET || "arendus-vale-võti";
-    payload = jwt.verify(token, secret);
+    payload = jwt.verify(token, jwtSecret());
   } catch {
     return res.status(401).json({ error: "Kehtetu või aegunud seanss." });
   }
