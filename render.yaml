@@ -7,7 +7,10 @@ services:
     plan: starter
     # EL-i piirkond: õpilasandmed ei lahku Euroopast.
     region: frankfurt
-    buildCommand: npm install && npm run build
+    # --include=dev on kohustuslik: NODE_ENV=production paneb npm-i
+    # arendussõltuvused vahele jätma, aga vite (mis frontendi ehitab)
+    # on just selline sõltuvus. Ilma selleta: "sh: 1: vite: not found".
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start -w server
     healthCheckPath: /api/health
     # Püsiketas — SQLite fail elab siin üle juurutuste ja taaskäivituste.
