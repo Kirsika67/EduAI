@@ -19,6 +19,18 @@ export default function Sidebar() {
   const [adding, setAdding] = useState(false)
   const [showCode, setShowCode] = useState(false)
 
+  /** Klassi muutmine. `editingId` = null tähendab, et ükski rida ei ole muutmisel. */
+  const [editingId, setEditingId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editSubject, setEditSubject] = useState('')
+  const [saving, setSaving] = useState(false)
+  /**
+   * Kustutamine on kaheastmeline: esimene klõps küsib kinnitust, teine kustutab.
+   * Klassi kustutamine viib kaasa ka õpilased ja hinded, seega üks eksikklõps
+   * ei tohi seda teha.
+   */
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
   const staff = isStaff(role)
 
   const handleAddClass = async () => {
@@ -37,6 +49,56 @@ export default function Sidebar() {
       alert('Klassi lisamine ebaõnnestus: ' + err.message)
     } finally {
       setAdding(false)
+    }
+  }
+
+  const startEdit = (cls) => {
+    setEditingId(Number(cls.id))
+    setEditName(cls.name)
+    setEditSubject(cls.subject)
+    setConfirmDelete(false)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditName('')
+    setEditSubject('')
+    setConfirmDelete(false)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editName.trim() || !editSubject.trim()) return
+    setSaving(true)
+    try {
+      await apiCall(`/api/classes/${editingId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name: editName.trim(), subject: editSubject.trim() }),
+      })
+      await refetchClasses()
+      cancelEdit()
+    } catch (err) {
+      alert('Muutmine ebaõnnestus: ' + err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setSaving(true)
+    try {
+      const deletedId = editingId
+      await apiCall(`/api/classes/${deletedId}`, { method: 'DELETE' })
+      const remaining = classes.filter(c => Number(c.id) !== Number(deletedId))
+      /** Kui kustutatud klass oli valitud, vali järgmine — muidu jääb leht tühjaks. */
+      if (Number(selectedClassId) === Number(deletedId)) {
+        setSelectedClassId(remaining.length ? Number(remaining[0].id) : null)
+      }
+      await refetchClasses()
+      cancelEdit()
+    } catch (err) {
+      alert('Kustutamine ebaõnnestus: ' + err.message)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -66,20 +128,82 @@ export default function Sidebar() {
             {classes.length === 0 && (
               <p className="text-sm text-gray-400 italic">Ühtegi klassi pole lisatud</p>
             )}
-            {classes.map(cls => (
-              <button
-                key={cls.id}
-                onClick={() => { setSelectedClassId(Number(cls.id)); navigate('/ulevaade') }}
-                className={`w-full text-left px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                  Number(cls.id) === Number(selectedClassId)
-                    ? 'bg-[#EEEDFE] text-[#534AB7] font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <div className="text-sm font-medium">{cls.name}</div>
-                <div className="text-xs text-gray-500">{cls.subject}</div>
-              </button>
-            ))}
+            {classes.map(cls =>
+              Number(cls.id) === Number(editingId) ? (
+                <div key={cls.id} className="mb-1 p-3 border border-[#AFA9EC] rounded-lg bg-[#EEEDFE]">
+                  <input
+                    type="text"
+                    placeholder="Klassi nimi (nt 8A)"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    className="w-full text-sm border border-gray-200 rounded px-2 py-1.5 mb-2 outline-none focus:border-[#7F77DD]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Õppeaine (nt Matemaatika)"
+                    value={editSubject}
+                    onChange={e => setEditSubject(e.target.value)}
+                    className="w-full text-sm border border-gray-200 rounded px-2 py-1.5 mb-2 outline-none focus:border-[#7F77DD]"
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={handleSaveEdit} disabled={saving}
+                      className="flex-1 bg-[#7F77DD] text-white text-sm rounded px-3 py-1.5 hover:bg-[#534AB7] disabled:opacity-50">
+                      {saving ? 'Salvestan...' : 'Salvesta'}
+                    </button>
+                    <button onClick={cancelEdit} disabled={saving}
+                      className="flex-1 border border-gray-300 text-gray-600 text-sm rounded px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50">
+                      Tühista
+                    </button>
+                  </div>
+
+                  <div className="mt-2 pt-2 border-t border-[#AFA9EC]">
+                    {confirmDelete ? (
+                      <>
+                        <p className="text-[11px] text-[#A32D2D] mb-2">
+                          Kustutab ka selle klassi õpilased ja hinded. Seda ei saa tagasi võtta.
+                        </p>
+                        <div className="flex gap-2">
+                          <button onClick={handleDelete} disabled={saving}
+                            className="flex-1 bg-[#E24B4A] text-white text-xs rounded px-2 py-1.5 hover:bg-[#A32D2D] disabled:opacity-50">
+                            Kustuta jäädavalt
+                          </button>
+                          <button onClick={() => setConfirmDelete(false)} disabled={saving}
+                            className="flex-1 border border-gray-300 text-gray-600 text-xs rounded px-2 py-1.5 hover:bg-gray-50 disabled:opacity-50">
+                            Ei
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <button onClick={() => setConfirmDelete(true)}
+                        className="text-xs text-[#A32D2D] hover:underline">
+                        Kustuta klass
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div key={cls.id} className="flex items-stretch gap-1 mb-1">
+                  <button
+                    onClick={() => { setSelectedClassId(Number(cls.id)); navigate('/ulevaade') }}
+                    className={`flex-1 min-w-0 text-left px-3 py-2.5 rounded-lg transition-colors ${
+                      Number(cls.id) === Number(selectedClassId)
+                        ? 'bg-[#EEEDFE] text-[#534AB7] font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="text-sm font-medium truncate">{cls.name}</div>
+                    <div className="text-xs text-gray-500 truncate">{cls.subject}</div>
+                  </button>
+                  <button
+                    onClick={() => startEdit(cls)}
+                    title="Muuda klassi nime või ainet"
+                    className="px-2 text-xs text-gray-400 hover:text-[#534AB7] hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    Muuda
+                  </button>
+                </div>
+              )
+            )}
             {showAddClass && (
               <div className="mt-3 p-3 border border-[#AFA9EC] rounded-lg bg-[#EEEDFE]">
                 <input
@@ -125,10 +249,13 @@ export default function Sidebar() {
             {isLeadership(role) && (
               <div className="mt-6">
                 <SectionLabel>Juhtimine</SectionLabel>
-                <span title="Valmib: Faas 6"
-                  className="block px-3 py-2 rounded-lg text-sm text-gray-300 cursor-default">
+                <NavLink to="/kool"
+                  className={({ isActive }) =>
+                    `block px-3 py-2 rounded-lg text-sm transition-colors ${
+                      isActive ? 'bg-[#EEEDFE] text-[#534AB7] font-medium' : 'text-gray-700 hover:bg-gray-50'
+                    }`}>
                   Kooli ülevaade
-                </span>
+                </NavLink>
               </div>
             )}
 
