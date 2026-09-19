@@ -157,8 +157,7 @@ export default function OverviewPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Õpilaste ülevaade</h2>
-            <p className="text-xs text-gray-400">A = kohalolek · B = käitumine · C = hinded</p>
-          </div>
+            </div>
           <button onClick={() => navigate('/opilased')}
             className="text-xs border border-[#AFA9EC] text-[#534AB7] rounded-full px-3 py-1 hover:bg-[#EEEDFE]">
             Märgi kohalolek
