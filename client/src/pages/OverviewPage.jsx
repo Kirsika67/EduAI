@@ -156,7 +156,7 @@ export default function OverviewPage() {
       <div className="bg-white rounded-[10px] border border-black/10 p-5 mb-6">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Õpilaste ABC-profiil</h2>
+            <h2 className="text-sm font-semibold text-gray-900">Õpilaste ülevaade</h2>
             <p className="text-xs text-gray-400">A = kohalolek · B = käitumine · C = hinded</p>
           </div>
           <button onClick={() => navigate('/opilased')}
@@ -174,9 +174,9 @@ export default function OverviewPage() {
                 <tr className="text-left text-[11px] text-gray-400 border-b border-gray-100">
                   <th className="py-2 font-medium">Õpilane</th>
                   <th className="py-2 font-medium">Tase</th>
-                  <th className="py-2 font-medium">A</th>
-                  <th className="py-2 font-medium">B</th>
-                  <th className="py-2 font-medium">C</th>
+                  <th className="py-2 font-medium">Kohalolek</th>
+                  <th className="py-2 font-medium">Käitumine</th>
+                  <th className="py-2 font-medium">Hinded</th>
                   <th className="py-2 font-medium">Miks</th>
                 </tr>
               </thead>
