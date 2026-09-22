@@ -12,7 +12,7 @@ export default function EssayGradingPage() {
     setLoading(true)
     setResult(null)
     try {
-      const res = await fetch(`${API_BASE_URL}/api/ai/grade-essay`, {
+      const res = await fetch(`${API_BASE_URL}/api/grade-essay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
