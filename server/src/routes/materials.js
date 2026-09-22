@@ -241,7 +241,9 @@ Vasta JSON formaadis (ilma markdown koodiplokita):
 }`;
     const raw = await generateWithClaude(prompt);
     const clean = raw.replace(/```json|```/g, '').trim();
-    const data = JSON.parse(clean);
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return res.json({ feedback: clean, corrected: '', grade: '' });
+    const data = JSON.parse(jsonMatch[0]);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
