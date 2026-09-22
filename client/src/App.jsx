@@ -12,6 +12,7 @@ import ClassesPage from './pages/ClassesPage'
 import MaterialsPage from './pages/MaterialsPage'
 import FeedbackPage from './pages/FeedbackPage'
 import PlanningPage from './pages/PlanningPage'
+import EssayGradingPage from './pages/EssayGradingPage'
 import InvitePage from './pages/InvitePage'
 import SettingsPage from './pages/SettingsPage'
 import TimetablePage from './pages/TimetablePage'
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="materjalid" element={<MaterialsPage />} />
           <Route path="tagasiside" element={<FeedbackPage />} />
           <Route path="planeerimine" element={<PlanningPage />} />
+        <Route path="esseede-hindamine" element={<EssayGradingPage />} />
           <Route path="seaded" element={<SettingsPage />} />
           <Route path="mentorlus" element={<MentoringPage />} />
         </Route>
