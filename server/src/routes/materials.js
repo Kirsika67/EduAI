@@ -222,3 +222,28 @@ router.post("/classes/:classId/materials/generate", async (req, res) => {
 });
 
 export default router;
+
+router.post("/grade-essay", async (req, res) => {
+  const { text, context } = req.body;
+  if (!text) return res.status(400).json({ error: "Tekst puudub" });
+  try {
+    const { generateWithClaude } = require('../services/aiEngine');
+    const prompt = `Sa oled eesti keele õpetaja assistent. ${context ? `Kontekst: ${context}.` : ''} 
+Analüüsi järgmist esseed/kirjandit eesti keeles:
+
+${text}
+
+Vasta JSON formaadis (ilma markdown koodiplokita):
+{
+  "feedback": "üldine tagasiside 3-4 lauset",
+  "corrected": "parandatud tekst grammatikavigadega märgitud",
+  "grade": "soovituslik hinne 1-5 skaalal"
+}`;
+    const raw = await generateWithClaude(prompt);
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const data = JSON.parse(clean);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
