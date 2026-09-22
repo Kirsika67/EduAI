@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { API_BASE_URL } from '../config'
+import { useClasses } from '../context/ClassContext'
 
 export default function EssayGradingPage() {
+  const { classes } = useClasses()
   const [essayText, setEssayText] = useState('')
   const [grade, setGrade] = useState('')
   const [criteria, setCriteria] = useState('')
-  const [maxGrade, setMaxGrade] = useState('5')
+  const [subject, setSubject] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -20,7 +22,7 @@ export default function EssayGradingPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('eduai_token')}`
         },
-        body: JSON.stringify({ text: essayText, context: `Klass: ${grade}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}. Maksimaalne hinne: ${maxGrade}.` })
+        body: JSON.stringify({ text: essayText, context: `Klass: ${grade}. Aine/teema: ${subject || 'täpsustamata'}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}.` })
       })
       const data = await res.json()
       setResult(data)
@@ -40,17 +42,16 @@ export default function EssayGradingPage() {
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Klass</label>
-            <input type="text" placeholder="nt: 8A" value={grade} onChange={e => setGrade(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
+            <select value={grade} onChange={e => setGrade(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
+              <option value="">— Vali klass —</option>
+              {classes.map(cls => <option key={cls.id} value={cls.name}>{cls.name} · {cls.subject}</option>)}
+            </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Maksimaalne hinne</label>
-            <select value={maxGrade} onChange={e => setMaxGrade(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="100">100 punkti</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Aine / teema (valikuline)</label>
+            <input type="text" placeholder="nt: Eesti keel, kirjand" value={subject} onChange={e => setSubject(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Hindamiskriteeriumid</label>
