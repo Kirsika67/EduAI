@@ -3,7 +3,9 @@ import { API_BASE_URL } from '../config'
 
 export default function EssayGradingPage() {
   const [essayText, setEssayText] = useState('')
-  const [context, setContext] = useState('')
+  const [grade, setGrade] = useState('')
+  const [criteria, setCriteria] = useState('')
+  const [maxGrade, setMaxGrade] = useState('5')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -18,7 +20,7 @@ export default function EssayGradingPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('eduai_token')}`
         },
-        body: JSON.stringify({ text: essayText, context })
+        body: JSON.stringify({ text: essayText, context: `Klass: ${grade}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}. Maksimaalne hinne: ${maxGrade}.` })
       })
       const data = await res.json()
       setResult(data)
@@ -35,14 +37,27 @@ export default function EssayGradingPage() {
       <p className="text-gray-500 text-sm mb-6">Kleebi õpilase essee siia — AI parandab grammatika ja annab tagasiside.</p>
 
       <div className="bg-white rounded-xl border border-black/10 p-6 mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Kontekst õpetajalt (valikuline)</label>
-        <input
-          type="text"
-          placeholder="nt: 8. klassi kirjand teemal 'Minu unistused', hindamiskriteeriumid..."
-          value={context}
-          onChange={e => setContext(e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD] mb-4"
-        />
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Klass</label>
+            <input type="text" placeholder="nt: 8A" value={grade} onChange={e => setGrade(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Maksimaalne hinne</label>
+            <select value={maxGrade} onChange={e => setMaxGrade(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="100">100 punkti</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Hindamiskriteeriumid</label>
+            <input type="text" placeholder="nt: grammatika, sisu, ülesehitus" value={criteria} onChange={e => setCriteria(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
+          </div>
+        </div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Õpilase essee tekst</label>
         <textarea
           placeholder="Kleebi õpilase essee siia..."
