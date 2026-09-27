@@ -25,6 +25,7 @@ export default function EssayGradingPage() {
         body: JSON.stringify({ text: essayText, context: `Klass: ${grade}. Aine/teema: ${subject || 'täpsustamata'}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}.` })
       })
       const data = await res.json()
+      console.log("AI vastus:", JSON.stringify(data))
       setResult(data)
     } catch (err) {
       alert('Viga: ' + err.message)
