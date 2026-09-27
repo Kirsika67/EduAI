@@ -31,6 +31,7 @@ export const AI_PURPOSES = {
   mentor_goal: "Mentorluse vahesammud",
   school_summary: "Kooli koondhinnang",
   grade_feedback: "Hinde tagasiside",
+  essay_grading: "Esseede hindamine",
 };
 
 function logUsage({ user, purpose, ok, errorKind, inputChars, outputChars, durationMs }) {
