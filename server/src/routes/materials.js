@@ -227,7 +227,7 @@ router.post("/grade-essay", async (req, res) => {
   const { text, context } = req.body;
   if (!text) return res.status(400).json({ error: "Tekst puudub" });
   try {
-    const { askClaudeOrThrow } = await import('../services/aiEngine.js');
+
     const prompt = `Sa oled eesti keele õpetaja assistent. ${context ? `Kontekst: ${context}.` : ''} 
 Analüüsi järgmist esseed/kirjandit eesti keeles:
 
@@ -239,6 +239,7 @@ Vasta JSON formaadis (ilma markdown koodiplokita):
   "corrected": "parandatud tekst grammatikavigadega märgitud",
   "grade": "soovituslik hinne 1-5 skaalal"
 }`;
+    const { askClaudeOrThrow } = await import('../services/aiEngine.js');
     const raw = await askClaudeOrThrow({ prompt, purpose: 'essay_grading', user: req.user });
     const clean = raw.replace(/```json|```/g, '').trim();
     const jsonMatch = clean.match(/\{[\s\S]*\}/);
