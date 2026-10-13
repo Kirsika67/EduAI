@@ -238,15 +238,46 @@ Vasta JSON formaadis (ilma markdown koodiplokita):
   "feedback": "üldine tagasiside 3-4 lauset",
   "corrected": "parandatud tekst grammatikavigadega märgitud",
   "grade": "soovituslik hinne 1-5 skaalal"
-}`;
+}
+
+Nõuded:
+- "feedback": 3-4 lauset eesti keeles.
+- "corrected": kogu essee parandatud kujul; iga parandus märgi kujul [vale → õige].
+- "grade": ainult üks number 1 kuni 5.
+- Tagasta AINULT kehtiv JSON, ilma muu tekstita. Jutumärgid tekstis escape'i (\\").`;
     const { askClaudeOrThrow } = await import('../services/aiEngine.js');
-    const raw = await askClaudeOrThrow({ prompt, purpose: 'essay_grading', user: req.user });
+    const { ANTHROPIC_MODEL_ESSAY } = await import('../constants/ai.js');
+    /** Parandatud tekst kordab kogu esseed — 800 vaiketokenit lõikas JSONi pooleli. */
+    const raw = await askClaudeOrThrow({
+      prompt,
+      purpose: 'essay_grading',
+      user: req.user,
+      maxTokens: 8000,
+      model: ANTHROPIC_MODEL_ESSAY,
+      timeoutMs: 120_000,
+    });
     const clean = raw.replace(/```json|```/g, '').trim();
     const jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return res.json({ feedback: clean, corrected: '', grade: '' });
-    const data = JSON.parse(jsonMatch[0]);
-    res.json(data);
+    let data = null;
+    if (jsonMatch) {
+      try {
+        data = JSON.parse(jsonMatch[0]);
+      } catch {
+        data = null;
+      }
+    }
+    if (!data) {
+      console.error('[grade-essay] AI vastus polnud kehtiv JSON:', clean.slice(0, 300));
+      return res.status(502).json({ error: 'AI vastust ei õnnestunud lugeda. Proovi uuesti.' });
+    }
+    const gradeMatch = String(data.grade ?? '').match(/[1-5]/);
+    res.json({
+      feedback: String(data.feedback ?? '').trim(),
+      corrected: String(data.corrected ?? '').trim(),
+      grade: gradeMatch ? gradeMatch[0] : '',
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[grade-essay]', err.message);
+    res.status(500).json({ error: err.message || 'Essee hindamine ebaõnnestus.' });
   }
 });

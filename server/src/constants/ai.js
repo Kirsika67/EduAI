@@ -24,3 +24,6 @@ export function anthropicRequestBase() {
     thinking: ANTHROPIC_THINKING,
   };
 }
+
+/** Esseede hindamise mudel. Praegu sama mis üldine; vajadusel saab siin võimekama mudeli määrata. */
+export const ANTHROPIC_MODEL_ESSAY = ANTHROPIC_MODEL;

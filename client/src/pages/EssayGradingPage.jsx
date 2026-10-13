@@ -3,18 +3,20 @@ import { API_BASE_URL } from '../config'
 import { useClasses } from '../context/ClassContext'
 
 export default function EssayGradingPage() {
-  const { classes } = useClasses()
+  const { classes, loading: classesLoading } = useClasses()
   const [essayText, setEssayText] = useState('')
   const [grade, setGrade] = useState('')
   const [criteria, setCriteria] = useState('')
   const [subject, setSubject] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const gradeEssay = async () => {
     if (!essayText.trim()) { alert('Kleebi essee tekst sisse'); return }
     setLoading(true)
     setResult(null)
+    setError('')
     try {
       const res = await fetch(`${API_BASE_URL}/api/grade-essay`, {
         method: 'POST',
@@ -24,15 +26,24 @@ export default function EssayGradingPage() {
         },
         body: JSON.stringify({ text: essayText, context: `Klass: ${grade}. Aine/teema: ${subject || 'täpsustamata'}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}.` })
       })
-      const data = await res.json()
-      console.log("AI vastus:", JSON.stringify(data))
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || data.error) {
+        setError(data.error || `Essee hindamine ebaõnnestus (kood ${res.status}).`)
+        return
+      }
+      if (!data.feedback && !data.corrected) {
+        setError('AI ei tagastanud tagasisidet. Proovi uuesti.')
+        return
+      }
       setResult(data)
     } catch (err) {
-      alert('Viga: ' + err.message)
+      setError('Ühendus serveriga ebaõnnestus: ' + err.message)
     } finally {
       setLoading(false)
     }
   }
+
+  if (classesLoading) return <div className="p-8 text-gray-500">Laadin...</div>
 
   return (
     <div className="max-w-4xl">
@@ -81,6 +92,10 @@ export default function EssayGradingPage() {
           ) : 'Hinda essee'}
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-4 text-sm">{error}</div>
+      )}
 
       {result && (
         <div className="space-y-4">

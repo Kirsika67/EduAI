@@ -34,7 +34,7 @@ export const AI_PURPOSES = {
   essay_grading: "Esseede hindamine",
 };
 
-function logUsage({ user, purpose, ok, errorKind, inputChars, outputChars, durationMs }) {
+function logUsage({ user, purpose, model = ANTHROPIC_MODEL, ok, errorKind, inputChars, outputChars, durationMs }) {
   try {
     db.prepare(
       `INSERT INTO ai_usage
@@ -44,7 +44,7 @@ function logUsage({ user, purpose, ok, errorKind, inputChars, outputChars, durat
       user?.schoolId ?? null,
       user?.id ?? null,
       purpose,
-      ANTHROPIC_MODEL,
+      model,
       ok ? 1 : 0,
       errorKind || null,
       inputChars ?? null,
@@ -80,11 +80,13 @@ export async function askClaude({
   purpose,
   user,
   maxTokens = 800,
+  model = ANTHROPIC_MODEL,
+  timeoutMs = TIMEOUT_MS,
   protectedNames = [],
   fallback = "AI vastust ei saanud laadida. Ülejäänud info on olemas ka ilma selleta.",
 }) {
   if (!hasApiKey()) {
-    logUsage({ user, purpose, ok: false, errorKind: "no_api_key", inputChars: prompt.length });
+    logUsage({ user, purpose, model, ok: false, errorKind: "no_api_key", inputChars: prompt.length });
     return {
       text: null,
       fallback: "Lisa ANTHROPIC_API_KEY, et AI-funktsioonid tööle hakkaksid.",
@@ -103,12 +105,12 @@ export async function askClaude({
   const started = Date.now();
   const client = new Anthropic({
     apiKey: String(process.env.ANTHROPIC_API_KEY).trim(),
-    timeout: TIMEOUT_MS,
+    timeout: timeoutMs,
   });
 
   try {
     const msg = await client.messages.create({
-      model: ANTHROPIC_MODEL,
+      model,
       thinking: ANTHROPIC_THINKING,
       max_tokens: maxTokens,
       messages: [{ role: "user", content: outgoingPrompt }],
@@ -151,8 +153,8 @@ export async function askClaude({
  * mis kuvab oma varuvariandi. Kui muudaks selle vaikselt `null`-iks,
  * salvestaks marsruut tühja materjali.
  */
-export async function askClaudeOrThrow({ prompt, purpose, user, maxTokens, protectedNames }) {
-  const result = await askClaude({ prompt, purpose, user, maxTokens, protectedNames });
+export async function askClaudeOrThrow({ prompt, purpose, user, maxTokens, model, timeoutMs, protectedNames }) {
+  const result = await askClaude({ prompt, purpose, user, maxTokens, model, timeoutMs, protectedNames });
   if (!result.text) {
     throw new Error(result.fallback || "AI vastust ei saadud.");
   }
