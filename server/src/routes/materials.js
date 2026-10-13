@@ -226,10 +226,12 @@ export default router;
 router.post("/grade-essay", async (req, res) => {
   const { text, context } = req.body;
   if (!text) return res.status(400).json({ error: "Tekst puudub" });
+  const LANGUAGES = { et: 'eesti', en: 'inglise', ru: 'vene' };
+  const essayLang = LANGUAGES[req.body.language] || LANGUAGES.et;
   try {
 
-    const prompt = `Sa oled eesti keele õpetaja assistent. ${context ? `Kontekst: ${context}.` : ''} 
-Analüüsi järgmist esseed/kirjandit eesti keeles:
+    const prompt = `Sa oled keeleõpetaja assistent. ${context ? `Kontekst: ${context}.` : ''} 
+Analüüsi järgmist esseed/kirjandit. Essee on kirjutatud keeles: ${essayLang}. Hinda seda selle keele reeglite järgi:
 
 ${text}
 
@@ -237,13 +239,15 @@ Vasta JSON formaadis (ilma markdown koodiplokita):
 {
   "feedback": "üldine tagasiside 3-4 lauset",
   "corrected": "parandatud tekst grammatikavigadega märgitud",
-  "grade": "soovituslik hinne 1-5 skaalal"
+  "grade": "soovituslik hinne protsentides 0-100",
+  "errors": [{ "wrong": "täpne vigane lõik originaaltekstist", "correct": "õige variant", "note": "lühike selgitus eesti keeles" }]
 }
 
 Nõuded:
-- "feedback": 3-4 lauset eesti keeles.
-- "corrected": kogu essee parandatud kujul; iga parandus märgi kujul [vale → õige].
-- "grade": ainult üks number 1 kuni 5.
+- "feedback": 3-4 lauset EESTI keeles (õpetajale), ka siis, kui essee on muus keeles.
+- "corrected": kogu essee parandatud kujul essee enda keeles (${essayLang}); iga parandus märgi kujul [vale → õige]. Ära tõlgi esseed.
+- "grade": ainult üks täisarv 0 kuni 100 (protsent), ilma %-märgita.
+- "errors": kõik leitud vead. "wrong" peab olema TÄPNE sõna-sõnaline katkend originaaltekstist (lühike, 1-5 sõna), et seda saaks tekstist üles leida. "note" eesti keeles.
 - Tagasta AINULT kehtiv JSON, ilma muu tekstita. Jutumärgid tekstis escape'i (\\").`;
     const { askClaudeOrThrow } = await import('../services/aiEngine.js');
     const { ANTHROPIC_MODEL_ESSAY } = await import('../constants/ai.js');
@@ -270,11 +274,20 @@ Nõuded:
       console.error('[grade-essay] AI vastus polnud kehtiv JSON:', clean.slice(0, 300));
       return res.status(502).json({ error: 'AI vastust ei õnnestunud lugeda. Proovi uuesti.' });
     }
-    const gradeMatch = String(data.grade ?? '').match(/[1-5]/);
+    const gradeNum = parseInt(String(data.grade ?? '').replace(/[^\d]/g, ''), 10);
     res.json({
       feedback: String(data.feedback ?? '').trim(),
       corrected: String(data.corrected ?? '').trim(),
-      grade: gradeMatch ? gradeMatch[0] : '',
+      grade: Number.isFinite(gradeNum) ? Math.min(100, gradeNum) : '',
+      errors: Array.isArray(data.errors)
+        ? data.errors
+            .map((e) => ({
+              wrong: String(e?.wrong ?? '').trim(),
+              correct: String(e?.correct ?? '').trim(),
+              note: String(e?.note ?? '').trim(),
+            }))
+            .filter((e) => e.wrong)
+        : [],
     });
   } catch (err) {
     console.error('[grade-essay]', err.message);

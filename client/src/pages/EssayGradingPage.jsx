@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { API_BASE_URL } from '../config'
 import { useClasses } from '../context/ClassContext'
+import HighlightedEssay from '../components/HighlightedEssay'
 
 export default function EssayGradingPage() {
   const { classes, loading: classesLoading } = useClasses()
@@ -8,9 +9,11 @@ export default function EssayGradingPage() {
   const [grade, setGrade] = useState('')
   const [criteria, setCriteria] = useState('')
   const [subject, setSubject] = useState('')
+  const [language, setLanguage] = useState('et')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [gradedText, setGradedText] = useState('')
 
   const gradeEssay = async () => {
     if (!essayText.trim()) { alert('Kleebi essee tekst sisse'); return }
@@ -24,7 +27,7 @@ export default function EssayGradingPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('eduai_token')}`
         },
-        body: JSON.stringify({ text: essayText, context: `Klass: ${grade}. Aine/teema: ${subject || 'täpsustamata'}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}.` })
+        body: JSON.stringify({ text: essayText, language, context: `Klass: ${grade}. Aine/teema: ${subject || 'täpsustamata'}. Hindamiskriteeriumid: ${criteria || 'grammatika, sisu, ülesehitus'}.` })
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok || data.error) {
@@ -35,6 +38,7 @@ export default function EssayGradingPage() {
         setError('AI ei tagastanud tagasisidet. Proovi uuesti.')
         return
       }
+      setGradedText(essayText)
       setResult(data)
     } catch (err) {
       setError('Ühendus serveriga ebaõnnestus: ' + err.message)
@@ -51,7 +55,16 @@ export default function EssayGradingPage() {
       <p className="text-gray-500 text-sm mb-6">Kleebi õpilase essee siia — AI parandab grammatika ja annab tagasiside.</p>
 
       <div className="bg-white rounded-xl border border-black/10 p-6 mb-4">
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Essee keel</label>
+            <select value={language} onChange={e => setLanguage(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
+              <option value="et">Eesti keel</option>
+              <option value="en">Inglise keel</option>
+              <option value="ru">Vene keel</option>
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Klass</label>
             <select value={grade} onChange={e => setGrade(e.target.value)}
@@ -104,12 +117,24 @@ export default function EssayGradingPage() {
             <p className="text-sm text-gray-700">{result.feedback}</p>
           </div>
           <div className="bg-white rounded-xl border border-black/10 p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-1">Vead tekstis</h2>
+            <p className="text-xs text-gray-500 mb-3">Vii hiir märgitud kohale, et näha parandust ja selgitust.</p>
+            <HighlightedEssay text={gradedText} errors={result.errors} />
+            {result.errors?.length > 0 && (
+              <ul className="mt-4 space-y-1 text-sm text-gray-700 border-t border-gray-100 pt-3">
+                {result.errors.map((e, i) => (
+                  <li key={i}><span className="text-red-700 line-through">{e.wrong}</span> → <span className="text-green-700 font-medium">{e.correct}</span>{e.note ? ` — ${e.note}` : ''}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="bg-white rounded-xl border border-black/10 p-6">
             <h2 className="text-base font-semibold text-gray-900 mb-3">Grammatikaparandused</h2>
             <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{result.corrected}</pre>
           </div>
-          {result.grade && (
+          {result.grade !== '' && (
             <div className="bg-[#EEEDFE] rounded-xl p-5">
-              <p className="text-sm font-semibold text-[#534AB7]">Soovituslik hinne: <span className="text-2xl font-bold">{result.grade}</span></p>
+              <p className="text-sm font-semibold text-[#534AB7]">Soovituslik hinne: <span className="text-2xl font-bold">{result.grade}%</span></p>
             </div>
           )}
         </div>
