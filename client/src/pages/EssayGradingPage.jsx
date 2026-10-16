@@ -3,20 +3,9 @@ import { API_BASE_URL } from '../config'
 import { useClasses } from '../context/ClassContext'
 import HighlightedEssay from '../components/HighlightedEssay'
 
-/** Parandused tulevad kujul [vale → õige]; kuva need värviga. */
+/** Puhas parandatud tekst; vanad [vale → õige] märked eemaldatakse, jäetakse õige variant. */
 function CorrectedText({ text }) {
-  const parts = String(text || '').split(/(\[[^\[\]]*?→[^\[\]]*?\])/)
-  return parts.map((part, i) => {
-    const m = part.match(/^\[([^\[\]]*?)→([^\[\]]*?)\]$/)
-    if (!m) return <span key={i}>{part}</span>
-    return (
-      <span key={i} className="bg-red-50 rounded px-1">
-        <span className="text-red-600 line-through decoration-red-400">{m[1].trim()}</span>
-        <span className="text-gray-400 mx-1">→</span>
-        <span className="text-green-700 font-semibold">{m[2].trim()}</span>
-      </span>
-    )
-  })
+  return String(text || '').replace(/\[[^\[\]]*?→([^\[\]]*?)\]/g, '$1')
 }
 
 export default function EssayGradingPage() {
@@ -157,7 +146,7 @@ export default function EssayGradingPage() {
           </div>
           <div className="bg-white rounded-xl border border-black/10 p-6">
             <h2 className="text-base font-semibold text-gray-900 mb-1">Grammatikaparandused</h2>
-            <p className="text-xs text-gray-500 mb-3"><span className="text-red-600 line-through">Viga</span> → <span className="text-green-700 font-semibold">parandus</span></p>
+            <p className="text-xs text-gray-500 mb-3">Kogu essee parandatud kujul. Vigade loetelu on ülal kaardil "Vead tekstis".</p>
             <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed"><CorrectedText text={result.corrected} /></pre>
           </div>
           {result.grade !== '' && (

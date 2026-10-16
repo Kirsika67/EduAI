@@ -245,7 +245,7 @@ Vasta JSON formaadis (ilma markdown koodiplokita):
 
 Nõuded:
 - "feedback": 3-4 lauset EESTI keeles (õpetajale), ka siis, kui essee on muus keeles.
-- "corrected": kogu essee parandatud kujul essee enda keeles (${essayLang}); iga parandus märgi kujul [vale → õige]. Ära tõlgi esseed.
+- "corrected": kogu essee täielikult parandatud kujul essee enda keeles (${essayLang}), ILMA igasuguste märgeteta ja sulgudeta — ainult puhas parandatud tekst. Ära tõlgi esseed. Vead loetle eraldi väljas "errors".
 - "grade": ainult üks täisarv 0 kuni 100 (protsent), ilma %-märgita.
 - "errors": kõik leitud vead. "wrong" peab olema TÄPNE sõna-sõnaline katkend originaaltekstist (lühike, 1-5 sõna), et seda saaks tekstist üles leida. "note" eesti keeles.
 - Tagasta AINULT kehtiv JSON, ilma muu tekstita. Jutumärgid tekstis escape'i (\\").`;
