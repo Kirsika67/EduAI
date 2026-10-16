@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AcceptInvitePage from './pages/AcceptInvitePage'
 import PaevikPage from './pages/PaevikPage'
+import ProfilePage from './pages/ProfilePage'
 import TeraPage from './pages/TeraPage'
 import OverviewPage from './pages/OverviewPage'
 import StudentsPage from './pages/StudentsPage'
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="huviringid" element={<ActivitiesPage />} />
 
         {/* Vanema ja õpilase vaade */}
+        <Route path="profiil" element={<ProfilePage />} />
         <Route path="minu-laps" element={<MyChildPage />} />
       </Route>
 

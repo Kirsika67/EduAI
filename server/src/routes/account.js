@@ -1,4 +1,5 @@
 import { Router } from "express";
+import bcrypt from "bcrypt";
 import db from "../db.js";
 import { requireAuth, requireStaff } from "../middleware/auth.js";
 import { audit } from "../services/audit.js";
@@ -104,6 +105,35 @@ router.patch("/school", requireAuth, requireStaff, (req, res) => {
     entityId: req.user.schoolId,
   });
 
+  res.json({ teacher: accountPayload(req.user.id) });
+});
+
+/** Oma nime ja parooli muutmine — kõigile rollidele, ka vanemale ja õpilasele. */
+router.patch("/profile", requireAuth, (req, res) => {
+  const name = req.body?.name === undefined ? null : String(req.body.name).trim();
+  if (name !== null && name.length < 2) {
+    return res.status(400).json({ error: "Nimi on liiga lühike." });
+  }
+
+  const newPassword = req.body?.newPassword ? String(req.body.newPassword) : null;
+  if (newPassword) {
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Uus parool peab olema vähemalt 8 märki." });
+    }
+    const row = db.prepare(`SELECT password_hash FROM teachers WHERE id = ?`).get(req.user.id);
+    if (!row || !bcrypt.compareSync(String(req.body?.currentPassword || ""), row.password_hash)) {
+      return res.status(400).json({ error: "Praegune parool on vale." });
+    }
+    db.prepare(`UPDATE teachers SET password_hash = ? WHERE id = ?`).run(
+      bcrypt.hashSync(newPassword, 12),
+      req.user.id
+    );
+  }
+  if (name !== null) {
+    db.prepare(`UPDATE teachers SET name = ? WHERE id = ?`).run(name.slice(0, 120), req.user.id);
+  }
+
+  audit(req, { action: newPassword ? "account.password_change" : "account.profile_update", entityType: "teacher", entityId: req.user.id });
   res.json({ teacher: accountPayload(req.user.id) });
 });
 

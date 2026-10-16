@@ -311,7 +311,11 @@ export default function Sidebar() {
               </>
             )}
           </div>
-          <div className="p-4 border-t border-black/10">
+          <div className="p-4 border-t border-black/10 space-y-2">
+            <NavLink to="/profiil" onClick={() => setOpen(null)}
+              className="block text-sm text-gray-700 hover:text-[#2a6db0] py-1">
+              Minu profiil
+            </NavLink>
             <button onClick={logout}
               className="w-full text-sm text-gray-500 hover:text-red-500 transition-colors py-1">
               Logi välja
