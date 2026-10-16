@@ -20,6 +20,45 @@ export default function MessagesPage() {
   const { role } = useAuth()
   const { selectedClassId, selectedClass, loading: classesLoading } = useClasses()
   const staff = isStaff(role)
+  const visibleConversations = conversations.filter(c => {
+    if (folder === 'unread') return c.unread > 0
+    if (folder === 'favorite') return c.favorite
+    if (folder === 'sent') return c.sentByMe
+    if (folder === 'groups') return c.kind === 'class_announcement'
+    return true
+  })
+
+  const toggleFavorite = async (id, isFavorite) => {
+    try {
+      await apiCall(`/api/messages/${id}/favorite`, { method: isFavorite ? 'DELETE' : 'POST' })
+      setConversations(prev => prev.map(c => (Number(c.id) === Number(id) ? { ...c, favorite: !isFavorite } : c)))
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  useEffect(() => {
+    if (folder !== 'calendar' || classesLoading || !selectedClassId) return
+    const load = async () => {
+      setCalendarLoading(true)
+      try {
+        const from = new Date().toISOString().slice(0, 10)
+        const to = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
+        const ex = await apiCall(`/api/timetable/exams?classId=${selectedClassId}&from=${from}&to=${to}`)
+        const as = await apiCall(`/api/assignments?classId=${selectedClassId}&from=${from}&to=${to}`)
+        const items = [
+          ...(ex.exams || []).map(e => ({ key: `e${e.id}`, date: String(e.date).slice(0, 10), title: e.title || e.subject, label: 'Kontrolltöö · ' + e.subject })),
+          ...(as.assignments || []).map(a => ({ key: `a${a.id}`, date: a.dueDate, title: a.title, label: (a.kind === 'task' ? 'Ülesanne' : 'Kodutöö') + ' · ' + a.subject })),
+        ].sort((x, y) => x.date.localeCompare(y.date))
+        setCalendarItems(items)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setCalendarLoading(false)
+      }
+    }
+    load()
+  }, [folder, classesLoading, selectedClassId])
 
   const [conversations, setConversations] = useState([])
   const [contacts, setContacts] = useState([])
@@ -29,6 +68,8 @@ export default function MessagesPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [folder, setFolder] = useState('all')
+  const [calendarItems, setCalendarItems] = useState([])
+  const [calendarLoading, setCalendarLoading] = useState(false)
 
   const [composing, setComposing] = useState(false)
   const [newMsg, setNewMsg] = useState({ kind: 'direct', recipientId: '', subject: '', body: '' })
@@ -234,24 +275,41 @@ export default function MessagesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-4">
         <div className="space-y-2">
-          <div className="flex gap-1 mb-1">
-            {[['all', 'Kõik'], ['unread', 'Lugemata']].map(([key, label]) => (
+          <div className="flex flex-wrap gap-1 mb-1">
+            {[['all', 'Kõik'], ['unread', 'Lugemata'], ['favorite', 'Lemmikud'], ['sent', 'Sinu saadetud'], ['groups', 'Grupid'], ...(staff ? [['calendar', 'Kalender']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setFolder(key)}
                 className={`px-3 py-1 rounded-full text-sm ${folder === key ? 'bg-[#1c3556] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                 {label}{key === 'unread' && conversations.some(c => c.unread > 0) ? ` (${conversations.filter(c => c.unread > 0).length})` : ''}
               </button>
             ))}
           </div>
-          {loading && <p className="text-sm text-gray-400">Laadin...</p>}
-          {!loading && !conversations.length && (
+          {loading && folder !== 'calendar' && <p className="text-sm text-gray-400">Laadin...</p>}
+          {folder === 'calendar' && (
+            <div className="bg-white rounded-xl border border-black/10 p-3">
+              {calendarLoading && <p className="text-sm text-gray-400">Laadin...</p>}
+              {!calendarLoading && !selectedClassId && <p className="text-sm text-gray-500">Vali päises klass.</p>}
+              {!calendarLoading && selectedClassId && calendarItems.length === 0 && (
+                <p className="text-sm text-gray-500">Järgmise 14 päeva jooksul sündmusi pole.</p>
+              )}
+              <ul className="divide-y divide-gray-100">
+                {calendarItems.map(it => (
+                  <li key={it.key} className="py-2">
+                    <p className="text-sm font-medium text-gray-900">{it.title}</p>
+                    <p className="text-xs text-gray-500">{it.label} · {it.date.slice(8, 10)}.{it.date.slice(5, 7)}.</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {!loading && folder === 'all' && !conversations.length && (
             <div className="bg-white rounded-xl border border-black/10 p-6 text-center text-sm text-gray-400">
               Vestlusi veel pole.
             </div>
           )}
-          {!loading && folder === 'unread' && !conversations.some(c => c.unread > 0) && (
-            <p className="text-sm text-gray-400 px-1">Lugemata sõnumeid pole.</p>
+          {!loading && folder !== 'all' && folder !== 'calendar' && visibleConversations.length === 0 && (
+            <p className="text-sm text-gray-400 px-1">Selles kaustas sõnumeid pole.</p>
           )}
-          {conversations.filter(c => folder === 'all' || c.unread > 0).map(c => (
+          {folder !== 'calendar' && visibleConversations.map(c => (
             <button key={c.id} onClick={() => { setActiveId(c.id); setComposing(false) }}
               className={`w-full text-left bg-white rounded-xl border p-3 transition-colors ${
                 activeId === c.id ? 'border-[#AFA9EC] bg-[#EEEDFE]' : 'border-black/10 hover:bg-gray-50'
@@ -288,6 +346,16 @@ export default function MessagesPage() {
                   {thread.conversation.subject || (thread.conversation.kind === 'class_announcement' ? 'Teade klassile' : 'Vestlus')}
                 </span>
                 {thread.conversation.kind === 'class_announcement' && <Badge variant="purple">Teade</Badge>}
+                {(() => {
+                  const fav = conversations.find(c => Number(c.id) === Number(thread.conversation.id))?.favorite || false
+                  return (
+                    <button onClick={() => toggleFavorite(thread.conversation.id, fav)}
+                      title={fav ? 'Eemalda lemmikutest' : 'Lisa lemmikutesse'}
+                      className={`ml-auto text-lg leading-none ${fav ? 'text-amber-500' : 'text-gray-300 hover:text-amber-400'}`}>
+                      {fav ? '★' : '☆'}
+                    </button>
+                  )
+                })()}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[420px]">

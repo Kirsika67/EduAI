@@ -45,6 +45,41 @@ function requireVisibleClass(req, res) {
   return classId;
 }
 
+/* ---------------- Tänased asendused ja ärajäämised ---------------- */
+
+/** Kõik tänased asendused klassides, mida kasutaja näeb (nt "Kunst, puudub X → asendab Y"). */
+router.get("/substitutions/today", requireStaff, (req, res) => {
+  const classIds = visibleClassIds(req.user);
+  if (!classIds.length) return res.json({ substitutions: [] });
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = db
+    .prepare(
+      `SELECT s.id, s.cancelled, s.note, s.new_room, c.name AS class_name,
+              t.subject, t.lesson_number, orig.name AS teacher_name, sub.name AS substitute_name
+       FROM substitutions s
+       JOIN timetable_entries t ON t.id = s.timetable_entry_id
+       JOIN classes c ON c.id = t.class_id
+       LEFT JOIN teachers orig ON orig.id = t.teacher_id
+       LEFT JOIN teachers sub ON sub.id = s.substitute_teacher_id
+       WHERE s.date = ? AND t.class_id IN (${classIds.map(() => "?").join(", ")})
+       ORDER BY t.lesson_number, c.name`
+    )
+    .all(today, ...classIds);
+  res.json({
+    substitutions: rows.map((r) => ({
+      id: r.id,
+      className: r.class_name,
+      subject: r.subject,
+      lessonNumber: r.lesson_number,
+      teacherName: r.teacher_name,
+      substituteName: r.substitute_name,
+      cancelled: Boolean(r.cancelled),
+      newRoom: r.new_room,
+      note: r.note,
+    })),
+  });
+});
+
 /* ---------------- Tunniplaan ---------------- */
 
 router.get("/", (req, res) => {

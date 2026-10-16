@@ -69,7 +69,9 @@ router.get("/", (req, res) => {
                   AND m.sender_id != ?
                   AND m.created_at > COALESCE(
                     (SELECT last_read_at FROM conversation_reads r
-                      WHERE r.conversation_id = c.id AND r.account_id = ?), '')) AS unread
+                      WHERE r.conversation_id = c.id AND r.account_id = ?), '')) AS unread,
+              (SELECT COUNT(*) FROM conversation_favorites f
+                WHERE f.conversation_id = c.id AND f.account_id = ?) AS favorite
        FROM conversations c
        LEFT JOIN classes cl ON cl.id = c.class_id
        LEFT JOIN students st ON st.id = c.student_id
@@ -77,7 +79,7 @@ router.get("/", (req, res) => {
        ORDER BY COALESCE(c.last_message_at, c.created_at) DESC
        LIMIT 100`
     )
-    .all(req.user.id, req.user.id, ...params);
+    .all(req.user.id, req.user.id, req.user.id, ...params);
 
   const participantsOf = db.prepare(
     `SELECT t.id, t.name, t.role FROM conversation_participants p
@@ -95,6 +97,8 @@ router.get("/", (req, res) => {
       lastBody: c.last_body,
       messageCount: c.message_count,
       unread: c.unread,
+      favorite: Number(c.favorite) > 0,
+      sentByMe: Number(c.created_by) === Number(req.user.id),
       lastMessageAt: c.last_message_at || c.created_at,
       participants: participantsOf
         .all(c.id)
@@ -102,6 +106,26 @@ router.get("/", (req, res) => {
         .map((p) => ({ id: p.id, name: p.name, roleLabel: roleLabel(p.role) })),
     })),
   });
+});
+
+/** Lemmikuks märkimine on isiklik — teised osalejad seda ei näe. */
+router.post("/:id/favorite", (req, res) => {
+  const conv = loadConversation(req.params.id);
+  if (!conv || !canSeeConversation(req.user, conv)) {
+    return res.status(404).json({ error: "Vestlust ei leitud." });
+  }
+  db.prepare(
+    `INSERT OR IGNORE INTO conversation_favorites (conversation_id, account_id) VALUES (?, ?)`
+  ).run(conv.id, req.user.id);
+  res.json({ ok: true });
+});
+
+router.delete("/:id/favorite", (req, res) => {
+  const id = Number(req.params.id);
+  db.prepare(
+    `DELETE FROM conversation_favorites WHERE conversation_id = ? AND account_id = ?`
+  ).run(id, req.user.id);
+  res.json({ ok: true });
 });
 
 /** Kellega saab uut vestlust alustada. */

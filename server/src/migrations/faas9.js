@@ -18,5 +18,11 @@ export function runFaas9Migration(db) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_assignments_class_due ON assignments(class_id, due_date);
+
+    CREATE TABLE IF NOT EXISTS conversation_favorites (
+      conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+      account_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+      PRIMARY KEY (conversation_id, account_id)
+    );
   `);
 }

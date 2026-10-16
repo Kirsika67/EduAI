@@ -32,6 +32,7 @@ export default function PaevikPage() {
   const staff = isStaff(role)
   const [exams, setExams] = useState([])
   const [assignments, setAssignments] = useState([])
+  const [subsToday, setSubsToday] = useState([])
   const [recentGrades, setRecentGrades] = useState([])
   const [recentNotes, setRecentNotes] = useState([])
   const [showForm, setShowForm] = useState(false)
@@ -73,6 +74,8 @@ export default function PaevikPage() {
         const as = await apiCall(`/api/assignments?classId=${selectedClassId}&from=${from}&to=${to}`)
         setAssignments(as.assignments || [])
         if (staff) {
+          const sb = await apiCall('/api/timetable/substitutions/today')
+          setSubsToday(sb.substitutions || [])
           const g = await apiCall(`/api/classes/${selectedClassId}/grades`)
           setRecentGrades((g.grades || []).slice(0, 6))
           const b = await apiCall(`/api/attendance/behavior/class/${selectedClassId}`)
@@ -81,6 +84,7 @@ export default function PaevikPage() {
       } else {
         setRecentGrades([])
         setRecentNotes([])
+        setSubsToday([])
         setLessons([])
         setExams([])
         setAssignments([])
@@ -181,6 +185,25 @@ export default function PaevikPage() {
             ))}
           </ul>
         </Panel>
+
+        {staff && selectedClass && (
+          <Panel title="Õpetajate puudumised ja asendused">
+            {!loading && subsToday.length === 0 && <p className="text-sm text-gray-500">Täna asendusi ega ärajäämisi pole.</p>}
+            <ul className="divide-y divide-gray-100">
+              {subsToday.map(x => (
+                <li key={x.id} className="py-2.5">
+                  <p className="text-sm font-medium text-gray-900">{x.subject}, {x.lessonNumber}. tund · {x.className}</p>
+                  <p className="text-xs text-red-600">
+                    {x.cancelled
+                      ? 'Tund jääb ära'
+                      : `${x.teacherName ? `puudub ${x.teacherName} → ` : ''}asendab ${x.substituteName || 'asendusõpetaja'}`}
+                    {x.newRoom ? ` · uus ruum ${x.newRoom}` : ''}{x.note ? ` · ${x.note}` : ''}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        )}
 
         <Panel
           title="Ülesanded, kodutööd ja kontrolltööd"
