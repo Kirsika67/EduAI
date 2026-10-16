@@ -51,7 +51,7 @@ function requireVisibleClass(req, res) {
 router.get("/substitutions/today", requireStaff, (req, res) => {
   const classIds = visibleClassIds(req.user);
   if (!classIds.length) return res.json({ substitutions: [] });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Tallinn" });
   const rows = db
     .prepare(
       `SELECT s.id, s.cancelled, s.note, s.new_room, c.name AS class_name,
@@ -86,7 +86,7 @@ router.get("/", (req, res) => {
   const classId = requireVisibleClass(req, res);
   if (classId === null) return;
 
-  const monday = weekStart(req.query.week || new Date().toISOString().slice(0, 10));
+  const monday = weekStart(req.query.week || new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Tallinn" }));
   if (!monday) return res.status(400).json({ error: "Kehtetu nädal." });
   const sunday = addDays(monday, 6);
 
@@ -340,7 +340,7 @@ router.get("/workload", requireStaff, async (req, res) => {
   const classId = requireVisibleClass(req, res);
   if (classId === null) return;
 
-  const monday = weekStart(req.query.week || new Date().toISOString().slice(0, 10));
+  const monday = weekStart(req.query.week || new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Tallinn" }));
   if (!monday) return res.status(400).json({ error: "Kehtetu nädal." });
   const sunday = addDays(monday, 6);
 

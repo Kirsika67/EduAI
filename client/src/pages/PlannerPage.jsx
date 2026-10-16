@@ -105,6 +105,15 @@ export default function PlannerPage() {
   const applyPlan = async (index, plan) => {
     setError(''); setNotice('')
     try {
+      let ls = 0
+      for (const l of plan.lessons || []) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(l.date))) continue
+        await apiCall('/api/lesson-plans', {
+          method: 'POST',
+          body: JSON.stringify({ classId: selectedClassId, date: l.date, title: String(l.title || 'Tund').slice(0, 160), content: l.content || '' }),
+        })
+        ls++
+      }
       let hw = 0
       for (const h of plan.homework || []) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(String(h.date))) continue
@@ -136,7 +145,7 @@ export default function PlannerPage() {
         ex++
       }
       setApplied(prev => ({ ...prev, [index]: true }))
-      setNotice(`Lisatud Päevikusse: ${hw} kodutööd ja ${ex} kontrolltööd.`)
+      setNotice(`Lisatud Päevikusse: ${ls} tunnikava, ${hw} kodutööd ja ${ex} kontrolltööd.`)
     } catch (err) {
       setError(err.message)
     }
@@ -180,7 +189,7 @@ export default function PlannerPage() {
             )
           }
           const { text, plan } = splitPlan(m.text)
-          const hasItems = plan && ((plan.homework || []).length || (plan.exams || []).length)
+          const hasItems = plan && ((plan.lessons || []).length || (plan.homework || []).length || (plan.exams || []).length)
           return (
             <div key={i} className="max-w-[92%] rounded-2xl px-4 py-2.5 bg-[#f4f6f9] text-sm text-gray-800 space-y-0.5">
               <RichText text={text} />
@@ -190,7 +199,7 @@ export default function PlannerPage() {
                 {hasItems && (
                   <button onClick={() => applyPlan(i, plan)} disabled={applied[i]}
                     className="text-xs bg-[#7F77DD] text-white rounded px-2.5 py-1 hover:bg-[#534AB7] disabled:opacity-50">
-                    {applied[i] ? 'Lisatud Päevikusse' : 'Lisa kodutööd ja kontrolltööd Päevikusse'}
+                    {applied[i] ? 'Lisatud Päevikusse' : 'Lisa tunnikavad, kodutööd ja kontrolltööd Päevikusse'}
                   </button>
                 )}
               </div>

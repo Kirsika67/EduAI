@@ -77,8 +77,9 @@ export default function MessagesPage() {
     const load = async () => {
       setCalendarLoading(true)
       try {
-        const from = new Date().toISOString().slice(0, 10)
-        const to = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
+        const loc = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        const from = loc(new Date())
+        const to = loc(new Date(Date.now() + 14 * 86400000))
         const ex = await apiCall(`/api/timetable/exams?classId=${selectedClassId}&from=${from}&to=${to}`)
         const as = await apiCall(`/api/assignments?classId=${selectedClassId}&from=${from}&to=${to}`)
         const items = [

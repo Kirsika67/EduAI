@@ -11,7 +11,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Kooli õpetajate puudumised, mis katavad antud päeva (vaikimisi täna). Ainult oma kooli omad. */
 router.get("/", (req, res) => {
-  const day = DATE_RE.test(String(req.query.date || "")) ? String(req.query.date) : new Date().toISOString().slice(0, 10);
+  const day = DATE_RE.test(String(req.query.date || "")) ? String(req.query.date) : new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Tallinn" });
   const rows = db
     .prepare(
       `SELECT a.id, a.teacher_id, a.date_from, a.date_to, a.note, t.name AS teacher_name

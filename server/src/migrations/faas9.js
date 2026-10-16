@@ -29,6 +29,17 @@ export function runFaas9Migration(db) {
     );
     CREATE INDEX IF NOT EXISTS idx_teacher_absences_dates ON teacher_absences(date_from, date_to);
 
+    CREATE TABLE IF NOT EXISTS lesson_plans (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+      date TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT,
+      created_by INTEGER REFERENCES teachers(id),
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_lesson_plans_class_date ON lesson_plans(class_id, date);
+
     CREATE TABLE IF NOT EXISTS conversation_favorites (
       conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
       account_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,

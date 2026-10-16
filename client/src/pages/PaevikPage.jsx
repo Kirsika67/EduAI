@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import { isStaff, isLeadership } from '../constants/roles'
 
 const WEEKDAYS = ['pühapäev', 'esmaspäev', 'teisipäev', 'kolmapäev', 'neljapäev', 'reede', 'laupäev']
-const isoDate = (d) => d.toISOString().slice(0, 10)
+/** Kohalik kuupäev (mitte UTC), et Päevik vahetaks päeva kesköö, mitte kell 03:00. */
+const isoDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 function formatDate(iso) {
   const d = new Date(`${iso}T12:00:00`)
@@ -32,6 +33,7 @@ export default function PaevikPage() {
   const staff = isStaff(role)
   const [exams, setExams] = useState([])
   const [assignments, setAssignments] = useState([])
+  const [lessonPlans, setLessonPlans] = useState([])
   const [subsToday, setSubsToday] = useState([])
   const [brief, setBrief] = useState('')
   const [briefLoading, setBriefLoading] = useState(false)
@@ -80,6 +82,8 @@ export default function PaevikPage() {
         const as = await apiCall(`/api/assignments?classId=${selectedClassId}&from=${from}&to=${to}`)
         setAssignments(as.assignments || [])
         if (staff) {
+          const lp = await apiCall(`/api/lesson-plans?classId=${selectedClassId}&from=${from}&to=${to}`)
+          setLessonPlans(lp.lessonPlans || [])
           const sb = await apiCall('/api/timetable/substitutions/today')
           setSubsToday(sb.substitutions || [])
           const g = await apiCall(`/api/classes/${selectedClassId}/grades`)
@@ -91,6 +95,7 @@ export default function PaevikPage() {
         setRecentGrades([])
         setRecentNotes([])
         setSubsToday([])
+        setLessonPlans([])
         setLessons([])
         setExams([])
         setAssignments([])
@@ -368,6 +373,25 @@ export default function PaevikPage() {
               ))}
           </ul>
         </Panel>
+
+        {staff && selectedClass && lessonPlans.length > 0 && (
+          <Panel title="Tunnikavad">
+            <ul className="divide-y divide-gray-100">
+              {lessonPlans.map(l => (
+                <li key={l.id} className="py-2.5">
+                  <details open={String(l.date).slice(0, 10) === todayIso}>
+                    <summary className="text-sm font-medium text-gray-900 cursor-pointer">
+                      {formatDate(String(l.date).slice(0, 10))} · {l.title}
+                    </summary>
+                    {l.content && <p className="text-sm text-gray-700 whitespace-pre-wrap mt-2">{l.content}</p>}
+                    <button onClick={async () => { try { await apiCall(`/api/lesson-plans/${l.id}`, { method: 'DELETE' }); await load() } catch (err) { setError(err.message) } }}
+                      className="text-xs text-gray-400 hover:text-red-600 mt-2">Kustuta</button>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        )}
 
         {staff && selectedClass && (
           <Panel title="Viimati lisatud hinded ja märked" action={<Link to="/hinded" className="text-sm text-[#2a6db0] hover:underline">Hinded →</Link>}>
