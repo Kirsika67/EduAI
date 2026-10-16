@@ -9,6 +9,7 @@ import { runFaas4Migration } from "./migrations/faas4.js";
 import { runFaas5Migration } from "./migrations/faas5.js";
 import { runFaas7Migration } from "./migrations/faas7.js";
 import { runFaas8Migration } from "./migrations/faas8.js";
+import { runFaas9Migration } from "./migrations/faas9.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -430,6 +431,7 @@ if (faas5.changed) {
 /* FAAS 7 — huviringid. FAAS 8 — AI kasutuslogi. Mõlemad ainult uued tabelid. */
 runFaas7Migration(db);
 runFaas8Migration(db);
+runFaas9Migration(db);
 
 /** Andmebaasi absoluutne tee — varundus vajab seda. */
 export const DB_PATH = dbPath;

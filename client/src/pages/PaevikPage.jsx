@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
+import { useAuth } from '../context/AuthContext'
+import { isStaff } from '../constants/roles'
 
 const WEEKDAYS = ['pühapäev', 'esmaspäev', 'teisipäev', 'kolmapäev', 'neljapäev', 'reede', 'laupäev']
 const isoDate = (d) => d.toISOString().slice(0, 10)
@@ -26,7 +28,16 @@ function Panel({ title, action, children }) {
 export default function PaevikPage() {
   const { selectedClassId, selectedClass, loading: classesLoading } = useClasses()
   const [lessons, setLessons] = useState([])
+  const { role } = useAuth()
+  const staff = isStaff(role)
   const [exams, setExams] = useState([])
+  const [assignments, setAssignments] = useState([])
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ subject: '', title: '', description: '', kind: 'homework', dueDate: '' })
+  const [done, setDone] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('eduai_done_assignments') || '[]') } catch { return [] }
+  })
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -57,9 +68,12 @@ export default function PaevikPage() {
         const to = isoDate(new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000))
         const ex = await apiCall(`/api/timetable/exams?classId=${selectedClassId}&from=${from}&to=${to}`)
         setExams(ex.exams || [])
+        const as = await apiCall(`/api/assignments?classId=${selectedClassId}&from=${from}&to=${to}`)
+        setAssignments(as.assignments || [])
       } else {
         setLessons([])
         setExams([])
+        setAssignments([])
       }
       const m = await apiCall('/api/messages')
       setConversations(m.conversations || [])
@@ -67,6 +81,43 @@ export default function PaevikPage() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const toggleDone = (id) => {
+    const next = done.includes(Number(id)) ? done.filter(x => x !== Number(id)) : [...done, Number(id)]
+    setDone(next)
+    try { localStorage.setItem('eduai_done_assignments', JSON.stringify(next)) } catch { /* ei ole kriitiline */ }
+  }
+
+  const addAssignment = async () => {
+    if (!form.subject.trim() || !form.title.trim() || !form.dueDate) {
+      setError('Täida aine, pealkiri ja tähtaeg.')
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      await apiCall('/api/assignments', {
+        method: 'POST',
+        body: JSON.stringify({ ...form, classId: selectedClassId }),
+      })
+      setForm({ subject: '', title: '', description: '', kind: 'homework', dueDate: '' })
+      setShowForm(false)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const removeAssignment = async (id) => {
+    try {
+      await apiCall(`/api/assignments/${id}`, { method: 'DELETE' })
+      await load()
+    } catch (err) {
+      setError(err.message)
     }
   }
 
@@ -121,15 +172,72 @@ export default function PaevikPage() {
           </ul>
         </Panel>
 
-        <Panel title="Lähimad kontrolltööd" action={<Link to="/tunniplaan" className="text-sm text-[#2a6db0] hover:underline">Kõik →</Link>}>
-          {!loading && exams.length === 0 && <p className="text-sm text-gray-500">Järgmise 14 päeva jooksul kontrolltöid pole.</p>}
+        <Panel
+          title="Ülesanded, kodutööd ja kontrolltööd"
+          action={staff && selectedClass && (
+            <button onClick={() => setShowForm(v => !v)} className="text-sm text-[#2a6db0] hover:underline">
+              {showForm ? 'Sulge' : '+ Lisa ülesanne'}
+            </button>
+          )}
+        >
+          {showForm && (
+            <div className="mb-4 p-3 border border-[#9ab7e0] rounded-lg bg-[#f4f8fd] space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <input placeholder="Aine" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })}
+                  className="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-[#2a6db0]" />
+                <input type="date" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })}
+                  className="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-[#2a6db0]" />
+              </div>
+              <input placeholder="Pealkiri" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
+                className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-[#2a6db0]" />
+              <textarea placeholder="Kirjeldus (valikuline)" rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+                className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-[#2a6db0] resize-none" />
+              <div className="flex items-center gap-3">
+                <select value={form.kind} onChange={e => setForm({ ...form, kind: e.target.value })}
+                  className="border border-gray-200 rounded px-2 py-1.5 text-sm">
+                  <option value="homework">Kodutöö</option>
+                  <option value="task">Ülesanne</option>
+                </select>
+                <button onClick={addAssignment} disabled={saving}
+                  className="bg-[#1c3556] text-white text-sm rounded px-4 py-1.5 hover:bg-[#2a4a7a] disabled:opacity-50">
+                  {saving ? 'Salvestan...' : 'Salvesta'}
+                </button>
+              </div>
+            </div>
+          )}
+          {!loading && assignments.length === 0 && exams.length === 0 && (
+            <p className="text-sm text-gray-500">Järgmise 14 päeva jooksul ülesandeid ega kontrolltöid pole.</p>
+          )}
           <ul className="divide-y divide-gray-100">
-            {exams.map(e => (
-              <li key={e.id} className="py-2.5">
-                <p className="text-sm font-medium text-gray-900">{e.title || e.subject}</p>
-                <p className="text-xs text-gray-500">{e.subject} · {formatDate(String(e.date).slice(0, 10))}</p>
-              </li>
-            ))}
+            {[...assignments.map(a => ({ ...a, type: 'assignment', date: a.dueDate })),
+              ...exams.map(e => ({ ...e, type: 'exam', date: String(e.date).slice(0, 10) }))]
+              .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+              .map(item => item.type === 'exam' ? (
+                <li key={`e${item.id}`} className="py-2.5">
+                  <p className="text-sm font-medium text-gray-900">
+                    <span className="text-[10px] font-bold uppercase bg-red-100 text-red-700 rounded px-1.5 py-0.5 mr-2">Kontrolltöö</span>
+                    {item.title || item.subject}
+                  </p>
+                  <p className="text-xs text-gray-500">{item.subject} · {formatDate(item.date)}</p>
+                </li>
+              ) : (
+                <li key={`a${item.id}`} className="py-2.5 flex items-start gap-3">
+                  <input type="checkbox" checked={done.includes(Number(item.id))} onChange={() => toggleDone(item.id)} className="mt-1" />
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-medium ${done.includes(Number(item.id)) ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                      <span className="text-[10px] font-bold uppercase bg-blue-100 text-blue-700 rounded px-1.5 py-0.5 mr-2">
+                        {item.kind === 'task' ? 'Ülesanne' : 'Kodutöö'}
+                      </span>
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-gray-500">{item.subject} · tähtaeg {formatDate(item.date)}</p>
+                    {item.description && <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{item.description}</p>}
+                  </div>
+                  {staff && (
+                    <button onClick={() => removeAssignment(item.id)} className="text-xs text-gray-400 hover:text-red-600">Kustuta</button>
+                  )}
+                </li>
+              ))}
           </ul>
         </Panel>
 
