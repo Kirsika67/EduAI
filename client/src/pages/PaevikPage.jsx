@@ -33,6 +33,9 @@ export default function PaevikPage() {
   const [exams, setExams] = useState([])
   const [assignments, setAssignments] = useState([])
   const [subsToday, setSubsToday] = useState([])
+  const [absences, setAbsences] = useState([])
+  const [showAbsence, setShowAbsence] = useState(false)
+  const [absenceForm, setAbsenceForm] = useState({ dateFrom: '', dateTo: '', note: '' })
   const [recentGrades, setRecentGrades] = useState([])
   const [recentNotes, setRecentNotes] = useState([])
   const [showForm, setShowForm] = useState(false)
@@ -89,6 +92,10 @@ export default function PaevikPage() {
         setExams([])
         setAssignments([])
       }
+      if (staff) {
+        const ab = await apiCall('/api/absences')
+        setAbsences(ab.absences || [])
+      }
       const m = await apiCall('/api/messages')
       setConversations(m.conversations || [])
     } catch (err) {
@@ -123,6 +130,28 @@ export default function PaevikPage() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const addAbsence = async () => {
+    if (!absenceForm.dateFrom) { setError('Vali puudumise algus.'); return }
+    setError('')
+    try {
+      await apiCall('/api/absences', { method: 'POST', body: JSON.stringify(absenceForm) })
+      setAbsenceForm({ dateFrom: '', dateTo: '', note: '' })
+      setShowAbsence(false)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const removeAbsence = async (id) => {
+    try {
+      await apiCall(`/api/absences/${id}`, { method: 'DELETE' })
+      await load()
+    } catch (err) {
+      setError(err.message)
     }
   }
 
@@ -186,9 +215,37 @@ export default function PaevikPage() {
           </ul>
         </Panel>
 
-        {staff && selectedClass && (
-          <Panel title="Õpetajate puudumised ja asendused">
-            {!loading && subsToday.length === 0 && <p className="text-sm text-gray-500">Täna asendusi ega ärajäämisi pole.</p>}
+        {staff && (
+          <Panel
+            title="Õpetajate puudumised ja asendused"
+            action={<button onClick={() => setShowAbsence(v => !v)} className="text-sm text-[#2a6db0] hover:underline">{showAbsence ? 'Sulge' : '+ Teata oma puudumisest'}</button>}
+          >
+            {showAbsence && (
+              <div className="mb-4 p-3 border border-[#9ab7e0] rounded-lg bg-[#f4f8fd] space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="text-xs text-gray-500">Algus
+                    <input type="date" value={absenceForm.dateFrom} onChange={e => setAbsenceForm({ ...absenceForm, dateFrom: e.target.value })}
+                      className="mt-1 w-full border border-gray-200 rounded px-2 py-1.5 text-sm" />
+                  </label>
+                  <label className="text-xs text-gray-500">Lõpp (kui erineb)
+                    <input type="date" value={absenceForm.dateTo} onChange={e => setAbsenceForm({ ...absenceForm, dateTo: e.target.value })}
+                      className="mt-1 w-full border border-gray-200 rounded px-2 py-1.5 text-sm" />
+                  </label>
+                </div>
+                <input placeholder="Märkus (valikuline)" value={absenceForm.note} onChange={e => setAbsenceForm({ ...absenceForm, note: e.target.value })}
+                  className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm" />
+                <button onClick={addAbsence} className="bg-[#1c3556] text-white text-sm rounded px-4 py-1.5 hover:bg-[#2a4a7a]">Salvesta</button>
+              </div>
+            )}
+            {absences.map(a => (
+              <p key={a.id} className="text-sm text-gray-900 py-1.5 border-b border-gray-100">
+                <span className="font-medium">{a.teacherName}</span> puudub
+                {a.dateTo !== a.dateFrom ? ` ${a.dateFrom.slice(8, 10)}.${a.dateFrom.slice(5, 7)}.–${a.dateTo.slice(8, 10)}.${a.dateTo.slice(5, 7)}.` : ' täna'}
+                {a.note ? <span className="text-gray-500"> · {a.note}</span> : null}
+                {a.isMine && <button onClick={() => removeAbsence(a.id)} className="ml-3 text-xs text-gray-400 hover:text-red-600">Kustuta</button>}
+              </p>
+            ))}
+            {!loading && absences.length === 0 && subsToday.length === 0 && <p className="text-sm text-gray-500">Täna puudumisi, asendusi ega ärajäämisi pole.</p>}
             <ul className="divide-y divide-gray-100">
               {subsToday.map(x => (
                 <li key={x.id} className="py-2.5">
