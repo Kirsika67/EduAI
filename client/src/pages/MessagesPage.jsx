@@ -28,6 +28,7 @@ export default function MessagesPage() {
   const [draft, setDraft] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [folder, setFolder] = useState('all')
 
   const [composing, setComposing] = useState(false)
   const [newMsg, setNewMsg] = useState({ kind: 'direct', recipientId: '', subject: '', body: '' })
@@ -233,13 +234,24 @@ export default function MessagesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-4">
         <div className="space-y-2">
+          <div className="flex gap-1 mb-1">
+            {[['all', 'Kõik'], ['unread', 'Lugemata']].map(([key, label]) => (
+              <button key={key} onClick={() => setFolder(key)}
+                className={`px-3 py-1 rounded-full text-sm ${folder === key ? 'bg-[#1c3556] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                {label}{key === 'unread' && conversations.some(c => c.unread > 0) ? ` (${conversations.filter(c => c.unread > 0).length})` : ''}
+              </button>
+            ))}
+          </div>
           {loading && <p className="text-sm text-gray-400">Laadin...</p>}
           {!loading && !conversations.length && (
             <div className="bg-white rounded-xl border border-black/10 p-6 text-center text-sm text-gray-400">
               Vestlusi veel pole.
             </div>
           )}
-          {conversations.map(c => (
+          {!loading && folder === 'unread' && !conversations.some(c => c.unread > 0) && (
+            <p className="text-sm text-gray-400 px-1">Lugemata sõnumeid pole.</p>
+          )}
+          {conversations.filter(c => folder === 'all' || c.unread > 0).map(c => (
             <button key={c.id} onClick={() => { setActiveId(c.id); setComposing(false) }}
               className={`w-full text-left bg-white rounded-xl border p-3 transition-colors ${
                 activeId === c.id ? 'border-[#AFA9EC] bg-[#EEEDFE]' : 'border-black/10 hover:bg-gray-50'

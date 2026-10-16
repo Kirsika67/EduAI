@@ -45,7 +45,9 @@ export const roleLabel = role => ROLE_LABELS[role] || role
  * seda kuvatakse hallilt ja mitteklõpsatavana, et kasutaja ei satuks tühjale lehele.
  */
 const STAFF_NAV = [
-  { to: '/ulevaade', label: 'Ülevaade' },
+  { to: '/paevik', label: 'Päevik' },
+  { to: '/tera', label: 'Tera' },
+  { to: '/ulevaade', label: 'Ülevaade', ai: true },
   { to: '/tunniplaan', label: 'Tunniplaan' },
   { to: '/opilased', label: 'Õpilased' },
   { to: '/hinded', label: 'Hinded' },
@@ -55,7 +57,7 @@ const STAFF_NAV = [
   { to: '/planeerimine', label: 'Planeerimine', ai: true },
   { to: '/kohalolek', label: 'Kohalolek' },
   { to: '/esseede-hindamine', label: 'Esseede hindamine', ai: true },
-  { to: '/sonumid', label: 'Sõnumid' },
+  { to: '/sonumid', label: 'Suhtlus' },
 ]
 
 const PARENT_NAV = [
@@ -75,9 +77,9 @@ const STUDENT_NAV = [
 
 /** Juhtkond näeb sama menüüd + kogu kooli vaadet kohe Ülevaate järel. */
 const LEADERSHIP_NAV = [
-  STAFF_NAV[0],
+  ...STAFF_NAV.slice(0, 3),
   { to: '/kool', label: 'Kool' },
-  ...STAFF_NAV.slice(1),
+  ...STAFF_NAV.slice(3),
 ]
 
 export function navForRole(role) {
@@ -90,5 +92,5 @@ export function navForRole(role) {
 /** Kuhu kasutaja pärast sisselogimist maandub. */
 export function landingPathForRole(role) {
   if (role === ROLES.PARENT || role === ROLES.STUDENT) return '/minu-laps'
-  return '/ulevaade'
+  return '/paevik'
 }
