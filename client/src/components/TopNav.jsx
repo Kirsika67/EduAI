@@ -8,7 +8,7 @@ export default function TopNav() {
   const tabs = navForRole(role)
 
   return (
-    <nav className="bg-[#1c3556] px-6 py-3 flex flex-wrap items-center gap-x-1 gap-y-2 flex-shrink-0">
+    <nav className="flex-1 min-w-0 px-6 py-3 flex flex-wrap items-center gap-x-1 gap-y-2 flex-shrink-0">
       {tabs.map(tab => (
         tab.soon ? (
           <span key={tab.label} title={`Valmib: ${tab.soon}`}
