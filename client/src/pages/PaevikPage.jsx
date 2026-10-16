@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 import { useAuth } from '../context/AuthContext'
-import { isStaff } from '../constants/roles'
+import { isStaff, isLeadership } from '../constants/roles'
 
 const WEEKDAYS = ['pühapäev', 'esmaspäev', 'teisipäev', 'kolmapäev', 'neljapäev', 'reede', 'laupäev']
 const isoDate = (d) => d.toISOString().slice(0, 10)
@@ -35,7 +35,8 @@ export default function PaevikPage() {
   const [subsToday, setSubsToday] = useState([])
   const [absences, setAbsences] = useState([])
   const [showAbsence, setShowAbsence] = useState(false)
-  const [absenceForm, setAbsenceForm] = useState({ dateFrom: '', dateTo: '', note: '' })
+  const [absenceForm, setAbsenceForm] = useState({ dateFrom: '', dateTo: '', note: '', teacherId: '' })
+  const [schoolTeachers, setSchoolTeachers] = useState([])
   const [recentGrades, setRecentGrades] = useState([])
   const [recentNotes, setRecentNotes] = useState([])
   const [showForm, setShowForm] = useState(false)
@@ -95,6 +96,10 @@ export default function PaevikPage() {
       if (staff) {
         const ab = await apiCall('/api/absences')
         setAbsences(ab.absences || [])
+        if (isLeadership(role)) {
+          const tl = await apiCall('/api/absences/teachers')
+          setSchoolTeachers(tl.teachers || [])
+        }
       }
       const m = await apiCall('/api/messages')
       setConversations(m.conversations || [])
@@ -138,7 +143,7 @@ export default function PaevikPage() {
     setError('')
     try {
       await apiCall('/api/absences', { method: 'POST', body: JSON.stringify(absenceForm) })
-      setAbsenceForm({ dateFrom: '', dateTo: '', note: '' })
+      setAbsenceForm({ dateFrom: '', dateTo: '', note: '', teacherId: '' })
       setShowAbsence(false)
       await load()
     } catch (err) {
@@ -218,10 +223,17 @@ export default function PaevikPage() {
         {staff && (
           <Panel
             title="Õpetajate puudumised ja asendused"
-            action={<button onClick={() => setShowAbsence(v => !v)} className="text-sm text-[#2a6db0] hover:underline">{showAbsence ? 'Sulge' : '+ Teata oma puudumisest'}</button>}
+            action={<button onClick={() => setShowAbsence(v => !v)} className="text-sm text-[#2a6db0] hover:underline">{showAbsence ? 'Sulge' : isLeadership(role) ? '+ Lisa puudumine' : '+ Teata oma puudumisest'}</button>}
           >
             {showAbsence && (
               <div className="mb-4 p-3 border border-[#9ab7e0] rounded-lg bg-[#f4f8fd] space-y-2">
+                {isLeadership(role) && (
+                  <select value={absenceForm.teacherId} onChange={e => setAbsenceForm({ ...absenceForm, teacherId: e.target.value })}
+                    className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                    <option value="">Mina ise</option>
+                    {schoolTeachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                )}
                 <div className="grid grid-cols-2 gap-2">
                   <label className="text-xs text-gray-500">Algus
                     <input type="date" value={absenceForm.dateFrom} onChange={e => setAbsenceForm({ ...absenceForm, dateFrom: e.target.value })}
