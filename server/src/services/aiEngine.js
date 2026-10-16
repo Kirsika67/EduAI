@@ -33,6 +33,7 @@ export const AI_PURPOSES = {
   grade_feedback: "Hinde tagasiside",
   essay_grading: "Esseede hindamine",
   daily_brief: "Päeva kokkuvõte",
+  planner_chat: "AI planeerija",
 };
 
 function logUsage({ user, purpose, model = ANTHROPIC_MODEL, ok, errorKind, inputChars, outputChars, durationMs }) {
@@ -160,6 +161,38 @@ export async function askClaudeOrThrow({ prompt, purpose, user, maxTokens, model
     throw new Error(result.fallback || "AI vastust ei saadud.");
   }
   return result.text;
+}
+
+/**
+ * Mitme vooruga vestlus (süsteemijuhis + sõnumite ajalugu, sõnumis võivad olla pildid).
+ * Viskab vea, kui teksti ei tulnud. Ei tee nimede pseudonümiseerimist — kutsuja
+ * vastutab selle eest, et sinna ei satuks tundlikku infot (pildid!).
+ */
+export async function chatClaude({ system, messages, purpose, user, maxTokens = 3000, model = ANTHROPIC_MODEL, timeoutMs = 90_000 }) {
+  if (!hasApiKey()) {
+    logUsage({ user, purpose, model, ok: false, errorKind: "no_api_key" });
+    throw new Error("Lisa ANTHROPIC_API_KEY, et AI-funktsioonid tööle hakkaksid.");
+  }
+  const started = Date.now();
+  const client = new Anthropic({ apiKey: String(process.env.ANTHROPIC_API_KEY).trim(), timeout: timeoutMs });
+  try {
+    const msg = await client.messages.create({
+      model,
+      thinking: ANTHROPIC_THINKING,
+      max_tokens: maxTokens,
+      system,
+      messages,
+    });
+    const text = msg.content?.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim() || "";
+    logUsage({ user, purpose, model, ok: true, outputChars: text.length, durationMs: Date.now() - started });
+    if (!text) throw new Error("AI vastust ei saadud.");
+    return text;
+  } catch (err) {
+    const errorKind = err?.status ? `http_${err.status}` : err?.name || "unknown";
+    console.error(`[EduAI AI:${purpose}]`, errorKind, err?.message);
+    logUsage({ user, purpose, model, ok: false, errorKind, durationMs: Date.now() - started });
+    throw new Error("AI vastust ei õnnestunud saada. Proovi uuesti.");
+  }
 }
 
 /** Kasutusstatistika juhtkonnale. */

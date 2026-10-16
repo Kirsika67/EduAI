@@ -17,6 +17,7 @@ import studentProfileRoutes from "./routes/studentProfile.js";
 import materialsRoutes from "./routes/materials.js";
 import assignmentsRoutes from "./routes/assignments.js";
 import absencesRoutes from "./routes/absences.js";
+import plannerRoutes from "./routes/planner.js";
 import weeklyPlansRoutes from "./routes/weeklyPlans.js";
 import invitationsRoutes from "./routes/invitations.js";
 import accountRoutes from "./routes/account.js";
@@ -71,6 +72,8 @@ if (!serveClient) {
     })
   );
 }
+/** Planeerija saab pilte (base64) — suurem limiit ainult sellel teel, enne üldist parserit. */
+app.use("/api/planner", express.json({ limit: "14mb" }));
 app.use(express.json({ limit: "1mb" }));
 
 /** Terviseotspunkt jääb limiitidest välja — Render pingib seda pidevalt. */
@@ -89,6 +92,7 @@ app.use("/api/attendance", attendanceBoardRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/assignments", assignmentsRoutes);
 app.use("/api/absences", absencesRoutes);
+app.use("/api/planner", plannerRoutes);
 app.use("/api/mentoring", mentoringRoutes);
 app.use("/api/school", schoolRoutes);
 app.use("/api/activities", activitiesRoutes);

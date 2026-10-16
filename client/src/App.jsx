@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AcceptInvitePage from './pages/AcceptInvitePage'
 import PaevikPage from './pages/PaevikPage'
+import PlannerPage from './pages/PlannerPage'
 import ProfilePage from './pages/ProfilePage'
 import TeraPage from './pages/TeraPage'
 import OverviewPage from './pages/OverviewPage'
@@ -75,6 +76,7 @@ export default function App() {
 
         {/* Koolitöötaja lehed */}
         <Route element={<RoleGate allow={isStaff} />}>
+          <Route path="planeerija" element={<PlannerPage />} />
           <Route path="paevik" element={<PaevikPage />} />
           <Route path="tera" element={<TeraPage />} />
           <Route path="ulevaade" element={<OverviewPage />} />
