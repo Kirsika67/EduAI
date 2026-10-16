@@ -4,7 +4,7 @@ import TopNav from './TopNav'
 
 export default function Layout() {
   return (
-    <div className="flex h-screen bg-[#f5f5f3] overflow-hidden">
+    <div className="flex h-screen bg-[#f4f6f9] overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopNav />

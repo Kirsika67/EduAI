@@ -3,20 +3,43 @@ import { API_BASE_URL } from '../config'
 import { useClasses } from '../context/ClassContext'
 import HighlightedEssay from '../components/HighlightedEssay'
 
+/** Parandused tulevad kujul [vale → õige]; kuva need värviga. */
+function CorrectedText({ text }) {
+  const parts = String(text || '').split(/(\[[^\[\]]*?→[^\[\]]*?\])/)
+  return parts.map((part, i) => {
+    const m = part.match(/^\[([^\[\]]*?)→([^\[\]]*?)\]$/)
+    if (!m) return <span key={i}>{part}</span>
+    return (
+      <span key={i} className="bg-red-50 rounded px-1">
+        <span className="text-red-600 line-through decoration-red-400">{m[1].trim()}</span>
+        <span className="text-gray-400 mx-1">→</span>
+        <span className="text-green-700 font-semibold">{m[2].trim()}</span>
+      </span>
+    )
+  })
+}
+
 export default function EssayGradingPage() {
   const { classes, loading: classesLoading } = useClasses()
   const [essayText, setEssayText] = useState('')
   const [grade, setGrade] = useState('')
   const [criteria, setCriteria] = useState('')
   const [subject, setSubject] = useState('')
-  const [language, setLanguage] = useState('et')
+  const [language, setLanguage] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [gradedText, setGradedText] = useState('')
 
+  const missing = [
+    !grade && 'klass',
+    !language && 'essee keel',
+    !essayText.trim() && 'essee tekst',
+  ].filter(Boolean)
+  const canGrade = missing.length === 0
+
   const gradeEssay = async () => {
-    if (!essayText.trim()) { alert('Kleebi essee tekst sisse'); return }
+    if (!canGrade) { setError('Täida enne hindamist kohustuslikud väljad: ' + missing.join(', ') + '.'); return }
     setLoading(true)
     setResult(null)
     setError('')
@@ -57,16 +80,17 @@ export default function EssayGradingPage() {
       <div className="bg-white rounded-xl border border-black/10 p-6 mb-4">
         <div className="grid grid-cols-4 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Essee keel</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Essee keel <span className="text-red-500">*</span></label>
             <select value={language} onChange={e => setLanguage(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
+              <option value="">— Vali keel —</option>
               <option value="et">Eesti keel</option>
               <option value="en">Inglise keel</option>
               <option value="ru">Vene keel</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Klass</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Klass <span className="text-red-500">*</span></label>
             <select value={grade} onChange={e => setGrade(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
               <option value="">— Vali klass —</option>
@@ -84,7 +108,7 @@ export default function EssayGradingPage() {
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
           </div>
         </div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Õpilase essee tekst</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Õpilase essee tekst <span className="text-red-500">*</span></label>
         <textarea
           placeholder="Kleebi õpilase essee siia..."
           value={essayText}
@@ -94,7 +118,7 @@ export default function EssayGradingPage() {
         />
         <button
           onClick={gradeEssay}
-          disabled={loading}
+          disabled={loading || !canGrade}
           className="mt-4 bg-[#7F77DD] text-white rounded-lg px-6 py-2.5 text-sm hover:bg-[#534AB7] disabled:opacity-50 transition-colors"
         >
           {loading ? (
@@ -104,6 +128,9 @@ export default function EssayGradingPage() {
             </span>
           ) : 'Hinda essee'}
         </button>
+        {!canGrade && (
+          <p className="mt-2 text-xs text-gray-500">Hindamiseks vali: {missing.join(', ')}.</p>
+        )}
       </div>
 
       {error && (
@@ -129,8 +156,9 @@ export default function EssayGradingPage() {
             )}
           </div>
           <div className="bg-white rounded-xl border border-black/10 p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-3">Grammatikaparandused</h2>
-            <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{result.corrected}</pre>
+            <h2 className="text-base font-semibold text-gray-900 mb-1">Grammatikaparandused</h2>
+            <p className="text-xs text-gray-500 mb-3"><span className="text-red-600 line-through">Viga</span> → <span className="text-green-700 font-semibold">parandus</span></p>
+            <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed"><CorrectedText text={result.corrected} /></pre>
           </div>
           {result.grade !== '' && (
             <div className="bg-[#EEEDFE] rounded-xl p-5">

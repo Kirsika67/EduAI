@@ -50,11 +50,11 @@ const STAFF_NAV = [
   { to: '/opilased', label: 'Õpilased' },
   { to: '/hinded', label: 'Hinded' },
   { to: '/klassid', label: 'Klassid' },
-  { to: '/materjalid', label: 'Materjalid' },
-  { to: '/tagasiside', label: 'Tagasiside' },
-  { to: '/planeerimine', label: 'Planeerimine' },
+  { to: '/materjalid', label: 'Materjalid', ai: true },
+  { to: '/tagasiside', label: 'Tagasiside', ai: true },
+  { to: '/planeerimine', label: 'Planeerimine', ai: true },
   { to: '/kohalolek', label: 'Kohalolek' },
-  { to: '/esseede-hindamine', label: 'Esseede hindamine' },
+  { to: '/esseede-hindamine', label: 'Esseede hindamine', ai: true },
   { to: '/sonumid', label: 'Sõnumid' },
 ]
 
