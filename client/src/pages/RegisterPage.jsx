@@ -32,7 +32,7 @@ export default function RegisterPage() {
         schoolName: schoolMode === 'new' ? schoolName.trim() : undefined,
         schoolCode: schoolMode === 'join' ? schoolCode.trim() : undefined,
       })
-      navigate('/ulevaade')
+      navigate('/')
     } catch (err) {
       setError(err.message || 'Registreerimine ebaõnnestus')
     } finally {

@@ -16,7 +16,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await login(email, password)
-      navigate('/ulevaade')
+      navigate('/')
     } catch (err) {
       setError(err.message || 'Sisselogimine ebaõnnestus')
     } finally {

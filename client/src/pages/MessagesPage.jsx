@@ -20,6 +20,41 @@ export default function MessagesPage() {
   const { role } = useAuth()
   const { selectedClassId, selectedClass, loading: classesLoading } = useClasses()
   const staff = isStaff(role)
+  const [conversations, setConversations] = useState([])
+  const [contacts, setContacts] = useState([])
+  const [activeId, setActiveId] = useState(null)
+  const [thread, setThread] = useState(null)
+  const [draft, setDraft] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [folder, setFolder] = useState('all')
+  const [calendarItems, setCalendarItems] = useState([])
+  const [calendarLoading, setCalendarLoading] = useState(false)
+
+  const [composing, setComposing] = useState(false)
+  const [newMsg, setNewMsg] = useState({ kind: 'direct', recipientId: '', subject: '', body: '' })
+
+  const [assistModes, setAssistModes] = useState([])
+  const [assisting, setAssisting] = useState(false)
+  const [suggestion, setSuggestion] = useState(null)
+  const [assistNote, setAssistNote] = useState('')
+
+  const bottomRef = useRef(null)
+
+  useEffect(() => {
+    if (classesLoading) return
+    loadAll()
+  }, [classesLoading])
+
+  useEffect(() => {
+    if (!activeId) { setThread(null); return }
+    openThread(activeId)
+  }, [activeId])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [thread?.messages?.length])
+
   const visibleConversations = conversations.filter(c => {
     if (folder === 'unread') return c.unread > 0
     if (folder === 'favorite') return c.favorite
@@ -60,40 +95,6 @@ export default function MessagesPage() {
     load()
   }, [folder, classesLoading, selectedClassId])
 
-  const [conversations, setConversations] = useState([])
-  const [contacts, setContacts] = useState([])
-  const [activeId, setActiveId] = useState(null)
-  const [thread, setThread] = useState(null)
-  const [draft, setDraft] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [folder, setFolder] = useState('all')
-  const [calendarItems, setCalendarItems] = useState([])
-  const [calendarLoading, setCalendarLoading] = useState(false)
-
-  const [composing, setComposing] = useState(false)
-  const [newMsg, setNewMsg] = useState({ kind: 'direct', recipientId: '', subject: '', body: '' })
-
-  const [assistModes, setAssistModes] = useState([])
-  const [assisting, setAssisting] = useState(false)
-  const [suggestion, setSuggestion] = useState(null)
-  const [assistNote, setAssistNote] = useState('')
-
-  const bottomRef = useRef(null)
-
-  useEffect(() => {
-    if (classesLoading) return
-    loadAll()
-  }, [classesLoading])
-
-  useEffect(() => {
-    if (!activeId) { setThread(null); return }
-    openThread(activeId)
-  }, [activeId])
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [thread?.messages?.length])
 
   const loadAll = async () => {
     setLoading(true)
@@ -202,7 +203,7 @@ export default function MessagesPage() {
   return (
     <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-1 gap-3 flex-wrap">
-        <h1 className="text-2xl font-bold text-gray-900">Sõnumid</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Suhtlus</h1>
         <button onClick={() => { setComposing(!composing); setActiveId(null) }}
           className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
           {composing ? 'Sulge' : '+ Uus sõnum'}
