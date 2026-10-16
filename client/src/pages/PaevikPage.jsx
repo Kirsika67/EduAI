@@ -32,6 +32,8 @@ export default function PaevikPage() {
   const staff = isStaff(role)
   const [exams, setExams] = useState([])
   const [assignments, setAssignments] = useState([])
+  const [recentGrades, setRecentGrades] = useState([])
+  const [recentNotes, setRecentNotes] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ subject: '', title: '', description: '', kind: 'homework', dueDate: '' })
@@ -70,7 +72,15 @@ export default function PaevikPage() {
         setExams(ex.exams || [])
         const as = await apiCall(`/api/assignments?classId=${selectedClassId}&from=${from}&to=${to}`)
         setAssignments(as.assignments || [])
+        if (staff) {
+          const g = await apiCall(`/api/classes/${selectedClassId}/grades`)
+          setRecentGrades((g.grades || []).slice(0, 6))
+          const b = await apiCall(`/api/attendance/behavior/class/${selectedClassId}`)
+          setRecentNotes((b.notes || []).slice(0, 6))
+        }
       } else {
+        setRecentGrades([])
+        setRecentNotes([])
         setLessons([])
         setExams([])
         setAssignments([])
@@ -240,6 +250,34 @@ export default function PaevikPage() {
               ))}
           </ul>
         </Panel>
+
+        {staff && selectedClass && (
+          <Panel title="Viimati lisatud hinded ja märked" action={<Link to="/hinded" className="text-sm text-[#2a6db0] hover:underline">Hinded →</Link>}>
+            {!loading && recentGrades.length === 0 && recentNotes.length === 0 && (
+              <p className="text-sm text-gray-500">Hindeid ega märkeid pole veel lisatud.</p>
+            )}
+            <ul className="divide-y divide-gray-100">
+              {recentGrades.map(g => (
+                <li key={`g${g.id}`} className="py-2.5 flex items-start gap-3">
+                  <span className="min-w-[2.5rem] text-center text-sm font-bold bg-[#eef3fa] text-[#1c3556] rounded px-2 py-1">{g.score}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{g.student_name}</p>
+                    <p className="text-xs text-gray-500">{g.topic_name} · {String(g.date).slice(0, 10)}{g.notes ? ` · ${g.notes}` : ''}</p>
+                  </div>
+                </li>
+              ))}
+              {recentNotes.map(n => (
+                <li key={`n${n.id}`} className="py-2.5">
+                  <p className="text-sm font-medium text-gray-900">
+                    <span className={`inline-block w-2 h-2 rounded-full mr-2 ${n.sentiment === 'positive' ? 'bg-green-500' : n.sentiment === 'negative' ? 'bg-red-500' : 'bg-gray-400'}`} />
+                    {n.studentName}{n.isPrivate ? ' (privaatne)' : ''}
+                  </p>
+                  <p className="text-xs text-gray-500">{n.category ? `${n.category} · ` : ''}{String(n.date).slice(0, 10)}{n.note ? ` · ${n.note}` : ''}</p>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        )}
 
         <Panel title="Viimased sõnumid" action={<Link to="/sonumid" className="text-sm text-[#2a6db0] hover:underline">Suhtlus →</Link>}>
           {!loading && conversations.length === 0 && <p className="text-sm text-gray-500">Sõnumeid pole.</p>}
