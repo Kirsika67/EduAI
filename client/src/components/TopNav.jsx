@@ -8,17 +8,17 @@ export default function TopNav() {
   const tabs = navForRole(role)
 
   return (
-    <nav className="flex-1 min-w-0 px-6 py-3 flex flex-wrap items-center gap-x-1 gap-y-2 flex-shrink-0">
+    <nav className="px-4 md:px-6 py-2 md:py-3 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible items-center gap-x-1 gap-y-2 flex-shrink-0">
       {tabs.map(tab => (
         tab.soon ? (
           <span key={tab.label} title={`Valmib: ${tab.soon}`}
-            className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-white/30 cursor-default">
+            className="px-3.5 py-1.5 rounded-lg whitespace-nowrap flex-shrink-0 text-sm font-medium text-white/30 cursor-default">
             {tab.label}
           </span>
         ) : (
           <NavLink key={tab.to} to={tab.to}
             className={({ isActive }) =>
-              `px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              `px-3.5 py-1.5 rounded-lg whitespace-nowrap flex-shrink-0 text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 isActive ? 'bg-white text-[#1c3556] shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}>
             {tab.label}
