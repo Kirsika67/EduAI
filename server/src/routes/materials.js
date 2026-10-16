@@ -223,6 +223,37 @@ router.post("/classes/:classId/materials/generate", async (req, res) => {
 
 export default router;
 
+/**
+ * AI päevakokkuvõte õpetajale. Saab ainult kokkuvõtlikud faktid (ained, kuupäevad,
+ * arvud) — õpilaste nimesid ega märkmeid ei saadeta.
+ */
+router.post("/daily-brief", async (req, res) => {
+  const b = req.body || {};
+  const list = (v, n = 12) =>
+    (Array.isArray(v) ? v : []).slice(0, n).map((x) => String(x).slice(0, 120));
+  const facts = {
+    klass: String(b.className || "").slice(0, 60),
+    tunnid: list(b.lessons),
+    asendused: list(b.substitutions),
+    puudujad: list(b.absentTeachers),
+    kontrolltood: list(b.exams),
+    ulesanded: list(b.assignments),
+    lugemataSonumeid: Number(b.unreadMessages) || 0,
+  };
+  const prompt = `Sa oled õpetaja assistent. Kirjuta eesti keeles lühike (4-6 lauset) ja praktiline tänase päeva kokkuvõte õpetajale, kasutades ainult allolevaid fakte. Too välja, mis vajab tähelepanu (asendused, ärajäänud tunnid, lähenevad kontrolltööd ja tähtajad), ja ära mõtle andmeid juurde. Ära kasuta pealkirju ega loetelu, kirjuta tavalise lõiguna.
+
+Faktid (JSON):
+${JSON.stringify(facts)}`;
+  try {
+    const { askClaudeOrThrow } = await import('../services/aiEngine.js');
+    const text = await askClaudeOrThrow({ prompt, purpose: 'daily_brief', user: req.user, maxTokens: 700 });
+    res.json({ text });
+  } catch (err) {
+    console.error('[daily-brief]', err.message);
+    res.status(500).json({ error: err.message || 'Kokkuvõtte koostamine ebaõnnestus.' });
+  }
+});
+
 router.post("/grade-essay", async (req, res) => {
   const { text, context } = req.body;
   if (!text) return res.status(400).json({ error: "Tekst puudub" });

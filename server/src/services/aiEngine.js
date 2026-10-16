@@ -32,6 +32,7 @@ export const AI_PURPOSES = {
   school_summary: "Kooli koondhinnang",
   grade_feedback: "Hinde tagasiside",
   essay_grading: "Esseede hindamine",
+  daily_brief: "Päeva kokkuvõte",
 };
 
 function logUsage({ user, purpose, model = ANTHROPIC_MODEL, ok, errorKind, inputChars, outputChars, durationMs }) {

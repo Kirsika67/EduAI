@@ -33,6 +33,8 @@ export default function PaevikPage() {
   const [exams, setExams] = useState([])
   const [assignments, setAssignments] = useState([])
   const [subsToday, setSubsToday] = useState([])
+  const [brief, setBrief] = useState('')
+  const [briefLoading, setBriefLoading] = useState(false)
   const [absences, setAbsences] = useState([])
   const [showAbsence, setShowAbsence] = useState(false)
   const [absenceForm, setAbsenceForm] = useState({ dateFrom: '', dateTo: '', note: '', teacherId: '' })
@@ -135,6 +137,30 @@ export default function PaevikPage() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const makeBrief = async () => {
+    setBriefLoading(true)
+    setError('')
+    try {
+      const data = await apiCall('/api/daily-brief', {
+        method: 'POST',
+        body: JSON.stringify({
+          className: selectedClass ? `${selectedClass.name} ${selectedClass.subject}` : '',
+          lessons: lessons.map(l => `${l.lessonNumber}. tund ${l.subject}${l.startTime ? ` kell ${l.startTime}` : ''}`),
+          substitutions: subsToday.map(x => `${x.className} ${x.subject} ${x.lessonNumber}. tund: ${x.cancelled ? 'jääb ära' : `asendab ${x.substituteName || 'asendusõpetaja'}`}`),
+          absentTeachers: absences.map(a => `${a.teacherName} puudub`),
+          exams: exams.map(e => `${e.title || e.subject} (${e.subject}) ${String(e.date).slice(0, 10)}`),
+          assignments: assignments.map(a => `${a.kind === 'task' ? 'Ülesanne' : 'Kodutöö'} ${a.subject}: ${a.title}, tähtaeg ${a.dueDate}`),
+          unreadMessages: unread,
+        }),
+      })
+      setBrief(data.text || '')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBriefLoading(false)
     }
   }
 
@@ -389,6 +415,11 @@ export default function PaevikPage() {
         </Panel>
 
         <Panel title="AI-abiline">
+          <button onClick={makeBrief} disabled={briefLoading || !selectedClass}
+            className="mb-3 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50">
+            {briefLoading ? 'Koostan...' : 'AI päevakokkuvõte'}
+          </button>
+          {brief && <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3 bg-[#EEEDFE] rounded-lg p-3">{brief}</p>}
           <ul className="space-y-2 text-sm">
             <li><Link to="/ulevaade" className="text-[#2a6db0] hover:underline">Klassi AI-ülevaade ja hoiatused</Link></li>
             <li><Link to="/materjalid" className="text-[#2a6db0] hover:underline">Loo töölehti, teste ja tunnikavasid</Link></li>
