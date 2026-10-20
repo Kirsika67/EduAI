@@ -316,6 +316,10 @@ export default function Sidebar() {
               className="block text-sm text-gray-700 hover:text-[#2a6db0] py-1">
               Minu profiil
             </NavLink>
+            <NavLink to="/kooli-liikmed" onClick={() => setOpen(null)}
+              className="block text-sm text-gray-700 hover:text-[#7F77DD] py-1">
+              Kooli liikmed
+            </NavLink>
             <button onClick={logout}
               className="w-full text-sm text-gray-500 hover:text-red-500 transition-colors py-1">
               Logi välja
