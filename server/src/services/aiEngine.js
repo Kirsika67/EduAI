@@ -168,22 +168,32 @@ export async function askClaudeOrThrow({ prompt, purpose, user, maxTokens, model
  * Viskab vea, kui teksti ei tulnud. Ei tee nimede pseudonümiseerimist — kutsuja
  * vastutab selle eest, et sinna ei satuks tundlikku infot (pildid!).
  */
-export async function chatClaude({ system, messages, purpose, user, maxTokens = 3000, model = ANTHROPIC_MODEL, timeoutMs = 90_000 }) {
+export async function chatClaude({ system, messages, purpose, user, maxTokens = 3000, model = ANTHROPIC_MODEL, timeoutMs = 90_000, protectedNames = [] }) {
   if (!hasApiKey()) {
     logUsage({ user, purpose, model, ok: false, errorKind: "no_api_key" });
     throw new Error("Lisa ANTHROPIC_API_KEY, et AI-funktsioonid tööle hakkaksid.");
   }
   const started = Date.now();
+  /** Nimekilp: õpilaste nimed lähevad AI-le märgistena; vastuses pannakse päris nimed tagasi. */
+  const shield = createNameShield(protectedNames);
+  const outSystem = shield.active ? `${SHIELD_INSTRUCTION}\n\n${shield.mask(system)}` : system;
+  const outMessages = shield.active
+    ? messages.map((m) => ({
+        ...m,
+        content: m.content.map((b) => (b.type === "text" ? { ...b, text: shield.mask(b.text) } : b)),
+      }))
+    : messages;
   const client = new Anthropic({ apiKey: String(process.env.ANTHROPIC_API_KEY).trim(), timeout: timeoutMs });
   try {
     const msg = await client.messages.create({
       model,
       thinking: ANTHROPIC_THINKING,
       max_tokens: maxTokens,
-      system,
-      messages,
+      system: outSystem,
+      messages: outMessages,
     });
-    const text = msg.content?.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim() || "";
+    const masked = msg.content?.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim() || "";
+    const text = shield.unmask(masked);
     logUsage({ user, purpose, model, ok: true, outputChars: text.length, durationMs: Date.now() - started });
     if (!text) throw new Error("AI vastust ei saadud.");
     return text;

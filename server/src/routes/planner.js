@@ -15,6 +15,27 @@ const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const iso = (d) => d.toISOString().slice(0, 10);
 const WEEKDAYS = ["", "esmaspäev", "teisipäev", "kolmapäev", "neljapäev", "reede", "laupäev", "pühapäev"];
 
+/** Klassi õpilaste kokkuvõte: hinded ja märgete arvud. Nimed pseudonümiseeritakse enne AI-le saatmist. */
+function studentSummaries(classId) {
+  const students = db.prepare(`SELECT id, name FROM students WHERE class_id = ? ORDER BY name COLLATE NOCASE LIMIT 40`).all(classId);
+  const gradesOf = db.prepare(
+    `SELECT g.score, g.date, t.name AS topic FROM grades g JOIN topics t ON t.id = g.topic_id
+     WHERE g.student_id = ? ORDER BY g.date DESC, g.id DESC LIMIT 8`
+  );
+  const avgOf = db.prepare(`SELECT ROUND(AVG(score)) AS avg, COUNT(*) AS n FROM grades WHERE student_id = ?`);
+  const notesOf = db.prepare(`SELECT kind, COUNT(*) AS n FROM behavior_notes WHERE student_id = ? GROUP BY kind`);
+  return students.map((s) => {
+    const avg = avgOf.get(s.id);
+    const notes = Object.fromEntries(notesOf.all(s.id).map((r) => [r.kind, r.n]));
+    return {
+      nimi: s.name,
+      keskmineProtsent: avg?.n ? avg.avg : null,
+      viimasedHinded: gradesOf.all(s.id).map((g) => `${g.topic}: ${g.score}% (${String(g.date).slice(0, 10)})`),
+      kaitumismarkeid: { positiivseid: notes.positive || 0, murekohti: notes.concern || 0, vahejuhtumeid: notes.incident || 0 },
+    };
+  });
+}
+
 function buildContext(classId) {
   const cls = db.prepare(`SELECT id, name, subject FROM classes WHERE id = ?`).get(classId);
   const lessons = db
@@ -39,6 +60,7 @@ function buildContext(classId) {
     nadalaTunniplaan: lessons,
     tulevadKontrolltood: exams,
     olemasolevadKodutood: assignments,
+    oppilased: studentSummaries(classId),
   };
 }
 
@@ -51,7 +73,8 @@ Kuidas töötad:
    Märkus: tunniplaanis on klassi KÕIK ained. Planeeri õpetaja nimetatud aine tundide jaoks; kui see aine tunniplaanis nimeliselt puudub või ained erinevad, ära takerdu sellesse — eelda, et õpetaja tunnid on tunniplaanis tema aine nime all, ja ütle eelduse välja. Kasuta ainult allpool antud tegelikke tunnipäevi. Ära paku kodutöö tähtaega päevale, millal selles klassis tundi pole.
 3. Plaani vorm (markdown): "## Kokkuvõte" (2–3 lauset), "## Tunnikava" (iga tund eraldi: kuupäev, teema, tegevused, aeg minutites), "## Kodutööd" (kuupäev, mida teha, umbkaudne aeg), "## Kordamine ja kontrolltöö".
 4. Plaani lõppu lisa täpselt üks koodiplokk märgendiga plan, milles on JSON: {"lessons":[{"date":"YYYY-MM-DD","title":"tunni teema","content":"tegevused ja ajad minutites, mitu rida"}],"homework":[{"date":"YYYY-MM-DD","title":"lühike pealkiri","description":"mida teha"}],"exams":[{"date":"YYYY-MM-DD","title":"pealkiri"}]}. Kodutöö tähtaeg ("date") on alati selle järgmise tunni kuupäev, millal kodutöö tuleb kaasa tuua — see peab olema päev, millal klassil tund on (tunniplaani nädalapäev), mitte nädalavahetus ega muu päev. Kuupäevad peavad olema tulevikus. "lessons" on iga planeeritud tund eraldi (sama sisu mis tunnikavas, kuupäev = tunni kuupäev). Kui kontrolltööd ei paku, jäta exams tühjaks.
-5. Pildilt loe tulemused ettevaatlikult; kui midagi pole loetav, küsi. Ära kunagi korda õpilaste nimesid, kui need pildil või tekstis on — kasuta "õpilane A", "õpilane B". Ära mõtle andmeid juurde.
+5. Pildilt loe tulemused ettevaatlikult; kui midagi pole loetav, küsi. Pildil olevaid nimesid ära korda — kasuta "õpilane A", "õpilane B". Ära mõtle andmeid juurde.
+   Õpilaste kohta on klassi andmetes ("oppilased") hinded ja märgete arvud; nimed on neis märgistega kujul [Õ1]. Kui õpetaja küsib konkreetse õpilase kohta (nt "kuidas läheb Jaanil?"), vasta nende andmete põhjal ja kasuta märgist täpselt samal kujul, nagu see andmetes on. Kui andmeid on vähe või puuduvad, ütle seda ausalt. Õpilase kohta ei tee sa diagnoose ega emotsioonide järeldusi, ainult hinnete ja märgete põhjal faktid ja soovitused.
 6. Ole konkreetne ja realistlik. Õpetaja otsustab, sina teed ettepanekuid.
 
 Klassi andmed (JSON):
@@ -172,7 +195,11 @@ router.post("/chat", async (req, res) => {
       (mustPlan
         ? `\n\nTÄHTIS: nüüd on plaani koostamise aeg. Sa EI TOHI enam küsimusi esitada. Koosta täielik plaan kohe (kokkuvõte, tunnikava, kodutööd, kordamine ja lõpus plan-plokk), tehes mõistlikud eeldused ja nimetades need kokkuvõtte alguses. Kasuta ainult tunniplaani päevasid.`
         : "");
-    const answer = await chatClaude({ system, messages, purpose: "planner_chat", user: req.user, maxTokens: 4000 });
+    const names = db
+      .prepare(`SELECT name FROM students WHERE class_id IN (${visibleClassIds(req.user).map(() => "?").join(",") || "NULL"})`)
+      .all(...visibleClassIds(req.user))
+      .map((r) => r.name);
+    const answer = await chatClaude({ system, messages, purpose: "planner_chat", user: req.user, maxTokens: 4000, protectedNames: names });
 
     const stored = [
       ...history,
