@@ -58,55 +58,138 @@ Klassi andmed (JSON):
 ${JSON.stringify(ctx)}`;
 }
 
+/* ---------------- Vestluste mälu (kustutatakse 20 päeva pärast viimast sõnumit) ---------------- */
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+export const RETENTION_DAYS = 20;
+
+function purgeOldChats() {
+  const cutoff = new Date(Date.now() - RETENTION_DAYS * DAY_MS).toISOString().slice(0, 19).replace("T", " ");
+  try {
+    db.prepare(`DELETE FROM planner_chats WHERE updated_at < ?`).run(cutoff);
+  } catch (err) {
+    console.error("[planner] vanade vestluste kustutamine ebaõnnestus:", err.message);
+  }
+}
+purgeOldChats();
+setInterval(purgeOldChats, 60 * 60 * 1000).unref?.();
+
+function daysLeft(updatedAt) {
+  const updated = Date.parse(String(updatedAt).replace(" ", "T") + "Z");
+  return Math.max(0, Math.ceil((updated + RETENTION_DAYS * DAY_MS - Date.now()) / DAY_MS));
+}
+
+function ownChat(req, id) {
+  return db
+    .prepare(`SELECT * FROM planner_chats WHERE id = ? AND account_id = ?`)
+    .get(Number(id), req.user.id);
+}
+
+router.get("/chats", (req, res) => {
+  purgeOldChats();
+  const rows = db
+    .prepare(
+      `SELECT p.id, p.title, p.updated_at, p.class_id, c.name AS class_name, c.subject AS class_subject
+       FROM planner_chats p JOIN classes c ON c.id = p.class_id
+       WHERE p.account_id = ? ORDER BY p.updated_at DESC, p.id DESC`
+    )
+    .all(req.user.id);
+  res.json({
+    retentionDays: RETENTION_DAYS,
+    chats: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      classId: r.class_id,
+      className: `${r.class_name} ${r.class_subject}`,
+      updatedAt: r.updated_at,
+      daysLeft: daysLeft(r.updated_at),
+    })),
+  });
+});
+
+router.get("/chats/:id", (req, res) => {
+  const chat = ownChat(req, req.params.id);
+  if (!chat) return res.status(404).json({ error: "Vestlust ei leitud." });
+  let messages = [];
+  try { messages = JSON.parse(chat.messages); } catch { messages = []; }
+  res.json({ id: chat.id, classId: chat.class_id, title: chat.title, daysLeft: daysLeft(chat.updated_at), messages });
+});
+
+router.delete("/chats/:id", (req, res) => {
+  const chat = ownChat(req, req.params.id);
+  if (!chat) return res.status(404).json({ error: "Vestlust ei leitud." });
+  db.prepare(`DELETE FROM planner_chats WHERE id = ?`).run(chat.id);
+  res.json({ ok: true });
+});
+
+/**
+ * Üks sõnum vestlusse. Server hoiab ajalugu; kliendilt tuleb ainult uus sõnum.
+ * Pilte EI salvestata (neil võib olla õpilaste nimesid): need lähevad ainult sellele
+ * ühele AI-päringule ja ajalukku jääb märge "[pilt]". AI vastuses on pildi sisu
+ * juba kokku võetud, nii et vestlust saab sellest hoolimata jätkata.
+ */
 router.post("/chat", async (req, res) => {
-  const classId = Number(req.body?.classId);
+  const text = String(req.body?.text || "").trim().slice(0, MAX_TEXT);
+  const images = Array.isArray(req.body?.images) ? req.body.images : [];
+  if (!text && !images.length) return res.status(400).json({ error: "Kirjuta sõnum või lisa pilt." });
+  if (images.length > 4) return res.status(400).json({ error: "Ühes sõnumis kuni 4 pilti." });
+  const blocks = [];
+  for (const img of images) {
+    if (!IMAGE_TYPES.includes(img?.mediaType) || typeof img?.data !== "string" || img.data.length > MAX_IMAGE_B64) {
+      return res.status(400).json({ error: "Pilt ei sobi (lubatud JPEG, PNG, WebP; kuni umbes 2 MB)." });
+    }
+    blocks.push({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.data } });
+  }
+  if (text) blocks.push({ type: "text", text });
+
+  let chat = null;
+  let history = [];
+  let classId;
+  if (req.body?.chatId) {
+    chat = ownChat(req, req.body.chatId);
+    if (!chat) return res.status(404).json({ error: "Vestlust ei leitud." });
+    classId = chat.class_id;
+    try { history = JSON.parse(chat.messages); } catch { history = []; }
+  } else {
+    classId = Number(req.body?.classId);
+  }
   if (!Number.isInteger(classId) || !visibleClassIds(req.user).includes(classId)) {
     return res.status(404).json({ error: "Vali klass." });
   }
-  const raw = Array.isArray(req.body?.messages) ? req.body.messages.slice(-MAX_MESSAGES) : [];
-  let imageCount = 0;
-  const messages = [];
-  for (const m of raw) {
-    const role = m?.role === "assistant" ? "assistant" : "user";
-    const text = String(m?.text || "").slice(0, MAX_TEXT);
-    const blocks = [];
-    if (role === "user") {
-      for (const img of Array.isArray(m?.images) ? m.images : []) {
-        if (!IMAGE_TYPES.includes(img?.mediaType) || typeof img?.data !== "string" || img.data.length > MAX_IMAGE_B64) {
-          return res.status(400).json({ error: "Pilt ei sobi (lubatud JPEG, PNG, WebP; kuni umbes 2 MB)." });
-        }
-        if (++imageCount > MAX_IMAGES_TOTAL) {
-          return res.status(400).json({ error: "Liiga palju pilte vestluses (kuni 6). Alusta uut vestlust." });
-        }
-        blocks.push({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.data } });
-      }
-    }
-    if (text) blocks.push({ type: "text", text });
-    if (!blocks.length) continue;
-    messages.push({ role, content: blocks });
-  }
+
+  const messages = history.slice(-MAX_MESSAGES).map((m) => ({
+    role: m.role === "assistant" ? "assistant" : "user",
+    content: [{ type: "text", text: (m.imageCount ? `[Lisatud ${m.imageCount} pilti]\n` : "") + (m.text || "(pilt)") }],
+  }));
   while (messages.length && messages[0].role !== "user") messages.shift();
-  if (!messages.length || messages[messages.length - 1].role !== "user") {
-    return res.status(400).json({ error: "Kirjuta sõnum või lisa pilt." });
-  }
+  messages.push({ role: "user", content: blocks });
 
   try {
     const userTurns = messages.filter((m) => m.role === "user").length;
-    const lastText = messages[messages.length - 1].content.filter((b) => b.type === "text").map((b) => b.text).join(" ");
-    const mustPlan = userTurns >= 3 || /planeeri|koosta plaan|tee plaan/i.test(lastText);
+    const mustPlan = userTurns >= 4 || /planeeri|koosta plaan|tee plaan/i.test(text);
     const system =
       systemPrompt(buildContext(classId)) +
       (mustPlan
-        ? `\n\nTÄHTIS: nüüd on plaani koostamise aeg. Sa EI TOHI enam küsimusi esitada. Koosta täielik plaan kohe (kokkuvõte, tunnikava, kodutööd, kordamine ja lõpus plan-plokk), tehes mõistlikud eeldused ja nimetades need kokkuvõtte alguses. Kasuta ainult tunniplaani päevi.`
+        ? `\n\nTÄHTIS: nüüd on plaani koostamise aeg. Sa EI TOHI enam küsimusi esitada. Koosta täielik plaan kohe (kokkuvõte, tunnikava, kodutööd, kordamine ja lõpus plan-plokk), tehes mõistlikud eeldused ja nimetades need kokkuvõtte alguses. Kasuta ainult tunniplaani päevasid.`
         : "");
-    const text = await chatClaude({
-      system,
-      messages,
-      purpose: "planner_chat",
-      user: req.user,
-      maxTokens: 4000,
-    });
-    res.json({ text });
+    const answer = await chatClaude({ system, messages, purpose: "planner_chat", user: req.user, maxTokens: 4000 });
+
+    const stored = [
+      ...history,
+      { role: "user", text, imageCount: images.length || undefined },
+      { role: "assistant", text: answer },
+    ];
+    let chatId;
+    if (chat) {
+      db.prepare(`UPDATE planner_chats SET messages = ?, updated_at = datetime('now') WHERE id = ?`).run(JSON.stringify(stored), chat.id);
+      chatId = chat.id;
+    } else {
+      const title = (text || "Pildiga vestlus").replace(/\s+/g, " ").slice(0, 60);
+      chatId = db
+        .prepare(`INSERT INTO planner_chats (account_id, class_id, title, messages) VALUES (?, ?, ?, ?)`)
+        .run(req.user.id, classId, title, JSON.stringify(stored)).lastInsertRowid;
+    }
+    res.json({ text: answer, chatId, daysLeft: RETENTION_DAYS });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
