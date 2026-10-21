@@ -40,6 +40,13 @@ const maskitud = s.mask("Mari, Marile, Mari Tamm, Jaan, Jaanile, Marina Lepik, K
 const lekib = ["Mari", "Jaan", "Marina", "Tamm", "Kask", "Lepik"].filter((n) => maskitud.includes(n));
 check("lekkeid pole", lekib.length ? `LEKIB: ${lekib.join(", ")} -> ${maskitud}` : "puhas", "puhas");
 
+// 8b. Mudeli väljamõeldud märgist ei tohi muuta päris nimeks
+const fresh = createNameShield(["Mari Tamm", "Jaan Kask"]);
+const maskedClean = fresh.mask("Palun pange oma laste kindad tagasi kotti.");
+check("tekstis nimesid pole", maskedClean, "Palun pange oma laste kindad tagasi kotti.");
+check("väljamõeldud märgis jääb nimeks muutmata", fresh.unmask("Palun, et [Õ1] paneks kindad kotti."), "Palun, et [Õ1] paneks kindad kotti.");
+check("väljamõeldud käändega märgis jääb muutmata", fresh.unmask("Palun [Õ2]-l kindad kotti."), "Palun [Õ2]-l kindad kotti.");
+
 // 9. Väljalülitatuna ei tee midagi
 process.env.AI_PSEUDONYMISE = "off";
 const off = createNameShield(["Mari Tamm"]);

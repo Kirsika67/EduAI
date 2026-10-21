@@ -112,10 +112,21 @@ export function createNameShield(names = []) {
     token,
   }));
 
+  /**
+   * Märgised, mis tegelikult promptis kasutati. Tagasiasendus teeb ainult neid:
+   * kui mudel mõtleb ise märgise välja ("[Õ1]", mida algtekstis polnud), ei tohi
+   * see muutuda juhuslikuks päris nimeks — nii sattus kunagi sõnumisse võõras
+   * õpilase nimi, keda õpetaja polnud maininudki.
+   */
+  const used = new Set();
+
   function mask(text) {
     let out = String(text ?? "");
     for (const { re, token } of patterns) {
-      out = out.replace(re, token);
+      out = out.replace(re, () => {
+        used.add(token);
+        return token;
+      });
     }
     return out;
   }
@@ -131,13 +142,17 @@ export function createNameShield(names = []) {
      * kirjas lapsevanemale on "Mari Tamm" just õige.
      */
     out = out.replace(/\[Õ(\d+)\]-(\p{L}+)/gu, (whole, n, suffix) => {
-      const real = byToken.get(`[Õ${n}]`);
+      const token = `[Õ${n}]`;
+      const real = used.has(token) ? byToken.get(token) : null;
       if (!real) return whole;
       return real.split(" ")[0] + suffix;
     });
 
     /** Seejärel paljas märgis. */
-    out = out.replace(/\[Õ(\d+)\]/gu, (whole, n) => byToken.get(`[Õ${n}]`) ?? whole);
+    out = out.replace(/\[Õ(\d+)\]/gu, (whole, n) => {
+      const token = `[Õ${n}]`;
+      return used.has(token) ? byToken.get(token) ?? whole : whole;
+    });
 
     return out;
   }

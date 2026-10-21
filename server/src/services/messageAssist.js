@@ -60,7 +60,8 @@ export async function assistMessage(text, mode, user, knownNames = []) {
       `${config.instruction} ` +
       "Vasta AINULT ümbersõnastatud tekstiga, ilma selgituste, sissejuhatuse " +
       "ega jutumärkideta. Ära lisa infot, mida algtekstis ei ole — eriti mitte " +
-      "väiteid lapse kohta.\n\n" +
+      "väiteid lapse kohta. Ära lisa ühtegi nime ega märgist kujul [Õ1], mida " +
+      "algtekstis ei ole; kui algtekstis nime pole, ära kirjuta ühtegi nime.\n\n" +
       `Algtekst:\n${text}`,
   });
 }
