@@ -56,6 +56,7 @@ export default function PlannerPage() {
   const [error, setError] = useState('')
   const [applied, setApplied] = useState({})
   const [notice, setNotice] = useState('')
+  const [dragging, setDragging] = useState(false)
   const fileRef = useRef(null)
   const endRef = useRef(null)
 
@@ -123,6 +124,20 @@ export default function PlannerPage() {
       }
     }
     if (fileRef.current) fileRef.current.value = ''
+  }
+
+  /** Lohistamine ja kleepimine (Cmd+V): võta kõik pildifailid. */
+  const onDrop = (e) => {
+    e.preventDefault()
+    setDragging(false)
+    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files)
+  }
+  const onDragOver = (e) => {
+    if (Array.from(e.dataTransfer?.types || []).includes('Files')) { e.preventDefault(); setDragging(true) }
+  }
+  const onPaste = (e) => {
+    const files = Array.from(e.clipboardData?.files || []).filter(f => f.type.startsWith('image/'))
+    if (files.length) { e.preventDefault(); addFiles(files) }
   }
 
   const send = async () => {
@@ -247,7 +262,17 @@ export default function PlannerPage() {
           </p>
         </aside>
 
-        <div>
+        <div
+          className="relative"
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+          onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDragging(false) }}
+        >
+          {dragging && (
+            <div className="absolute inset-0 z-10 rounded-lg border-2 border-dashed border-[#2a6db0] bg-[#f4f8fd]/90 flex items-center justify-center text-[#1c3556] font-medium pointer-events-none">
+              Lase pilt siia maha
+            </div>
+          )}
           <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2 text-xs mb-3">
             Enne pildi üleslaadimist kata kinni õpilaste nimed. Pildid saadetakse AI-le ja nimesid neil kaitsta ei saa. AI ettepanekud vaata alati ise üle.
           </div>
@@ -312,8 +337,9 @@ export default function PlannerPage() {
             <textarea
               value={draft}
               onChange={e => setDraft(e.target.value)}
+              onPaste={onPaste}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-              placeholder="Kirjuta tulemused, eesmärk või vastus küsimusele... (Enter saadab, Shift+Enter uus rida)"
+              placeholder="Kirjuta tulemused, eesmärk või vastus küsimusele... Pildi saad lohistada siia või kleepida (Cmd+V). Enter saadab, Shift+Enter uus rida."
               rows={3}
               className="w-full text-sm outline-none resize-none"
             />
