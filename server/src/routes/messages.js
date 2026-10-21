@@ -4,7 +4,7 @@ import { requireAuth, requireStaff } from "../middleware/auth.js";
 import { audit } from "../services/audit.js";
 import { visibleClassIds, canAccessStudent } from "../services/access.js";
 import { assistMessage, ASSIST_MODES } from "../services/messageAssist.js";
-import { ROLES, isStaff, roleLabel } from "../constants/roles.js";
+import { ROLES, STAFF_ROLES, isStaff, roleLabel } from "../constants/roles.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -131,7 +131,8 @@ router.delete("/:id/favorite", (req, res) => {
 /** Kellega saab uut vestlust alustada. */
 router.get("/contacts", (req, res) => {
   const classIds = visibleClassIds(req.user);
-  if (!classIds.length) return res.json({ contacts: [] });
+  /** Koolitöötaja näeb kolleege ka siis, kui tal veel klasse pole. */
+  if (!classIds.length && !isStaff(req.user.role)) return res.json({ contacts: [] });
 
   let rows;
   if (isStaff(req.user.role)) {
@@ -143,10 +144,21 @@ router.get("/contacts", (req, res) => {
          LEFT JOIN parent_student_links l ON l.parent_id = t.id
          LEFT JOIN students s ON s.id = COALESCE(l.student_id, t.linked_student_id)
          WHERE t.role IN ('parent', 'student')
-           AND s.class_id IN (${classIds.map(() => "?").join(", ")})
+           AND s.class_id IN (${classIds.length ? classIds.map(() => "?").join(", ") : "NULL"})
          ORDER BY t.name COLLATE NOCASE`
       )
       .all(...classIds);
+    /** Kolleegid samast koolist (õpetajad ja töötajad), ilma õpilaseta. */
+    if (req.user.schoolId != null) {
+      const colleagues = db
+        .prepare(
+          `SELECT id, name, role, NULL AS student_name, NULL AS student_id
+           FROM teachers WHERE school_id = ? AND role IN (${STAFF_ROLES.map(() => "?").join(", ")})
+           ORDER BY name COLLATE NOCASE`
+        )
+        .all(req.user.schoolId, ...STAFF_ROLES);
+      rows = [...rows, ...colleagues];
+    }
   } else {
     /** Vanem ja õpilane näevad oma klasside koolitöötajaid. */
     rows = db

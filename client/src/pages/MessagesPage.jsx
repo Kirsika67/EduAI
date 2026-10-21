@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
@@ -40,6 +41,15 @@ export default function MessagesPage() {
   const [assistNote, setAssistNote] = useState('')
 
   const bottomRef = useRef(null)
+  const location = useLocation()
+  const prefillRecipientId = location.state?.recipientId
+
+  /** "Saada sõnum" kooli liikmete lehelt avab uue sõnumi valitud saajaga. */
+  useEffect(() => {
+    if (!prefillRecipientId || loading) return
+    setComposing(true)
+    setNewMsg(prev => ({ ...prev, kind: 'direct', recipientId: String(prefillRecipientId) }))
+  }, [prefillRecipientId, loading])
 
   useEffect(() => {
     if (classesLoading) return
