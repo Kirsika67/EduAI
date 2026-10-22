@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import AuthShell from '../components/AuthShell'
 import { ROLES, ROLE_LABELS, SELF_REGISTER_ROLES } from '../constants/roles'
 
 export default function RegisterPage() {
@@ -41,24 +42,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] flex items-center justify-center py-10">
-      <div className="bg-white rounded-2xl shadow-sm border border-black/10 p-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-block bg-[#1C3556] text-white text-xl font-bold px-6 py-3 rounded-xl mb-4">EduAI</div>
-          <h1 className="text-2xl font-bold text-gray-900">Loo konto</h1>
-          <p className="text-gray-500 text-sm mt-1">Koolitöötaja konto</p>
-        </div>
+    <AuthShell>
+      <div>
+        <h1 className="text-3xl text-[#14213D]">Loo konto</h1>
+        <p className="text-[#6B6B66] text-sm mt-2 mb-8">Koolitöötaja konto.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nimi</label>
             <input type="text" value={name} onChange={e => setName(e.target.value)} required
               placeholder="Sinu täisnimi"
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#7F77DD]" />
+              className="w-full bg-white border border-[#D9D4C7] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#14213D] transition-colors" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Roll koolis</label>
             <select value={role} onChange={e => setRole(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#7F77DD] bg-white">
+              className="w-full bg-white border border-[#D9D4C7] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#14213D] transition-colors bg-white">
               {SELF_REGISTER_ROLES.map(r => (
                 <option key={r} value={r}>{ROLE_LABELS[r]}</option>
               ))}
@@ -71,13 +69,13 @@ export default function RegisterPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">E-post</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
               placeholder="sinu@kool.ee"
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#7F77DD]" />
+              className="w-full bg-white border border-[#D9D4C7] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#14213D] transition-colors" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Parool</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
               placeholder="Vähemalt 8 tähemärki"
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#7F77DD]" />
+              className="w-full bg-white border border-[#D9D4C7] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#14213D] transition-colors" />
           </div>
 
           <div className="border-t border-black/5 pt-4">
@@ -87,7 +85,7 @@ export default function RegisterPage() {
                 <button key={value} type="button" onClick={() => { setSchoolMode(value); setError('') }}
                   className={`flex-1 text-xs rounded-full px-3 py-1.5 border transition-colors ${
                     schoolMode === value
-                      ? 'bg-[#EEEDFE] border-[#AFA9EC] text-[#534AB7] font-medium'
+                      ? 'bg-[#14213D] border-[#14213D] text-white font-medium'
                       : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}>
                   {label}
@@ -98,7 +96,7 @@ export default function RegisterPage() {
               <>
                 <input type="text" value={schoolName} onChange={e => setSchoolName(e.target.value)}
                   placeholder="Nt Tartu Kesklinna Kool"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#7F77DD]" />
+                  className="w-full bg-white border border-[#D9D4C7] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#14213D] transition-colors" />
                 <p className="text-xs text-gray-400 mt-1">
                   Saad liitumiskoodi, millega kolleegid sama kooliga liituvad.
                 </p>
@@ -108,7 +106,7 @@ export default function RegisterPage() {
                 <input type="text" value={schoolCode}
                   onChange={e => setSchoolCode(e.target.value.toUpperCase())}
                   placeholder="Nt K7QM4XPD"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#7F77DD] tracking-widest font-mono" />
+                  className="w-full bg-white border border-[#D9D4C7] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#14213D] transition-colors tracking-widest font-mono" />
                 <p className="text-xs text-gray-400 mt-1">
                   Koodi saad oma kooli EduAI haldajalt.
                 </p>
@@ -116,17 +114,17 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {error && <div className="bg-[#FCEBEB] text-[#A32D2D] text-sm px-4 py-2.5 rounded-lg">{error}</div>}
+          {error && <div className="bg-[#F4E5E5] text-[#8A2C2C] text-sm px-4 py-3 rounded-lg">{error}</div>}
           <button type="submit" disabled={loading}
-            className="w-full bg-[#1C3556] hover:bg-[#2A4A7A] text-white font-medium rounded-lg py-2.5 text-sm transition-colors disabled:opacity-50">
+            className="w-full bg-[#14213D] hover:bg-[#1C3556] text-white font-medium rounded-lg py-3 text-sm transition-colors disabled:opacity-50">
             {loading ? 'Loon kontot...' : 'Registreeru'}
           </button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-sm text-[#6B6B66] mt-8">
           On juba konto?{' '}
-          <Link to="/login" className="text-[#7F77DD] hover:underline font-medium">Logi sisse</Link>
+          <Link to="/login" className="text-[#14213D] underline underline-offset-4 decoration-[#B08D57]">Logi sisse</Link>
         </p>
       </div>
-    </div>
+    </AuthShell>
   )
 }

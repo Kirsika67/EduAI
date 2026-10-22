@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AcceptInvitePage from './pages/AcceptInvitePage'
 import PaevikPage from './pages/PaevikPage'
+import LandingPage from './pages/LandingPage'
 import AutomationsPage from './pages/AutomationsPage'
 import PlannerPage from './pages/PlannerPage'
 import ProfilePage from './pages/ProfilePage'
@@ -38,7 +39,7 @@ function Loading() {
 function PrivateRoute({ children }) {
   const { teacher, loading } = useAuth()
   if (loading) return <Loading />
-  if (!teacher) return <Navigate to="/login" replace />
+  if (!teacher) return <Navigate to="/avaleht" replace />
   return children
 }
 
@@ -69,6 +70,7 @@ function RoleGate({ allow }) {
 export default function App() {
   return (
     <Routes>
+      <Route path="/avaleht" element={<PublicRoute><LandingPage /></PublicRoute>} />
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path="/kutse/:token" element={<AcceptInvitePage />} />
