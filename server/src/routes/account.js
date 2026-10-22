@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import db from "../db.js";
 import { requireAuth, requireStaff } from "../middleware/auth.js";
 import { audit } from "../services/audit.js";
+import { newJoinCode } from "../utils/codes.js";
 import { accountPayload } from "./auth.js";
 import {
   STAFF_ROLES,
@@ -134,6 +135,24 @@ router.patch("/profile", requireAuth, (req, res) => {
   }
 
   audit(req, { action: newPassword ? "account.password_change" : "account.profile_update", entityType: "teacher", entityId: req.user.id });
+  res.json({ teacher: accountPayload(req.user.id) });
+});
+
+/** Uus liitumiskood: vana muutub kohe kehtetuks (nt kui kood on valedesse kätesse sattunud). */
+router.patch("/school/join-code", requireAuth, requireStaff, (req, res) => {
+  const rights = schoolAdminRights(req.user);
+  if (!rights.allowed) return res.status(403).json({ error: rights.reason });
+
+  let code = null;
+  for (let i = 0; i < 8 && !code; i++) {
+    const candidate = newJoinCode();
+    const clash = db.prepare(`SELECT 1 FROM schools WHERE join_code = ? COLLATE NOCASE`).get(candidate);
+    if (!clash) code = candidate;
+  }
+  if (!code) return res.status(500).json({ error: "Koodi loomine ebaõnnestus. Proovi uuesti." });
+
+  db.prepare(`UPDATE schools SET join_code = ? WHERE id = ?`).run(code, req.user.schoolId);
+  audit(req, { action: "school.join_code_rotate", entityType: "school", entityId: req.user.schoolId });
   res.json({ teacher: accountPayload(req.user.id) });
 });
 

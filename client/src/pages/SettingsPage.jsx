@@ -53,6 +53,19 @@ export default function SettingsPage() {
     }
   }
 
+  const rotateCode = async () => {
+    if (!window.confirm('Loon uue liitumiskoodi? Vana kood lakkab kohe kehtimast, kuid juba liitunud töötajad jäävad alles.')) return
+    setError(''); setMessage('')
+    try {
+      const data = await apiCall('/api/account/school/join-code', { method: 'PATCH' })
+      applyAccount(data.teacher)
+      setShowCode(true)
+      setMessage('Uus liitumiskood on loodud. Vana kood ei kehti enam.')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   const saveRole = async () => {
     setSavingRole(true); setError(''); setMessage('')
     try {
@@ -148,6 +161,13 @@ export default function SettingsPage() {
             className="text-sm text-[#534AB7] hover:underline">
             Näita koodi
           </button>
+        )}
+        {canManage && (
+          <div className="mt-3">
+            <button onClick={rotateCode} className="text-sm text-red-600 hover:underline">
+              Loo uus kood (vana lõpetab kehtimise)
+            </button>
+          </div>
         )}
       </div>
 

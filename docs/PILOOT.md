@@ -25,7 +25,10 @@ Kaks osa: **A. Õpetaja juhend** (saada õpetajatele) ja **B. Kontrollnimekiri**
 - **Ülevaade:** valitud klassi seis ja AI hoiatused.
 - **Tunniplaan:** nädala tunniplaan, asendused, kontrolltööd.
 - **Õpilased, Hinded, Kohalolek:** õpilaste andmed, hinnete sisestus, kohalolek ja käitumismärked.
-- **Materjalid, Planeerimine, Tagasiside, Esseede hindamine** (lilla **AI** silt): AI aitab koostada töölehti, nädalaplaane, tagasisidet ja hinnata esseesid.
+- **Materjalid** (**AI**): vali tüüp **Teooria (reeglivihik)** (selgitused, põhjendused, näited, joonised), **Tööleht** (harjutused tasemete kaupa) või **Kontrolltöö** (ainult ülesanded, variandid A ja B, punktid). Valemid ja joonised tulevad korralikult välja, **Prindi** prindib ainult materjali. Genereerimine võtab 1–2 minutit.
+- **AI planeerija** (**AI**): vestlus, mis küsib täpsustusi ja koostab tunnikava, kodutööd ja kordamise. Lohista või kleebi (`Cmd+V`) kontrolltöö tulemuste pilt ja **kata enne nimed kinni**. Vestlused säilivad 20 päeva viimasest sõnumist (viimasel 10 päeval on kustutamise märge punane). Pilte ei salvestata. Nupuga lisab plaani otse Päevikusse.
+- **Planeerimine, Tagasiside, Esseede hindamine** (**AI**): nädalaplaanid, tagasiside õpilastele ja essee hindamine eesti, inglise ja vene keeles (hinne protsentides).
+- **Kooli liikmed:** kolleegide nimekiri, sealt saab otse sõnumi saata.
 - **Suhtlus:** sõnumid lapsevanemate ja õpilastega. Vahekaardid: Kõik, Lugemata, Lemmikud, Sinu saadetud, Grupid, Kalender.
 
 ### Essee hindamine
@@ -34,6 +37,8 @@ Kaks osa: **A. Õpetaja juhend** (saada õpetajatele) ja **B. Kontrollnimekiri**
 3. Saad üldise tagasiside (eesti keeles), vigade loetelu koos selgitustega, parandatud teksti ja soovitusliku hinde **protsentides**. Hinne on ainult soovitus.
 
 ### Kui midagi ei tööta
+Leht võib mõne minuti olla maas (502), kui rakendust uuendatakse. Oota ja värskenda (`Cmd+Shift+R`).
+
 Tee ekraanipilt, kirjuta, mida klõpsasid, ja saada see koordinaatorile. Kui leht näitab "502" või "Laadin...", oota paar minutit ja värskenda lehte.
 
 ---
@@ -46,6 +51,7 @@ Tee ekraanipilt, kirjuta, mida klõpsasid, ja saada see koordinaatorile. Kui leh
 - [ ] Anthropic Console'is: **Spend limits** on seatud (nt 20–30 $/kuu) ja auto-reload on **välja** lülitatud.
 - [ ] Renderi **Logs**-is on rida `[EduAI varundus] koopia tehtud: ...`.
 - [ ] Tehtud on käsitsi varukoopia väljapoole Renderit (vt allpool).
+- [ ] Liitumiskood on koolil kõigile sama ja ei aegu. Jaga seda ainult piloodiõpetajatele. Kui kood satub valedesse kätesse, loo uus: **EduAI nupp → Kool ja konto → Loo uus kood**.
 - [ ] Kooli juhtkonna luba on olemas; vajadusel on lapsevanemaid teavitatud; andmekaitsespetsialisti arvamus on küsitud.
 - [ ] Esimese nädala jooksul kasutatakse **testandmeid**, mitte päris õpilasi.
 - [ ] Õpetajatele on saadetud link, liitumiskood ja osa A.
