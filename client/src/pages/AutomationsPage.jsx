@@ -26,6 +26,11 @@ export default function AutomationsPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busyId, setBusyId] = useState(null)
+  const [hook, setHook] = useState(null)
+  const [hookUrl, setHookUrl] = useState('')
+  const [hookSecret, setHookSecret] = useState('')
+  const [hookNames, setHookNames] = useState(false)
+  const [hookBusy, setHookBusy] = useState(false)
 
   useEffect(() => {
     if (classesLoading) return
@@ -40,6 +45,9 @@ export default function AutomationsPage() {
       setAutomations(a.automations || [])
       const n = await apiCall('/api/notifications?limit=15')
       setNotes(n.notifications || [])
+      const h = await apiCall('/api/automations/webhook')
+      setHook(h.webhook)
+      if (h.webhook) { setHookUrl(h.webhook.url); setHookNames(h.webhook.includeNames) }
     } catch (err) { setError(err.message) }
   }
 
@@ -76,6 +84,36 @@ export default function AutomationsPage() {
       await load()
     } catch (err) { setError(err.message) }
     finally { setBusyId(null) }
+  }
+
+  const saveHook = async () => {
+    setHookBusy(true); setError(''); setNotice('')
+    try {
+      const body = { url: hookUrl.trim(), includeNames: hookNames }
+      if (hookSecret) body.secret = hookSecret
+      const r = await apiCall('/api/automations/webhook', { method: 'PUT', body: JSON.stringify(body) })
+      setHook(r.webhook); setHookSecret('')
+      setNotice('Webhook salvestatud. Vajuta "Saada katse", et kontrollida ühendust.')
+    } catch (err) { setError(err.message) }
+    finally { setHookBusy(false) }
+  }
+
+  const testHook = async () => {
+    setHookBusy(true); setError(''); setNotice('')
+    try {
+      const r = await apiCall('/api/automations/webhook/test', { method: 'POST' })
+      setNotice(r.ok ? 'Katse saadetud ja n8n vastas edukalt.' : `Katse ebaõnnestus: ${r.status || 'tundmatu viga'}`)
+      await load()
+    } catch (err) { setError(err.message) }
+    finally { setHookBusy(false) }
+  }
+
+  const removeHook = async () => {
+    if (!window.confirm('Eemaldan webhooki? Teavitusi enam n8n-i ei saadeta.')) return
+    try {
+      await apiCall('/api/automations/webhook', { method: 'DELETE' })
+      setHook(null); setHookUrl(''); setHookSecret(''); setHookNames(false)
+    } catch (err) { setError(err.message) }
   }
 
   const selected = types.find(t => t.value === type)
@@ -185,6 +223,28 @@ export default function AutomationsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <h2 className="text-base font-semibold text-gray-900 mb-2">Ühenda n8n (webhook)</h2>
+      <div className="bg-white rounded-lg border border-black/10 p-4 mb-8">
+        <p className="text-sm text-gray-600 mb-3">
+          Iga automatsiooni teavitus saadetakse lisaks ka sinu <strong>n8n</strong> töövoogu, kus saad sellest teha e-kirja, Slacki sõnumi, kalendrisündmuse vms.
+          Loo n8n-is <strong>Webhook</strong> sõlm (meetod POST), kopeeri selle <strong>Production URL</strong> ja kleebi siia.
+        </p>
+        <label className="block text-xs text-gray-500 mb-1">Webhooki aadress (https://...)</label>
+        <input value={hookUrl} onChange={e => setHookUrl(e.target.value)} placeholder="https://sinu-n8n.app.n8n.cloud/webhook/..." className={input + ' w-full mb-3'} />
+        <label className="block text-xs text-gray-500 mb-1">Salajane võti (valikuline; saadetakse päisega X-EduAI-Secret)</label>
+        <input value={hookSecret} onChange={e => setHookSecret(e.target.value)} placeholder={hook?.hasSecret ? 'Võti on salvestatud, jäta tühjaks, et mitte muuta' : 'nt pikk juhuslik tekst'} className={input + ' w-full mb-3'} />
+        <label className="flex items-start gap-2 text-sm text-gray-700 mb-3 cursor-pointer">
+          <input type="checkbox" checked={hookNames} onChange={e => setHookNames(e.target.checked)} className="accent-[#7F77DD] mt-1" />
+          <span>Saada ka õpilaste nimed ("Õpilase tulemused langevad" teavituses). <span className="text-amber-700">Nimed lähevad sinu n8n-i ja sealt edasi, nii et kasuta seda ainult siis, kui tead, kuhu need lähevad.</span> Vaikimisi nimesid ei saadeta.</span>
+        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={saveHook} disabled={hookBusy || !hookUrl.trim()} className="bg-[#1c3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2a4a7a] disabled:opacity-50">Salvesta</button>
+          <button onClick={testHook} disabled={hookBusy || !hook} className="text-sm border border-gray-300 rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50">Saada katse</button>
+          {hook && <button onClick={removeHook} className="text-sm text-gray-400 hover:text-red-600">Eemalda</button>}
+          {hook?.lastStatus && <span className="text-xs text-gray-500 ml-2">Viimane saatmine: {hook.lastStatus} ({String(hook.lastAt).slice(0, 16)})</span>}
+        </div>
       </div>
 
       <h2 className="text-base font-semibold text-gray-900 mb-2">Viimased teavitused</h2>

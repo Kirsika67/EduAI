@@ -103,6 +103,15 @@ export function runFaas9Migration(db) {
     );
     CREATE INDEX IF NOT EXISTS idx_notifications_account ON notifications(account_id, created_at);
 
+    CREATE TABLE IF NOT EXISTS webhook_settings (
+      account_id INTEGER PRIMARY KEY REFERENCES teachers(id) ON DELETE CASCADE,
+      url TEXT NOT NULL,
+      secret TEXT,
+      include_names INTEGER NOT NULL DEFAULT 0,
+      last_status TEXT,
+      last_at TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS conversation_favorites (
       conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
       account_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,

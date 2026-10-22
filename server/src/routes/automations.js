@@ -3,6 +3,7 @@ import db from "../db.js";
 import { requireAuth, requireStaff } from "../middleware/auth.js";
 import { audit } from "../services/audit.js";
 import { AUTOMATION_TYPES, runAutomation } from "../services/automations.js";
+import { assertSafeWebhookUrl, getWebhookSettings, sendWebhook } from "../services/webhook.js";
 
 const router = Router();
 router.use(requireAuth, requireStaff);
@@ -44,6 +45,51 @@ function present(row) {
     lastRunAt: row.last_run_at,
   };
 }
+
+/* ---------------- Webhook (n8n) ---------------- */
+
+function presentWebhook(s) {
+  return s
+    ? { url: s.url, hasSecret: Boolean(s.secret), includeNames: Boolean(s.include_names), lastStatus: s.last_status, lastAt: s.last_at }
+    : null;
+}
+
+router.get("/webhook", (req, res) => {
+  res.json({ webhook: presentWebhook(getWebhookSettings(req.user.id)) });
+});
+
+router.put("/webhook", async (req, res) => {
+  try {
+    const url = await assertSafeWebhookUrl(req.body?.url);
+    const existing = getWebhookSettings(req.user.id);
+    const secret = req.body?.secret === undefined ? existing?.secret ?? null : String(req.body.secret).slice(0, 200) || null;
+    db.prepare(
+      `INSERT INTO webhook_settings (account_id, url, secret, include_names) VALUES (?, ?, ?, ?)
+       ON CONFLICT(account_id) DO UPDATE SET url = excluded.url, secret = excluded.secret, include_names = excluded.include_names`
+    ).run(req.user.id, url.toString(), secret, req.body?.includeNames === true ? 1 : 0);
+    audit(req, { action: "webhook.set", entityType: "webhook" });
+    res.json({ webhook: presentWebhook(getWebhookSettings(req.user.id)) });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.delete("/webhook", (req, res) => {
+  db.prepare(`DELETE FROM webhook_settings WHERE account_id = ?`).run(req.user.id);
+  audit(req, { action: "webhook.delete", entityType: "webhook" });
+  res.json({ ok: true });
+});
+
+router.post("/webhook/test", async (req, res) => {
+  if (!getWebhookSettings(req.user.id)) return res.status(400).json({ error: "Salvesta enne webhook aadress." });
+  const result = await sendWebhook(req.user.id, {
+    event: "test",
+    title: "EduAI katsesõnum",
+    body: "Kui see jõudis sinu n8n töövoogu, siis ühendus töötab.",
+    createdAt: new Date().toISOString(),
+  });
+  res.json({ ok: result.ok, status: result.status || null });
+});
 
 router.get("/types", (_req, res) => {
   res.json({ types: Object.entries(AUTOMATION_TYPES).map(([value, t]) => ({ value, label: t.label, description: t.description, defaults: t.defaults })) });

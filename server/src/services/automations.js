@@ -1,5 +1,6 @@
 import db from "../db.js";
 import { askClaude } from "./aiEngine.js";
+import { sendWebhook } from "./webhook.js";
 
 /**
  * Automatsioonid: õpetaja seab reegli, server kontrollib seda ise (iga 10 min) ja
@@ -59,7 +60,19 @@ const insertNote = db.prepare(
 
 function notify(auto, { title, body, link, key, force }) {
   const dedupe = force ? `${key}:force:${Date.now()}` : key;
-  return insertNote.run(auto.account_id, auto.id, title, body || null, link || null, dedupe).changes;
+  const changes = insertNote.run(auto.account_id, auto.id, title, body || null, link || null, dedupe).changes;
+  if (changes) {
+    /** Webhook (nt n8n) ei oota: viga ei tohi automatsiooni peatada. */
+    sendWebhook(auto.account_id, {
+      event: "automation",
+      type: auto.type,
+      title,
+      body: body || null,
+      link: link || null,
+      createdAt: new Date().toISOString(),
+    }).catch(() => {});
+  }
+  return changes;
 }
 
 function classesFor(auto) {
