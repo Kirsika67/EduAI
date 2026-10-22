@@ -45,7 +45,15 @@ export const ASSIST_MODES = {
  *        vastuses tagasi — nii ei lahku lapse nimi majast ka siis, kui
  *        õpetaja selle ise sõnumisse kirjutas.
  */
-export async function assistMessage(text, mode, user, knownNames = []) {
+const AUDIENCES = {
+  colleague: "kolleegile (teisele õpetajale või koolitöötajale)",
+  parent: "lapsevanemale",
+  student: "õpilasele",
+  class: "klassi õpilastele ja nende vanematele (teade klassile)",
+  unknown: "vastuvõtjale, kelle roll pole teada",
+};
+
+export async function assistMessage(text, mode, user, knownNames = [], audience = "unknown") {
   const config = ASSIST_MODES[mode];
   if (!config) return { text: null, error: "Tundmatu režiim." };
 
@@ -56,7 +64,8 @@ export async function assistMessage(text, mode, user, knownNames = []) {
     protectedNames: knownNames,
     fallback: "AI abi ei õnnestunud. Sõnumi saad ikka ise saata.",
     prompt:
-      "Sa aitad õpetajal sõnastada sõnumit lapsevanemale või õpilasele. " +
+      `Sa aitad õpetajal sõnastada sõnumit ${AUDIENCES[audience] || AUDIENCES.unknown}. ` +
+      "Säilita algteksti pöördumine ja tervitus (nt \"Tere!\"); ära lisa pöördumist, mida algtekstis ei ole, ja ära eelda, et vastuvõtja on lapsevanem, kui ülal pole nii öeldud. " +
       `${config.instruction} ` +
       "Vasta AINULT ümbersõnastatud tekstiga, ilma selgituste, sissejuhatuse " +
       "ega jutumärkideta. Ära lisa infot, mida algtekstis ei ole — eriti mitte " +

@@ -177,7 +177,14 @@ export default function MessagesPage() {
     try {
       const r = await apiCall('/api/messages/assist', {
         method: 'POST',
-        body: JSON.stringify({ text, mode }),
+        body: JSON.stringify({
+          text,
+          mode,
+          /** Kellele sõnum läheb — et AI ei eeldaks automaatselt lapsevanemat. */
+          recipientId: target === 'new' && newMsg.kind === 'direct' && newMsg.recipientId ? Number(newMsg.recipientId) : undefined,
+          conversationId: target !== 'new' && activeId ? Number(activeId) : undefined,
+          announcement: target === 'new' && newMsg.kind === 'class_announcement' ? true : undefined,
+        }),
       })
       if (r.suggestion) setSuggestion({ text: r.suggestion, target })
       if (r.fallback) setAssistNote(r.fallback)

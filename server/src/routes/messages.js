@@ -390,7 +390,33 @@ router.post("/assist", requireStaff, async (req, res) => {
         .map((r) => r.name)
     : [];
 
-  const result = await assistMessage(text, mode, req.user, knownNames);
+  /** Kellele sõnum läheb: kolleeg, lapsevanem, õpilane või terve klass. */
+  let audience = "unknown";
+  if (req.body?.announcement) {
+    audience = "class";
+  } else {
+    let otherId = Number(req.body?.recipientId);
+    if (!Number.isInteger(otherId) && Number.isInteger(Number(req.body?.conversationId))) {
+      const conv = loadConversation(req.body.conversationId);
+      if (conv && canSeeConversation(req.user, conv)) {
+        if (conv.kind === "class_announcement") audience = "class";
+        else {
+          const other = db
+            .prepare(`SELECT account_id FROM conversation_participants WHERE conversation_id = ? AND account_id != ? LIMIT 1`)
+            .get(conv.id, req.user.id);
+          otherId = Number(other?.account_id);
+        }
+      }
+    }
+    if (audience === "unknown" && Number.isInteger(otherId)) {
+      const target = db.prepare(`SELECT role, school_id FROM teachers WHERE id = ?`).get(otherId);
+      if (target && Number(target.school_id) === Number(req.user.schoolId)) {
+        audience = target.role === ROLES.PARENT ? "parent" : target.role === ROLES.STUDENT ? "student" : "colleague";
+      }
+    }
+  }
+
+  const result = await assistMessage(text, mode, req.user, knownNames, audience);
   if (result.error) return res.status(400).json({ error: result.error });
 
   audit(req, { action: `message.ai_assist:${mode}`, entityType: "message" });
