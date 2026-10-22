@@ -135,7 +135,7 @@ export default function InvitePage() {
           Kui lisad e-posti, saab kutsega luua konto ainult selle aadressiga.
         </p>
         <button onClick={createInvite} disabled={creating}
-          className="mt-3 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50">
+          className="mt-3 bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-50">
           {creating ? 'Loon kutset...' : 'Loo kutselink'}
         </button>
         {error && (

@@ -145,7 +145,7 @@ export default function OverviewPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Ülevaade</h1>
       <p className="text-gray-500 text-sm mb-4">Peamised näitajad, hoiatused ja lühike AI ülevaade valitud klassi kohta.</p>
 
-      <div className="bg-[#7F77DD] text-white rounded-xl p-5 mb-6">
+      <div className="bg-[#1C3556] text-white rounded-xl p-5 mb-6">
         <p className="text-sm font-semibold mb-1">Uus: personaalne jälgimine (ABC)</p>
         <p className="text-sm text-white/90">
           Iga õpilast jälgitakse kolmes kihis — kohalolek, käitumine ja kursusehinded.
@@ -263,11 +263,11 @@ export default function OverviewPage() {
       <div className="bg-[#EEEDFE] rounded-xl p-5 mb-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#7F77DD]" />
+            <div className="w-2 h-2 rounded-full bg-[#1C3556]" />
             <span className="text-xs text-[#534AB7] font-medium">AI ülevaade täna</span>
           </div>
           <button onClick={loadAI} disabled={aiLoading}
-            className="text-xs border border-[#AFA9EC] text-[#534AB7] rounded-full px-3 py-1 hover:bg-[#7F77DD] hover:text-white transition-colors disabled:opacity-50">
+            className="text-xs border border-[#AFA9EC] text-[#534AB7] rounded-full px-3 py-1 hover:bg-[#1C3556] hover:text-white transition-colors disabled:opacity-50">
             {aiLoading ? 'Laadin...' : 'Küsi detaile ↗'}
           </button>
         </div>
@@ -311,7 +311,7 @@ export default function OverviewPage() {
           Halda õpilasi
         </button>
         <button onClick={() => navigate('/hinded')}
-          className="bg-[#7F77DD] text-white rounded-lg px-5 py-2.5 text-sm hover:bg-[#534AB7] transition-colors">
+          className="bg-[#1C3556] text-white rounded-lg px-5 py-2.5 text-sm hover:bg-[#2A4A7A] transition-colors">
           Sisesta hinded
         </button>
       </div>

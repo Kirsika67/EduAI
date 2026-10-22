@@ -142,7 +142,7 @@ export default function AttendanceBehaviorPanel({ studentId }) {
                 Ühtegi hoiatusmärki ei leitud — tulemused, kohalolek ja käitumine on korras.
               </p>
             )}
-            <div className="bg-[#f5f5f3] rounded-lg p-3 mb-4">
+            <div className="bg-[#F7F4EE] rounded-lg p-3 mb-4">
               <p className="text-[11px] text-gray-500">
                 Hinded: {risk.components?.course} · Kohalolek: {risk.components?.attendance} ·
                 Käitumine: {risk.components?.behavior}
@@ -152,7 +152,7 @@ export default function AttendanceBehaviorPanel({ studentId }) {
               See on tööriist õpetajale, mitte hinnang lapsele. Otsuse teed sina.
             </p>
             <button onClick={() => setShowWhy(false)}
-              className="w-full bg-[#7F77DD] text-white text-sm rounded-lg py-2.5 hover:bg-[#534AB7]">
+              className="w-full bg-[#1C3556] text-white text-sm rounded-lg py-2.5 hover:bg-[#2A4A7A]">
               Sulge
             </button>
           </div>

@@ -114,7 +114,7 @@ export default function StudentsPage() {
               setShowAddMany(false)
               setBulkNames('')
             }}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]"
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]"
           >
             + Lisa õpilane
           </button>
@@ -138,7 +138,7 @@ export default function StudentsPage() {
             onKeyDown={e => e.key === 'Enter' && addStudent()}
             className="flex-1 border border-[#AFA9EC] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
           <button onClick={addStudent} disabled={adding}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-50">
             {adding ? 'Lisan...' : 'Lisa'}
           </button>
           <button onClick={() => { setShowAdd(false); setNewName('') }} className="text-gray-400 text-sm">Tühista</button>
@@ -162,7 +162,7 @@ export default function StudentsPage() {
             <button
               onClick={addManyStudents}
               disabled={addingMany}
-              className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50"
+              className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-50"
             >
               {addingMany ? 'Lisan...' : 'Lisa kõik'}
             </button>
@@ -182,7 +182,7 @@ export default function StudentsPage() {
           <p className="text-xs text-gray-400">Kohaloleku märkimine ja käitumismärkused on nüüd omal lehel.</p>
         </div>
         <Link to="/kohalolek"
-          className="text-sm bg-[#7F77DD] text-white rounded-lg px-4 py-2 hover:bg-[#534AB7] whitespace-nowrap">
+          className="text-sm bg-[#1C3556] text-white rounded-lg px-4 py-2 hover:bg-[#2A4A7A] whitespace-nowrap">
           Ava kohaloleku leht
         </Link>
       </div>

@@ -25,10 +25,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f3] flex items-center justify-center">
+    <div className="min-h-screen bg-[#F7F4EE] flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-sm border border-black/10 p-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-block bg-[#7F77DD] text-white text-xl font-bold px-6 py-3 rounded-xl mb-4">EduAI</div>
+          <div className="inline-block bg-[#1C3556] text-white text-xl font-bold px-6 py-3 rounded-xl mb-4">EduAI</div>
           <h1 className="text-2xl font-bold text-gray-900">Logi sisse oma kontoga</h1>
           <p className="text-gray-500 text-sm mt-1">Tere tulemast tagasi</p>
         </div>
@@ -47,7 +47,7 @@ export default function LoginPage() {
           </div>
           {error && <div className="bg-[#FCEBEB] text-[#A32D2D] text-sm px-4 py-2.5 rounded-lg">{error}</div>}
           <button type="submit" disabled={loading}
-            className="w-full bg-[#7F77DD] hover:bg-[#534AB7] text-white font-medium rounded-lg py-2.5 text-sm transition-colors disabled:opacity-50">
+            className="w-full bg-[#1C3556] hover:bg-[#2A4A7A] text-white font-medium rounded-lg py-2.5 text-sm transition-colors disabled:opacity-50">
             {loading ? 'Laadin...' : 'Logi sisse'}
           </button>
         </form>

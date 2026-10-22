@@ -268,7 +268,7 @@ export default function MentoringPage() {
                   ))}
                 </div>
 
-                <div className="bg-[#f5f5f3] rounded-lg p-3">
+                <div className="bg-[#F7F4EE] rounded-lg p-3">
                   <p className="text-xs font-semibold text-gray-700 mb-2">Uus eesmärk</p>
                   <input value={goalForm.title} onChange={e => setGoalForm({ ...goalForm, title: e.target.value })}
                     placeholder="Nt: Esitan kodutööd õigeks ajaks"
@@ -294,7 +294,7 @@ export default function MentoringPage() {
 
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <button onClick={addGoal}
-                      className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+                      className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
                       Lisa eesmärk
                     </button>
                     <button onClick={askSuggestion} disabled={suggesting}
@@ -311,7 +311,7 @@ export default function MentoringPage() {
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">{suggestion}</p>
                       <div className="flex gap-2 mt-2">
                         <button onClick={() => { setGoalForm({ ...goalForm, detail: suggestion }); setSuggestion(null) }}
-                          className="text-xs bg-[#7F77DD] text-white rounded-lg px-3 py-1.5 hover:bg-[#534AB7]">
+                          className="text-xs bg-[#1C3556] text-white rounded-lg px-3 py-1.5 hover:bg-[#2A4A7A]">
                           Pane kirjeldusse
                         </button>
                         <button onClick={() => setSuggestion(null)} className="text-xs text-gray-500 px-2">Sulge</button>
@@ -346,7 +346,7 @@ export default function MentoringPage() {
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <button onClick={addNote}
-                    className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+                    className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
                     Salvesta märge
                   </button>
                   <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">

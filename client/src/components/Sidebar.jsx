@@ -151,7 +151,7 @@ export default function Sidebar() {
                   />
                   <div className="flex gap-2">
                     <button onClick={handleSaveEdit} disabled={saving}
-                      className="flex-1 bg-[#7F77DD] text-white text-sm rounded px-3 py-1.5 hover:bg-[#534AB7] disabled:opacity-50">
+                      className="flex-1 bg-[#1C3556] text-white text-sm rounded px-3 py-1.5 hover:bg-[#2A4A7A] disabled:opacity-50">
                       {saving ? 'Salvestan...' : 'Salvesta'}
                     </button>
                     <button onClick={cancelEdit} disabled={saving}
@@ -226,7 +226,7 @@ export default function Sidebar() {
                 />
                 <div className="flex gap-2">
                   <button onClick={handleAddClass} disabled={adding}
-                    className="flex-1 bg-[#7F77DD] text-white text-sm rounded px-3 py-1.5 hover:bg-[#534AB7] disabled:opacity-50">
+                    className="flex-1 bg-[#1C3556] text-white text-sm rounded px-3 py-1.5 hover:bg-[#2A4A7A] disabled:opacity-50">
                     {adding ? 'Lisan...' : 'Lisa'}
                   </button>
                   <button onClick={() => { setShowAddClass(false); setNewClassName(''); setNewSubject('') }}

@@ -236,7 +236,7 @@ export default function StudentDetailPage() {
             <option value="absent">Puudus</option>
           </select>
           <button onClick={addAttendance}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Lisa
           </button>
         </div>
@@ -264,7 +264,7 @@ export default function StudentDetailPage() {
             onKeyDown={e => e.key === 'Enter' && addBehavior()}
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
           <button onClick={addBehavior}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Lisa
           </button>
         </div>
@@ -291,7 +291,7 @@ export default function StudentDetailPage() {
             </button>
           ))}
           <button onClick={addWellbeing}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-1.5 hover:bg-[#534AB7]">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-1.5 hover:bg-[#2A4A7A]">
             Salvesta täna
           </button>
         </div>
@@ -317,7 +317,7 @@ export default function StudentDetailPage() {
             onKeyDown={e => e.key === 'Enter' && addGoal()}
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
           <button onClick={addGoal}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Lisa
           </button>
         </div>
@@ -327,7 +327,7 @@ export default function StudentDetailPage() {
             <button key={goal.id} onClick={() => toggleGoal(goal)}
               className="w-full text-left flex items-center gap-2 text-sm">
               <span className={`w-4 h-4 rounded border flex-shrink-0 ${
-                goal.status === 'done' ? 'bg-[#7F77DD] border-[#7F77DD]' : 'border-gray-300'
+                goal.status === 'done' ? 'bg-[#1C3556] border-[#7F77DD]' : 'border-gray-300'
               }`} />
               <span className={goal.status === 'done' ? 'text-gray-400 line-through' : 'text-gray-800'}>
                 {goal.title}
@@ -343,7 +343,7 @@ export default function StudentDetailPage() {
           rows={3} placeholder="Mis räägiti, mis kokku lepiti..."
           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD] mb-2" />
         <button onClick={addMentorNote}
-          className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] mb-4">
+          className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] mb-4">
           Lisa märge
         </button>
         {!mentorNotes.length && <p className="text-sm text-gray-400">Märkmeid pole.</p>}
@@ -361,7 +361,7 @@ export default function StudentDetailPage() {
         <h2 className="text-base font-semibold text-gray-900 mb-3">AI analüüs</h2>
         {!aiAnalysis && (
           <button onClick={runAI} disabled={aiLoading}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-5 py-2.5 hover:bg-[#534AB7] disabled:opacity-50">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-5 py-2.5 hover:bg-[#2A4A7A] disabled:opacity-50">
             {aiLoading
               ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Analüüsin...</span>
               : 'Käivita AI analüüs'}

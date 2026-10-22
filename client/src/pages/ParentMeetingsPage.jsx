@@ -149,7 +149,7 @@ export default function ParentMeetingsPage() {
             </div>
           </div>
           <button onClick={createSlots}
-            className="mt-3 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="mt-3 bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Loo ajapesad
           </button>
         </div>

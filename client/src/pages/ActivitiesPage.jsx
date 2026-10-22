@@ -98,7 +98,7 @@ export default function ActivitiesPage() {
         <h1 className="text-2xl font-bold text-gray-900">Huviringid</h1>
         {staff && (
           <button onClick={() => setCreating(!creating)}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             {creating ? 'Sulge' : '+ Lisa ring'}
           </button>
         )}
@@ -135,7 +135,7 @@ export default function ActivitiesPage() {
               className="border border-gray-200 rounded-lg px-2 py-2 text-xs outline-none" />
           </div>
           <button onClick={create}
-            className="mt-3 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="mt-3 bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Loo ring
           </button>
         </div>

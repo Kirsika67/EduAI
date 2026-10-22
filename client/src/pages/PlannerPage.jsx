@@ -278,7 +278,7 @@ export default function PlannerPage() {
           </div>
 
           <div className="bg-white rounded-lg border border-black/10 p-4 min-h-[320px] max-h-[60vh] overflow-y-auto space-y-3">
-            <div className="max-w-[85%] rounded-2xl px-4 py-2.5 bg-[#f4f6f9] text-sm text-gray-800">{GREETING}</div>
+            <div className="max-w-[85%] rounded-2xl px-4 py-2.5 bg-[#F7F4EE] text-sm text-gray-800">{GREETING}</div>
             {messages.map((m, i) => {
               if (m.role === 'user') {
                 return (
@@ -300,14 +300,14 @@ export default function PlannerPage() {
               const { text, plan } = splitPlan(m.text)
               const hasItems = plan && ((plan.lessons || []).length || (plan.homework || []).length || (plan.exams || []).length)
               return (
-                <div key={i} className="max-w-[92%] rounded-2xl px-4 py-2.5 bg-[#f4f6f9] text-sm text-gray-800 space-y-0.5">
+                <div key={i} className="max-w-[92%] rounded-2xl px-4 py-2.5 bg-[#F7F4EE] text-sm text-gray-800 space-y-0.5">
                   <RichText text={text} />
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button onClick={() => navigator.clipboard?.writeText(text)}
                       className="text-xs border border-gray-300 rounded px-2.5 py-1 text-gray-600 hover:bg-white">Kopeeri tekst</button>
                     {hasItems && (
                       <button onClick={() => applyPlan(i, plan)} disabled={applied[i]}
-                        className="text-xs bg-[#7F77DD] text-white rounded px-2.5 py-1 hover:bg-[#534AB7] disabled:opacity-50">
+                        className="text-xs bg-[#1C3556] text-white rounded px-2.5 py-1 hover:bg-[#2A4A7A] disabled:opacity-50">
                         {applied[i] ? 'Lisatud Päevikusse' : 'Lisa tunnikavad, kodutööd ja kontrolltööd Päevikusse'}
                       </button>
                     )}
@@ -315,7 +315,7 @@ export default function PlannerPage() {
                 </div>
               )
             })}
-            {sending && <div className="max-w-[85%] rounded-2xl px-4 py-2.5 bg-[#f4f6f9] text-sm text-gray-400">Mõtlen... (plaani koostamine võib võtta kuni minuti)</div>}
+            {sending && <div className="max-w-[85%] rounded-2xl px-4 py-2.5 bg-[#F7F4EE] text-sm text-gray-400">Mõtlen... (plaani koostamine võib võtta kuni minuti)</div>}
             <div ref={endRef} />
           </div>
 

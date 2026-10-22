@@ -81,7 +81,7 @@ export default function MaterialsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Materjalid</h1>
         <button onClick={() => setShowForm(!showForm)}
-          className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+          className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
           + Loo uus materjal
         </button>
       </div>
@@ -151,7 +151,7 @@ export default function MaterialsPage() {
           </div>
 
           <button onClick={generate} disabled={generating}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-5 py-2.5 hover:bg-[#534AB7] disabled:opacity-50">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-5 py-2.5 hover:bg-[#2A4A7A] disabled:opacity-50">
             {generating
               ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Genereerin...</span>
               : 'Loo materjal'}
@@ -167,7 +167,7 @@ export default function MaterialsPage() {
               <button onClick={() => window.print()}
                 className="text-sm border border-gray-200 text-gray-600 rounded-lg px-4 py-2 hover:bg-gray-50">Prindi</button>
               <button onClick={save} disabled={saving}
-                className="text-sm bg-[#7F77DD] text-white rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50">
+                className="text-sm bg-[#1C3556] text-white rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-50">
                 Sule
               </button>
             </div>

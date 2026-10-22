@@ -187,7 +187,7 @@ export default function TimetablePage() {
         {[['week', 'Nädal'], ['day', 'Päev'], ['exams', 'Eksamid']].map(([value, label]) => (
           <button key={value} onClick={() => setView(value)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              view === value ? 'bg-[#7F77DD] text-white' : 'text-gray-500 hover:bg-gray-100'
+              view === value ? 'bg-[#1C3556] text-white' : 'text-gray-500 hover:bg-gray-100'
             }`}>
             {label}
           </button>
@@ -256,13 +256,13 @@ export default function TimetablePage() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={addLesson}
-                      className="flex-1 bg-[#7F77DD] text-white text-sm rounded-lg px-3 py-1.5 hover:bg-[#534AB7]">Lisa</button>
+                      className="flex-1 bg-[#1C3556] text-white text-sm rounded-lg px-3 py-1.5 hover:bg-[#2A4A7A]">Lisa</button>
                     <button onClick={() => setShowAddLesson(false)} className="text-gray-400 text-sm px-2">Tühista</button>
                   </div>
                 </div>
               ) : (
                 <button onClick={() => setShowAddLesson(true)}
-                  className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+                  className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
                   + Lisa tund
                 </button>
               )}
@@ -358,13 +358,13 @@ export default function TimetablePage() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={addExam}
-                      className="flex-1 bg-[#7F77DD] text-white text-sm rounded-lg px-3 py-1.5 hover:bg-[#534AB7]">Lisa</button>
+                      className="flex-1 bg-[#1C3556] text-white text-sm rounded-lg px-3 py-1.5 hover:bg-[#2A4A7A]">Lisa</button>
                     <button onClick={() => setShowAddExam(false)} className="text-gray-400 text-sm px-2">Tühista</button>
                   </div>
                 </div>
               ) : (
                 <button onClick={() => setShowAddExam(true)}
-                  className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+                  className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
                   + Lisa kontrolltöö
                 </button>
               )}

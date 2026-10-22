@@ -108,7 +108,7 @@ export default function EssayGradingPage() {
         <button
           onClick={gradeEssay}
           disabled={loading || !canGrade}
-          className="mt-4 bg-[#7F77DD] text-white rounded-lg px-6 py-2.5 text-sm hover:bg-[#534AB7] disabled:opacity-50 transition-colors"
+          className="mt-4 bg-[#1C3556] text-white rounded-lg px-6 py-2.5 text-sm hover:bg-[#2A4A7A] disabled:opacity-50 transition-colors"
         >
           {loading ? (
             <span className="flex items-center gap-2">

@@ -92,7 +92,7 @@ export default function GradeEntryPage() {
             onChange={e => setNewTopicName(e.target.value)} onKeyDown={e => e.key === 'Enter' && addTopic()}
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]" />
           <button onClick={addTopic}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">Lisa teema</button>
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">Lisa teema</button>
         </div>
       </div>
 
@@ -155,7 +155,7 @@ export default function GradeEntryPage() {
 
       <div className="flex items-center gap-4">
         <button onClick={saveGrades} disabled={saving || !students.length}
-          className="bg-[#7F77DD] text-white rounded-lg px-6 py-2.5 text-sm hover:bg-[#534AB7] disabled:opacity-50">
+          className="bg-[#1C3556] text-white rounded-lg px-6 py-2.5 text-sm hover:bg-[#2A4A7A] disabled:opacity-50">
           {saving ? 'Salvestan...' : 'Salvesta kõik'}
         </button>
         {saved && <span className="text-sm text-[#3B6D11] font-medium">✓ Hinded salvestatud!</span>}

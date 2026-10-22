@@ -440,7 +440,7 @@ export default function PaevikPage() {
 
         <Panel title="AI-abiline">
           <button onClick={makeBrief} disabled={briefLoading || !selectedClass}
-            className="mb-3 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50">
+            className="mb-3 bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-50">
             {briefLoading ? 'Koostan...' : 'AI päevakokkuvõte'}
           </button>
           {brief && <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3 bg-[#EEEDFE] rounded-lg p-3">{brief}</p>}

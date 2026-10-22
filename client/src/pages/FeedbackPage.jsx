@@ -158,7 +158,7 @@ export default function FeedbackPage() {
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-bold text-gray-900">Tagasiside</h1>
         <button onClick={generateAll} disabled={generating || !students.length}
-          className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-50">
+          className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-50">
           {generating ? (progress || 'Genereerin...') : 'Genereeri kõigile'}
         </button>
       </div>

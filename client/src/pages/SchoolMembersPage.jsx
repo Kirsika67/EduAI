@@ -65,7 +65,7 @@ export default function SchoolMembersPage() {
             {!member.isMe && (
               <button
                 onClick={() => navigate('/sonumid', { state: { recipientId: member.id } })}
-                className="text-sm bg-[#7F77DD] text-white rounded-lg px-4 py-2 hover:bg-[#534AB7] transition-colors flex-shrink-0">
+                className="text-sm bg-[#1C3556] text-white rounded-lg px-4 py-2 hover:bg-[#2A4A7A] transition-colors flex-shrink-0">
                 Saada sõnum
               </button>
             )}

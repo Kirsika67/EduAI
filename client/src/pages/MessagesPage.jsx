@@ -223,7 +223,7 @@ export default function MessagesPage() {
       <div className="flex items-center justify-between mb-1 gap-3 flex-wrap">
         <h1 className="text-2xl font-bold text-gray-900">Suhtlus</h1>
         <button onClick={() => { setComposing(!composing); setActiveId(null) }}
-          className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+          className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
           {composing ? 'Sulge' : '+ Uus sõnum'}
         </button>
       </div>
@@ -278,7 +278,7 @@ export default function MessagesPage() {
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{suggestion.text}</p>
               <div className="flex gap-2 mt-2">
                 <button onClick={applySuggestion}
-                  className="text-xs bg-[#7F77DD] text-white rounded-lg px-3 py-1.5 hover:bg-[#534AB7]">Kasuta seda</button>
+                  className="text-xs bg-[#1C3556] text-white rounded-lg px-3 py-1.5 hover:bg-[#2A4A7A]">Kasuta seda</button>
                 <button onClick={() => setSuggestion(null)}
                   className="text-xs text-gray-500 px-2">Jäta oma tekst</button>
               </div>
@@ -286,7 +286,7 @@ export default function MessagesPage() {
           )}
 
           <button onClick={startConversation}
-            className="mt-3 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="mt-3 bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Saada
           </button>
         </div>
@@ -340,7 +340,7 @@ export default function MessagesPage() {
                     : c.participants.map(p => p.name).join(', ') || 'Vestlus'}
                 </span>
                 {c.unread > 0 && (
-                  <span className="bg-[#7F77DD] text-white text-[10px] rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                  <span className="bg-[#1C3556] text-white text-[10px] rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
                     {c.unread}
                   </span>
                 )}
@@ -381,7 +381,7 @@ export default function MessagesPage() {
                 {thread.messages.map(m => (
                   <div key={m.id} className={`flex ${m.isMine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${
-                      m.isMine ? 'bg-[#7F77DD] text-white' : 'bg-[#f5f5f3] text-gray-800'
+                      m.isMine ? 'bg-[#1C3556] text-white' : 'bg-[#F7F4EE] text-gray-800'
                     }`}>
                       {!m.isMine && (
                         <p className="text-[10px] opacity-70 mb-0.5">{m.senderName} · {m.senderRoleLabel}</p>
@@ -408,14 +408,14 @@ export default function MessagesPage() {
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">{suggestion.text}</p>
                       <div className="flex gap-2 mt-2">
                         <button onClick={applySuggestion}
-                          className="text-xs bg-[#7F77DD] text-white rounded-lg px-3 py-1.5 hover:bg-[#534AB7]">Kasuta seda</button>
+                          className="text-xs bg-[#1C3556] text-white rounded-lg px-3 py-1.5 hover:bg-[#2A4A7A]">Kasuta seda</button>
                         <button onClick={() => setSuggestion(null)}
                           className="text-xs text-gray-500 px-2">Jäta oma tekst</button>
                       </div>
                     </div>
                   )}
                   <button onClick={send} disabled={!draft.trim()}
-                    className="mt-2 bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-40">
+                    className="mt-2 bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-40">
                     Saada
                   </button>
                 </div>

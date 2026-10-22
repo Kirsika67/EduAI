@@ -84,7 +84,7 @@ export default function PlanningPage() {
       </div>
 
       <button onClick={generatePlan} disabled={aiLoading}
-        className="bg-[#7F77DD] text-white text-sm rounded-lg px-5 py-2.5 hover:bg-[#534AB7] disabled:opacity-50 mb-4">
+        className="bg-[#1C3556] text-white text-sm rounded-lg px-5 py-2.5 hover:bg-[#2A4A7A] disabled:opacity-50 mb-4">
         {aiLoading
           ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Genereerin...</span>
           : 'Loo lõbus tunnikava ↗'}
@@ -93,7 +93,7 @@ export default function PlanningPage() {
       {aiPlan && (
         <div className="bg-[#EEEDFE] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full bg-[#7F77DD]" />
+            <div className="w-2 h-2 rounded-full bg-[#1C3556]" />
             <span className="text-xs text-[#534AB7] font-medium">AI genereeritud tunnikava</span>
           </div>
           <pre className="whitespace-pre-wrap font-sans text-sm text-[#3C3489] leading-relaxed">{aiPlan}</pre>

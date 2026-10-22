@@ -188,7 +188,7 @@ export default function AutomationsPage() {
                   </label>
                 )}
               </div>
-              <button onClick={create} className="bg-[#7F77DD] text-white text-sm rounded-lg px-5 py-2 hover:bg-[#534AB7]">Loo automatsioon</button>
+              <button onClick={create} className="bg-[#1C3556] text-white text-sm rounded-lg px-5 py-2 hover:bg-[#2A4A7A]">Loo automatsioon</button>
             </>
           )}
         </div>

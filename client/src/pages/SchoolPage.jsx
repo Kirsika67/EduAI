@@ -126,7 +126,7 @@ export default function SchoolPage() {
             </p>
           </div>
           <button onClick={askSummary} disabled={summarising}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-40 whitespace-nowrap">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-40 whitespace-nowrap">
             {summarising ? 'Analüüsin...' : 'Koosta kokkuvõte'}
           </button>
         </div>

@@ -119,7 +119,7 @@ export default function SettingsPage() {
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD] disabled:bg-gray-50 disabled:text-gray-400" />
           <button onClick={saveSchool}
             disabled={!canManage || savingSchool || !schoolName.trim() || schoolName.trim() === school?.name}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-40">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-40">
             {savingSchool ? 'Salvestan...' : 'Salvesta'}
           </button>
         </div>
@@ -141,7 +141,7 @@ export default function SettingsPage() {
           </select>
           <button onClick={saveRole}
             disabled={!canManage || savingRole || chosenRole === role}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7] disabled:opacity-40">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] disabled:opacity-40">
             {savingRole ? 'Salvestan...' : 'Salvesta'}
           </button>
         </div>

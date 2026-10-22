@@ -242,7 +242,7 @@ export default function AttendancePage() {
           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD] resize-y" />
         <div className="flex items-center gap-3 mt-3 flex-wrap">
           <button onClick={addNote}
-            className="bg-[#7F77DD] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#534AB7]">
+            className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A]">
             Salvesta märkus
           </button>
           <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
