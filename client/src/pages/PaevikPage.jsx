@@ -7,6 +7,14 @@ import { isStaff, isLeadership } from '../constants/roles'
 
 const WEEKDAYS = ['pühapäev', 'esmaspäev', 'teisipäev', 'kolmapäev', 'neljapäev', 'reede', 'laupäev']
 /** Kohalik kuupäev (mitte UTC), et Päevik vahetaks päeva kesköö, mitte kell 03:00. */
+/** Hinde toon: kuld = väga hea (90+), roheline = hea (75+), neutraalne, punakas = tähelepanu (alla 50). */
+const gradeTone = (score) => {
+  const n = Number(score)
+  if (n >= 90) return 'bg-[#F4ECD9] text-[#8A6A2F]'
+  if (n >= 75) return 'bg-[#E5EEE8] text-[#2F4F3E]'
+  if (n < 50) return 'bg-[#F4E5E5] text-[#8A2C2C]'
+  return 'bg-[#EAEDF2] text-[#1C3556]'
+}
 const isoDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 function formatDate(iso) {
@@ -401,7 +409,7 @@ export default function PaevikPage() {
             <ul className="divide-y divide-gray-100">
               {recentGrades.map(g => (
                 <li key={`g${g.id}`} className="py-2.5 flex items-start gap-3">
-                  <span className="min-w-[2.5rem] text-center text-sm font-bold bg-[#eef3fa] text-[#1c3556] rounded px-2 py-1">{g.score}</span>
+                  <span className={`min-w-[2.5rem] text-center text-sm font-bold rounded px-2 py-1 ${gradeTone(g.score)}`}>{g.score}</span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900">{g.student_name}</p>
                     <p className="text-xs text-gray-500">{g.topic_name} · {String(g.date).slice(0, 10)}{g.notes ? ` · ${g.notes}` : ''}</p>

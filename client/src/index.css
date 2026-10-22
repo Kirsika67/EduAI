@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Pealkirjad: rahulik serif (Newsreader) annab ajakirja tunde; tekst jääb DM Sans'i. */
+h1, h2.serif { font-family: 'Newsreader', Georgia, 'Times New Roman', serif; letter-spacing: -0.01em; }
+h1 { font-size: 1.9rem; line-height: 1.2; }
+.material-doc h1, .material-doc h2 { font-family: 'Newsreader', Georgia, serif; }
+
 /* ---------- Õppematerjali välimus (tööleht, teooria, kontrolltöö) ---------- */
 .material-doc { font-size: 15px; line-height: 1.65; color: #111827; }
 .material-doc h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 0.75rem; border-bottom: 2px solid #1c3556; padding-bottom: 0.4rem; }
