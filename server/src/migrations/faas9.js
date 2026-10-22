@@ -5,6 +5,31 @@
  * (õpetaja, vanem, õpilane), näeb ka selle ülesandeid.
  */
 export function runFaas9Migration(db) {
+  /**
+   * materials.type CHECK ei luba uut tüüpi 'theory' (teooria / reeglivihik).
+   * SQLite ei saa CHECK-i muuta, seega ehitatakse tabel ümber — ainult üks kord.
+   */
+  const existing = db.prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'materials'`).get();
+  if (existing && !existing.sql.includes("'theory'")) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE materials_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+          type TEXT NOT NULL CHECK (type IN ('worksheet', 'test', 'lesson_plan', 'theory')),
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        INSERT INTO materials_new (id, class_id, type, title, content, created_at)
+          SELECT id, class_id, type, title, content, created_at FROM materials;
+        DROP TABLE materials;
+        ALTER TABLE materials_new RENAME TO materials;
+        CREATE INDEX IF NOT EXISTS idx_materials_class ON materials(class_id);
+      `);
+    })();
+  }
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS assignments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

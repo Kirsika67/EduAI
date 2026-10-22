@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------- Õppematerjali välimus (tööleht, teooria, kontrolltöö) ---------- */
+.material-doc { font-size: 15px; line-height: 1.65; color: #111827; }
+.material-doc h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 0.75rem; border-bottom: 2px solid #1c3556; padding-bottom: 0.4rem; }
+.material-doc h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: #1c3556; }
+.material-doc h3 { font-size: 1.05rem; font-weight: 700; margin: 1.1rem 0 0.4rem; }
+.material-doc p { margin: 0.5rem 0; }
+.material-doc ul { list-style: disc; padding-left: 1.4rem; margin: 0.5rem 0; }
+.material-doc ol { list-style: decimal; padding-left: 1.6rem; margin: 0.5rem 0; }
+.material-doc li { margin: 0.25rem 0; }
+.material-doc blockquote { border-left: 4px solid #2a6db0; background: #eef4fb; padding: 0.6rem 1rem; margin: 0.9rem 0; border-radius: 0 8px 8px 0; }
+.material-doc blockquote p { margin: 0.25rem 0; }
+.material-doc hr { border: 0; border-top: 1px solid #d1d5db; margin: 1.5rem 0; }
+.material-doc table { border-collapse: collapse; margin: 0.8rem 0; }
+.material-doc th, .material-doc td { border: 1px solid #6b7280; padding: 0.4rem 0.7rem; }
+.material-doc th { background: #f3f4f6; }
+.material-doc .mat-math { margin: 0.5rem 0; overflow-x: auto; }
+.material-doc .mat-figure { margin: 0.9rem 0; text-align: center; }
+.material-doc .mat-figure svg { max-width: 100%; height: auto; max-height: 340px; background: #fff; }
+.material-doc .mat-pagebreak { border-top: 2px dashed #9ca3af; margin: 1.8rem 0; }
+.material-doc strong { font-weight: 700; }
+
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; border: 0 !important; padding: 0 !important; box-shadow: none !important; }
+  .print-area .no-print { display: none !important; }
+  .material-doc .mat-pagebreak { border: 0; margin: 0; break-after: page; page-break-after: always; }
+  .material-doc blockquote { background: #fff; border-left-color: #000; }
+}

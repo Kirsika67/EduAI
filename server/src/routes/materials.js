@@ -17,12 +17,14 @@ function buildFallbackMaterial({ type, topicName, className, subject }) {
   const baseTitle =
     type === "worksheet"
       ? `Tööleht: ${topicName}`
+      : type === "theory"
+        ? `Teooria: ${topicName}`
       : type === "test"
         ? `Kontrolltöö: ${topicName}`
         : `Tunnikava: ${topicName}`;
 
   const content =
-    type === "worksheet"
+    type === "worksheet" || type === "theory"
       ? `Teema: ${topicName}
 Klass: ${className}
 Aine: ${subject}
@@ -106,12 +108,14 @@ router.post("/classes/:classId/materials/generate", async (req, res) => {
     difficulty,
     durationMinutes,
     extraNotes,
+    variants,
+    includeAnswers,
   } = req.body || {};
 
-  const allowedTypes = ["worksheet", "test", "lesson_plan"];
+  const allowedTypes = ["worksheet", "theory", "test", "lesson_plan"];
   if (!type || !allowedTypes.includes(type)) {
     return res.status(400).json({
-      error: "Tüüp peab olema: worksheet, test või lesson_plan.",
+      error: "Tüüp peab olema: worksheet, theory, test või lesson_plan.",
     });
   }
 
@@ -171,6 +175,8 @@ router.post("/classes/:classId/materials/generate", async (req, res) => {
         difficulty: diff,
         durationMinutes: type === "lesson_plan" ? dur : null,
         extraNotes: extra,
+        variants: Number(variants) === 2 ? 2 : 1,
+        includeAnswers: includeAnswers === true,
       },
       req.user
     );

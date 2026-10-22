@@ -2,8 +2,15 @@ import { useState, useEffect } from 'react'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 import Badge from '../components/Badge'
+import MaterialView from '../components/MaterialView'
 
-const typeLabels = { worksheet: 'Tööleht', test: 'Kontrolltöö', lesson_plan: 'Tunnikava' }
+const typeLabels = { worksheet: 'Tööleht', theory: 'Teooria (reeglivihik)', test: 'Kontrolltöö', lesson_plan: 'Tunnikava' }
+const typeHints = {
+  worksheet: 'Harjutused tasemete kaupa (A, B, C), vähe seletust, ruum lahendamiseks.',
+  theory: 'Teema täielikult selgeks: reeglid ja põhjendused, läbitöötatud näited, joonised, meelespea kastid.',
+  test: 'Ainult ülesanded, ilma selgituste ja valemiteta. Lihtsamad ja raskemad, punktid, soovi korral variandid A ja B.',
+  lesson_plan: 'Tunni eesmärgid, käik ja ajakava.',
+}
 const diffLabels = { easy: 'Kerge', medium: 'Keskmine', hard: 'Raske' }
 
 export default function MaterialsPage() {
@@ -14,6 +21,8 @@ export default function MaterialsPage() {
   const [customTopic, setCustomTopic] = useState('')
   const [difficulty, setDifficulty] = useState('medium')
   const [extraNotes, setExtraNotes] = useState('')
+  const [variants, setVariants] = useState(1)
+  const [includeAnswers, setIncludeAnswers] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [generatedMaterial, setGeneratedMaterial] = useState(null)
   const [savedMaterials, setSavedMaterials] = useState([])
@@ -49,6 +58,8 @@ export default function MaterialsPage() {
           customTopicName: customTopicName || undefined,
           difficulty: difficulty === 'easy' ? 'light' : difficulty,
           extraNotes,
+          variants: type === 'test' ? Number(variants) : undefined,
+          includeAnswers: (type === 'test' || type === 'worksheet') ? includeAnswers : undefined,
         }),
       })
       setGeneratedMaterial(res.material || null)
@@ -89,7 +100,25 @@ export default function MaterialsPage() {
                 </label>
               ))}
             </div>
+            <p className="text-xs text-gray-500 mt-2">{typeHints[type]}</p>
           </div>
+
+          {type === 'test' && (
+            <div className="mb-4 flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">Variandid</label>
+              <select value={variants} onChange={e => setVariants(Number(e.target.value))}
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#7F77DD]">
+                <option value={1}>Üks variant</option>
+                <option value={2}>Kaks varianti (A ja B)</option>
+              </select>
+            </div>
+          )}
+          {(type === 'test' || type === 'worksheet') && (
+            <label className="mb-4 flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={includeAnswers} onChange={e => setIncludeAnswers(e.target.checked)} className="accent-[#7F77DD]" />
+              Lisa õpetajale vastused eraldi lehele
+            </label>
+          )}
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Teema</label>
@@ -131,8 +160,8 @@ export default function MaterialsPage() {
       )}
 
       {generatedMaterial && (
-        <div className="bg-white rounded-xl border-2 border-[#AFA9EC] p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="print-area bg-white rounded-xl border-2 border-[#AFA9EC] p-6 mb-6">
+          <div className="no-print flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-gray-900">{typeLabels[generatedMaterial.type] || generatedMaterial.type}: {generatedMaterial.title}</h2>
             <div className="flex gap-2">
               <button onClick={() => window.print()}
@@ -143,9 +172,7 @@ export default function MaterialsPage() {
               </button>
             </div>
           </div>
-          <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800 leading-relaxed">
-            {generatedMaterial.content}
-          </pre>
+          <MaterialView content={generatedMaterial.content} />
         </div>
       )}
 
@@ -166,7 +193,7 @@ export default function MaterialsPage() {
             <div className="flex gap-2">
               <button onClick={() => setGeneratedMaterial(m)}
                 className="text-sm border border-gray-200 text-gray-600 rounded-lg px-3 py-1.5 hover:bg-gray-50">Vaata</button>
-              <button onClick={() => window.print()}
+              <button onClick={() => { setGeneratedMaterial(m); setTimeout(() => window.print(), 400) }}
                 className="text-sm border border-gray-200 text-gray-600 rounded-lg px-3 py-1.5 hover:bg-gray-50">Prindi</button>
             </div>
           </div>
