@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 import { useState } from 'react'
+import NotificationBell from './NotificationBell'
 import { ROLES, canInvite, isLeadership, isStaff } from '../constants/roles'
 
 function SectionLabel({ children }) {
@@ -110,6 +111,7 @@ export default function Sidebar() {
     <div className="relative flex items-center gap-1 px-4 py-2 flex-shrink-0">
       {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(null)} />}
 
+      {staff && <NotificationBell />}
       {staff && (
         <button onClick={() => setOpen(open === 'class' ? null : 'class')} className={btn}>
           <span className="font-medium">{selectedClass ? selectedClass.name : 'Vali klass'}</span>

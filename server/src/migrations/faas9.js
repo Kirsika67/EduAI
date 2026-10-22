@@ -76,6 +76,33 @@ export function runFaas9Migration(db) {
     );
     CREATE INDEX IF NOT EXISTS idx_planner_chats_account ON planner_chats(account_id, updated_at);
 
+    CREATE TABLE IF NOT EXISTS automations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+      class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      config TEXT NOT NULL DEFAULT '{}',
+      enabled INTEGER NOT NULL DEFAULT 1,
+      last_run_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_automations_account ON automations(account_id);
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+      automation_id INTEGER REFERENCES automations(id) ON DELETE SET NULL,
+      kind TEXT NOT NULL DEFAULT 'automation',
+      title TEXT NOT NULL,
+      body TEXT,
+      link TEXT,
+      dedupe_key TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      read_at TEXT,
+      UNIQUE(account_id, dedupe_key)
+    );
+    CREATE INDEX IF NOT EXISTS idx_notifications_account ON notifications(account_id, created_at);
+
     CREATE TABLE IF NOT EXISTS conversation_favorites (
       conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
       account_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,

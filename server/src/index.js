@@ -19,6 +19,8 @@ import assignmentsRoutes from "./routes/assignments.js";
 import absencesRoutes from "./routes/absences.js";
 import plannerRoutes from "./routes/planner.js";
 import lessonPlansRoutes from "./routes/lessonPlans.js";
+import automationsRoutes, { notificationsRouter } from "./routes/automations.js";
+import { startAutomationScheduler } from "./services/automations.js";
 import weeklyPlansRoutes from "./routes/weeklyPlans.js";
 import invitationsRoutes from "./routes/invitations.js";
 import accountRoutes from "./routes/account.js";
@@ -95,6 +97,8 @@ app.use("/api/assignments", assignmentsRoutes);
 app.use("/api/absences", absencesRoutes);
 app.use("/api/planner", plannerRoutes);
 app.use("/api/lesson-plans", lessonPlansRoutes);
+app.use("/api/automations", automationsRoutes);
+app.use("/api/notifications", notificationsRouter);
 app.use("/api/mentoring", mentoringRoutes);
 app.use("/api/school", schoolRoutes);
 app.use("/api/activities", activitiesRoutes);
@@ -134,5 +138,10 @@ app.listen(PORT, () => {
    */
   if (isProduction || String(process.env.BACKUPS).toLowerCase() === "on") {
     startBackupSchedule();
+  }
+
+  /** Automatsioonid kontrollivad reegleid ise (iga 10 min). Kohalikult: AUTOMATIONS=on. */
+  if (isProduction || String(process.env.AUTOMATIONS).toLowerCase() === "on") {
+    startAutomationScheduler();
   }
 });

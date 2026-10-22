@@ -56,6 +56,7 @@ const STAFF_NAV = [
   { to: '/tagasiside', label: 'Tagasiside', ai: true },
   { to: '/planeerimine', label: 'Planeerimine', ai: true },
   { to: '/planeerija', label: 'AI planeerija', ai: true },
+  { to: '/automatsioonid', label: 'Automatsioonid' },
   { to: '/kohalolek', label: 'Kohalolek' },
   { to: '/esseede-hindamine', label: 'Esseede hindamine', ai: true },
   { to: '/kooli-liikmed', label: 'Kooli liikmed' },

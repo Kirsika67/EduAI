@@ -34,6 +34,7 @@ export const AI_PURPOSES = {
   essay_grading: "Esseede hindamine",
   daily_brief: "Päeva kokkuvõte",
   planner_chat: "AI planeerija",
+  automation_summary: "Automaatne nädalakokkuvõte",
 };
 
 function logUsage({ user, purpose, model = ANTHROPIC_MODEL, ok, errorKind, inputChars, outputChars, durationMs }) {
