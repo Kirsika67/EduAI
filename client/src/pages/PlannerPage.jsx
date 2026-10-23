@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
+import { useAuth } from '../context/AuthContext'
+import { splitPlan, RichText } from '../components/plannerHelpers'
+import PlannerMobile from '../components/PlannerMobile'
 
 const GREETING = 'Tere! Aitan sul planeerida tunnid, kodutööd ja kordamise. Lisa kontrolltöö tulemuste pilt (või kirjuta tulemused ja eesmärk) ning ma küsin vajalikud täpsustused.'
 
@@ -21,25 +24,6 @@ function fileToImage(file, maxSide = 1600) {
     }
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Pilti ei õnnestunud avada.')) }
     img.src = url
-  })
-}
-
-/** Eraldab vastuse lõpust masinloetava plaaniploki; tagastab {text, plan}. */
-function splitPlan(text) {
-  const m = text.match(/```plan\s*([\s\S]*?)```/)
-  if (!m) return { text, plan: null }
-  let plan = null
-  try { plan = JSON.parse(m[1]) } catch { plan = null }
-  return { text: text.replace(m[0], '').trim(), plan }
-}
-
-function RichText({ text }) {
-  return text.split('\n').map((line, i) => {
-    if (line.startsWith('## ')) return <h3 key={i} className="font-semibold text-gray-900 mt-3 mb-1">{line.slice(3)}</h3>
-    if (line.startsWith('# ')) return <h3 key={i} className="font-semibold text-gray-900 mt-3 mb-1">{line.slice(2)}</h3>
-    const parts = line.split(/(\*\*[^*]+\*\*)/).map((p, j) =>
-      p.startsWith('**') && p.endsWith('**') ? <strong key={j}>{p.slice(2, -2)}</strong> : p)
-    return <p key={i} className={line.trim() === '' ? 'h-2' : ''}>{parts}</p>
   })
 }
 
@@ -220,7 +204,8 @@ export default function PlannerPage() {
     days <= 0 ? 'Kustutatakse täna' : `Kustutatakse ${days} päeva pärast`
 
   return (
-    <div className="max-w-6xl">
+    <>
+    <div className="hidden md:block max-w-6xl">
       <div className="mb-3">
         <h1 className="text-2xl font-bold text-gray-900">AI planeerija</h1>
         <p className="text-gray-500 text-sm">
@@ -361,5 +346,14 @@ export default function PlannerPage() {
         </div>
       </div>
     </div>
+    <PlannerMobile
+      chats={chats} activeId={activeId} messages={messages}
+      draft={draft} setDraft={setDraft} images={images} setImages={setImages}
+      sending={sending} error={error} notice={notice} applied={applied}
+      send={send} newChat={newChat} openChat={openChat} deleteChat={deleteChat}
+      addFiles={addFiles} applyPlan={applyPlan} expiryLabel={expiryLabel}
+      chatClass={chatClass} retentionDays={retentionDays}
+    />
+    </>
   )
 }
