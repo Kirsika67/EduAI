@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiCall } from '../api/client'
 import { isStaff } from '../constants/roles'
+import PaevikTabs from '../components/PaevikTabs'
 
 export default function ProfilePage() {
   const { teacher, role, school, applyAccount } = useAuth()
@@ -33,6 +34,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl">
+      {isStaff(role) && <PaevikTabs />}
       <h1 className="text-2xl font-bold text-gray-900 mb-5">Profiil</h1>
       {message && <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 mb-4 text-sm">{message}</div>}
       {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 mb-4 text-sm">{error}</div>}

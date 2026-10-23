@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AcceptInvitePage from './pages/AcceptInvitePage'
 import PaevikPage from './pages/PaevikPage'
+import VeelPage from './pages/VeelPage'
 import LandingPage from './pages/LandingPage'
 import AutomationsPage from './pages/AutomationsPage'
 import PlannerPage from './pages/PlannerPage'
@@ -117,6 +118,7 @@ export default function App() {
 
         {/* Vanema ja õpilase vaade */}
         <Route path="profiil" element={<ProfilePage />} />
+        <Route path="veel" element={<VeelPage />} />
         <Route path="minu-laps" element={<MyChildPage />} />
       </Route>
 

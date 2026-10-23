@@ -4,6 +4,7 @@ import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { isStaff, isLeadership } from '../constants/roles'
+import PaevikTabs from '../components/PaevikTabs'
 
 const WEEKDAYS = ['pühapäev', 'esmaspäev', 'teisipäev', 'kolmapäev', 'neljapäev', 'reede', 'laupäev']
 /** Kohalik kuupäev (mitte UTC), et Päevik vahetaks päeva kesköö, mitte kell 03:00. */
@@ -214,6 +215,7 @@ export default function PaevikPage() {
 
   return (
     <div className="max-w-6xl">
+      <PaevikTabs />
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Päevik</h1>
       <p className="text-gray-500 text-sm mb-5">
         {formatDate(todayIso)}{selectedClass ? ` · ${selectedClass.name} · ${selectedClass.subject}` : ''}
