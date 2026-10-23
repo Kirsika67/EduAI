@@ -236,4 +236,50 @@ router.get("/classes/:classId/grades", (req, res) => {
   res.json({ grades: rows });
 });
 
+/* ---------------- CSV eksport (Excelis avatav: UTF-8 BOM, semikoolon) ---------------- */
+
+/** Lahtri kaitse: "=" "+" "-" "@" algusega väärtused ei tohi Excelis valemina käivituda. */
+function csvCell(value) {
+  let s = String(value ?? "");
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function sendCsv(res, filename, header, rows) {
+  const lines = [header, ...rows].map((r) => r.map(csvCell).join(";"));
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send("\uFEFF" + lines.join("\r\n") + "\r\n");
+}
+
+router.get("/classes/:classId/export/grades.csv", (req, res) => {
+  const classId = Number(req.params.classId);
+  const cls = Number.isInteger(classId) ? db.prepare(`SELECT id, name FROM classes WHERE id = ? AND teacher_id = ?`).get(classId, req.teacherId) : null;
+  if (!cls) return res.status(404).json({ error: "Klassi ei leitud." });
+  const rows = db
+    .prepare(
+      `SELECT s.name AS student, t.name AS topic, g.score, g.date, g.notes
+       FROM grades g JOIN students s ON s.id = g.student_id JOIN topics t ON t.id = g.topic_id
+       WHERE s.class_id = ? ORDER BY s.name COLLATE NOCASE, g.date, g.id`
+    )
+    .all(classId)
+    .map((r) => [r.student, r.topic, r.score, String(r.date).slice(0, 10), r.notes || ""]);
+  sendCsv(res, `hinded-${cls.name}.csv`.replace(/[^\w.\-äöüõÄÖÜÕ]+/g, "_"), ["Õpilane", "Teema", "Hinne", "Kuupäev", "Märkus"], rows);
+});
+
+router.get("/classes/:classId/export/students.csv", (req, res) => {
+  const classId = Number(req.params.classId);
+  const cls = Number.isInteger(classId) ? db.prepare(`SELECT id, name FROM classes WHERE id = ? AND teacher_id = ?`).get(classId, req.teacherId) : null;
+  if (!cls) return res.status(404).json({ error: "Klassi ei leitud." });
+  const rows = db
+    .prepare(
+      `SELECT s.name, COUNT(g.id) AS n, ROUND(AVG(g.score)) AS avg
+       FROM students s LEFT JOIN grades g ON g.student_id = s.id
+       WHERE s.class_id = ? GROUP BY s.id ORDER BY s.name COLLATE NOCASE`
+    )
+    .all(classId)
+    .map((r) => [r.name, r.n, r.avg ?? ""]);
+  sendCsv(res, `opilased-${cls.name}.csv`.replace(/[^\w.\-äöüõÄÖÜÕ]+/g, "_"), ["Nimi", "Hindeid", "Keskmine (%)"], rows);
+});
+
 export default router;

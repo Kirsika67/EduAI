@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useClasses } from '../context/ClassContext'
+import { downloadFile } from '../api/download'
 import { apiCall } from '../api/client'
 import Badge from '../components/Badge'
 import ProgressBar from '../components/ProgressBar'
@@ -127,6 +128,12 @@ export default function StudentsPage() {
             className="border border-[#AFA9EC] text-[#534AB7] text-sm rounded-lg px-4 py-2 hover:bg-[#EEEDFE]"
           >
             + Lisa mitu õpilast
+          </button>
+          <button
+            onClick={async () => { try { await downloadFile(`/api/classes/${selectedClassId}/export/students.csv`, 'opilased.csv') } catch (err) { alert('Eksport ebaõnnestus: ' + err.message) } }}
+            className="border border-gray-300 text-gray-600 text-sm rounded-lg px-4 py-2 hover:bg-gray-50"
+          >
+            Ekspordi CSV
           </button>
         </div>
       </div>

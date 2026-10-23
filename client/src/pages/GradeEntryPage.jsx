@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useClasses } from '../context/ClassContext'
 import { apiCall } from '../api/client'
+import { downloadFile, uploadForm } from '../api/download'
 
 export default function GradeEntryPage() {
   const { selectedClassId, selectedClass, loading: classesLoading } = useClasses()
@@ -8,12 +9,16 @@ export default function GradeEntryPage() {
   const [topics, setTopics] = useState([])
   const [selectedTopic, setSelectedTopic] = useState('')
   const [newTopicName, setNewTopicName] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })
   const [grades, setGrades] = useState({})
   const [notes, setNotes] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showTools, setShowTools] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [toolMsg, setToolMsg] = useState('')
+  const [toolErr, setToolErr] = useState('')
 
   useEffect(() => {
     if (classesLoading) return
@@ -78,12 +83,68 @@ export default function GradeEntryPage() {
     finally { setSaving(false) }
   }
 
+  const importFile = async (file) => {
+    if (!file) return
+    if (!selectedTopic) { setToolErr('Vali enne teema.'); return }
+    setImporting(true); setToolErr(''); setToolMsg('')
+    try {
+      const form = new FormData()
+      form.append('topicId', selectedTopic)
+      form.append('date', date)
+      form.append('file', file)
+      const r = await uploadForm(`/api/classes/${selectedClassId}/grades/import`, form)
+      const extra = [...(r.warnings || []), ...(r.skipped || [])].length
+      setToolMsg(`Imporditud ${r.imported} hinnet.${extra ? ` Märkusi/vahelejäetud ridu: ${extra}.` : ''}`)
+    } catch (err) { setToolErr(err.message) }
+    finally { setImporting(false) }
+  }
+
+  const exportGrades = async () => {
+    setToolErr('')
+    try { await downloadFile(`/api/classes/${selectedClassId}/export/grades.csv`, 'hinded.csv') }
+    catch (err) { setToolErr(err.message) }
+  }
+
+  const downloadTemplate = () => {
+    const rows = ['nimi;hinne', ...students.map(s => `${s.name};`)]
+    const blob = new Blob(['\uFEFF' + rows.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'hinnete-mall.csv'; document.body.appendChild(a); a.click(); a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+
   if (classesLoading) return <div className="p-8 text-gray-500">Laadin...</div>
 
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Hinnete sisestamine</h1>
       <p className="text-gray-500 text-sm mb-6">Klass {selectedClass?.name || '—'} · {selectedClass?.subject || '—'}</p>
+
+      <div className="mb-6">
+        <button onClick={() => setShowTools(v => !v)} className="text-sm text-[#2a6db0] hover:underline">
+          {showTools ? 'Peida import ja eksport' : 'Import ja eksport (CSV, Excel)'}
+        </button>
+        {showTools && (
+          <div className="mt-3 bg-white rounded-xl border border-black/10 p-4 space-y-3">
+            <p className="text-sm text-gray-600">
+              Import kasutab allpool valitud <strong>teemat</strong> ja <strong>kuupäeva</strong>. Fail vajab veerge <code>nimi</code> ja <code>hinne</code> (või <code>id</code> ja <code>hinne</code>).
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="bg-[#1C3556] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#2A4A7A] cursor-pointer">
+                {importing ? 'Impordin...' : 'Impordi fail'}
+                <input type="file" accept=".csv,.txt,.xlsx,.xls" className="hidden" disabled={importing}
+                  onChange={e => { importFile(e.target.files?.[0]); e.target.value = '' }} />
+              </label>
+              <button onClick={downloadTemplate} className="text-sm border border-gray-300 rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-50">Lae alla mall</button>
+              <button onClick={exportGrades} className="text-sm border border-gray-300 rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-50">Ekspordi hinded (CSV)</button>
+            </div>
+            {toolMsg && <p className="text-sm text-green-700">{toolMsg}</p>}
+            {toolErr && <p className="text-sm text-red-700">{toolErr}</p>}
+          </div>
+        )}
+      </div>
 
       <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 mb-6">
         <p className="text-sm font-medium text-gray-700 mb-3">Lisa uus teema</p>
