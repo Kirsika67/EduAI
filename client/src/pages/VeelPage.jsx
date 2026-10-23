@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { navForRole, isStaff, isLeadership, canInvite } from '../constants/roles'
 import PaevikTabs from '../components/PaevikTabs'
+import InstallHint from '../components/InstallHint'
 
 /** "Veel": kõik rakenduse osad ühel lehel, rühmitatud, Stuudiumi "Veel"-menüü eeskujul. */
 function groupsForStaff(role) {
@@ -62,6 +63,7 @@ export default function VeelPage() {
   return (
     <div className="max-w-6xl">
       {staff && <PaevikTabs />}
+      <InstallHint />
       <h1 className="text-3xl text-[#14213D] mb-1">Veel</h1>
       <p className="text-[#6B6B66] text-sm mb-8">Kõik EduAI osad ühes kohas.</p>
       {groups.map(g => (
