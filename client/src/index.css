@@ -49,3 +49,12 @@ body { overscroll-behavior-y: none; }
   .material-doc { font-size: 16px; }
   .material-doc table { display: block; overflow-x: auto; }
 }
+
+/* Leht ei liigu külgsuunas: horisontaalne pühkimine on lubatud ainult tabelitel ja muudel kerimisaladel. */
+@media (max-width: 767px) {
+  html, body, #root { max-width: 100vw; overflow-x: hidden; overscroll-behavior-x: none; }
+  .app-main { touch-action: pan-y; max-width: 100vw; }
+  .app-main img, .app-main video { max-width: 100%; height: auto; }
+  .app-main table { display: block; max-width: 100%; overflow-x: auto; touch-action: pan-x pan-y; }
+  .app-main pre, .app-main .overflow-x-auto { max-width: 100%; touch-action: pan-x pan-y; }
+}

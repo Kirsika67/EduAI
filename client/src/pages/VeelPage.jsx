@@ -5,7 +5,7 @@ import PaevikTabs from '../components/PaevikTabs'
 import InstallHint from '../components/InstallHint'
 
 /** "Veel": kõik rakenduse osad ühel lehel, rühmitatud, Stuudiumi "Veel"-menüü eeskujul. */
-function groupsForStaff(role) {
+export function groupsForStaff(role) {
   const groups = [
     {
       title: 'Igapäevane töö',

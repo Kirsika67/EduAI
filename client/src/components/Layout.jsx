@@ -10,7 +10,7 @@ export default function Layout() {
         <div className="hidden md:block order-2 md:order-1 flex-1 min-w-0"><TopNav /></div>
         <div className="order-1 md:order-2 self-end md:self-auto"><Sidebar /></div>
       </header>
-      <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden overscroll-x-none p-4 pb-24 md:p-8 app-main">
         <Outlet />
       </main>
       <BottomNav />
