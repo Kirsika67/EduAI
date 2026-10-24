@@ -46,7 +46,7 @@ export default function PenMark({ type = 'circle', drawn, className = '', delay 
         d={p.d}
         pathLength="1"
         fill="none"
-        stroke="#FF3B30"
+        stroke="#E5483D"
         strokeWidth={type === 'check' ? 4 : 2.6}
         strokeLinecap="round"
         strokeLinejoin="round"

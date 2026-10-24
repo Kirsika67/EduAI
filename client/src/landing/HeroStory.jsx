@@ -50,8 +50,8 @@ function hasWebGL() {
 }
 
 const toneClass = {
-  red: 'bg-[#FF3B30]',
-  amber: 'bg-[#FFB800]',
+  red: 'bg-[#E5483D]',
+  amber: 'bg-[#F0B23A]',
 }
 
 export default function HeroStory() {
@@ -201,25 +201,25 @@ export default function HeroStory() {
         >
           {/* Päikesetõusu kihid (CSS), 3D-lõuend on läbipaistev nende peal */}
           <div className="hero-sun pointer-events-none absolute inset-0" />
-          <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-overlay" />
+          <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.09] mix-blend-overlay" />
 
           {/* 3D-stseen lisab siia oma lõuendi (vt deskScene.js) */}
           {webgl && <div ref={canvasRef} className="absolute inset-0" />}
 
           {/* Loetavus: pehme tumedam ala teksti taga */}
-          <div className="pointer-events-none absolute inset-0 hidden md:block bg-[linear-gradient(90deg,rgba(9,12,52,0.72)_0%,rgba(9,12,52,0.4)_38%,rgba(9,12,52,0)_60%)]" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] md:hidden bg-[linear-gradient(0deg,rgba(9,12,52,0.92)_0%,rgba(9,12,52,0.7)_55%,rgba(9,12,52,0)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 hidden md:block bg-[linear-gradient(90deg,rgba(16,27,51,0.72)_0%,rgba(16,27,51,0.4)_38%,rgba(16,27,51,0)_60%)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] md:hidden bg-[linear-gradient(0deg,rgba(16,27,51,0.92)_0%,rgba(16,27,51,0.7)_55%,rgba(16,27,51,0)_100%)]" />
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 z-10 bg-[linear-gradient(180deg,rgba(9,12,52,0.55),rgba(9,12,52,0))]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 z-10 bg-[linear-gradient(180deg,rgba(16,27,51,0.55),rgba(16,27,51,0))]" />
           <header className="absolute inset-x-0 top-0 z-20">
             <div className="max-w-6xl mx-auto px-5 sm:px-10 py-5 flex items-center justify-between">
-              <span className="flex items-center gap-2 text-xl font-bold tracking-[-0.03em]">
-                <span className="w-3 h-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FFE59A,#FF7A4D)] shadow-[0_0_18px_rgba(255,170,90,0.9)]" />
+              <span className="flex items-center gap-2 font-serif-brand text-2xl tracking-tight">
+                <span className="w-3 h-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FBE3A8,#E8735A)] shadow-[0_0_18px_rgba(232,150,100,0.9)]" />
                 EduAI
               </span>
               <nav className="flex items-center gap-3 sm:gap-5 text-sm">
                 <Link to="/login" className="text-white/85 hover:text-white">Logi sisse</Link>
-                <Link to="/register" className="bg-white text-[#0E1450] rounded-full px-4 py-2 font-semibold hover:bg-[#FFF3DA] transition-colors">
+                <Link to="/register" className="bg-white text-[#14213D] rounded-full px-4 py-2 font-semibold hover:bg-[#F7F0E2] transition-colors">
                   Loo konto
                 </Link>
               </nav>
@@ -234,13 +234,13 @@ export default function HeroStory() {
               className="hero-callout pointer-events-none absolute left-0 top-0 z-10 opacity-0 transition-opacity duration-300 hidden sm:block"
             >
               <span data-leader className="absolute left-0 top-0 h-[1.5px] origin-left bg-white/70" />
-              <div className="bg-white text-[#0E1450] rounded-2xl shadow-[0_18px_40px_-12px_rgba(10,15,58,0.55)] px-4 py-3 w-[200px] xl:w-[236px]">
+              <div className="bg-white text-[#14213D] rounded-2xl shadow-[0_18px_40px_-12px_rgba(16,27,51,0.55)] px-4 py-3 w-[200px] xl:w-[236px]">
                 <p className="flex items-center gap-2 text-[13px] font-bold">
                   <span className={`w-2.5 h-2.5 rounded-full ${toneClass[f.tone]}`} />
                   {f.name}
-                  <span className="font-medium text-[#0E1450]/50">{f.level}</span>
+                  <span className="font-medium text-[#14213D]/50">{f.level}</span>
                 </p>
-                <p className="text-[12.5px] text-[#0E1450]/75 mt-0.5 leading-snug">{f.reason}</p>
+                <p className="text-[12.5px] text-[#14213D]/75 mt-0.5 leading-snug">{f.reason}</p>
               </div>
             </div>
           ))}
@@ -261,10 +261,10 @@ export default function HeroStory() {
                     style={scrollStory ? { opacity: i === 0 ? 1 : 0 } : undefined}
                   >
                     <p className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1 text-[13px] font-medium text-white/90">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFC23D]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F2B544]" />
                       {s.kicker}
                     </p>
-                    <Heading className="font-sans font-bold text-[2.7rem] sm:text-6xl lg:text-[4.6rem] leading-[0.98] tracking-[-0.04em] mt-4 text-white">
+                    <Heading className="font-serif-brand text-[2.7rem] sm:text-6xl lg:text-[4.5rem] leading-[1.02] tracking-[-0.02em] mt-4 text-white">
                       {s.title[0]}
                       <em className="hero-accent font-serif-italic not-italic">{s.title[1]}</em>
                       {s.title[2]}
@@ -282,7 +282,7 @@ export default function HeroStory() {
                     )}
                     {(i === 0 || i === 2) && (
                       <div className="mt-8 flex flex-wrap items-center gap-3">
-                        <Link to="/register" className="bg-white text-[#0E1450] rounded-full px-6 py-3 text-sm font-semibold shadow-[0_10px_30px_-8px_rgba(255,190,110,0.7)] hover:bg-[#FFF3DA] transition-colors">
+                        <Link to="/register" className="bg-white text-[#14213D] rounded-full px-6 py-3 text-sm font-semibold shadow-[0_10px_30px_-8px_rgba(232,170,120,0.7)] hover:bg-[#F7F0E2] transition-colors">
                           Proovi oma klassiga
                         </Link>
                         <Link to="/login" className="rounded-full px-5 py-3 text-sm font-medium text-white bg-white/10 border border-white/25 backdrop-blur-md hover:bg-white/20 transition-colors">

@@ -20,13 +20,13 @@ const PAPER = { w: 1.6, d: 2.26 }
 
 /** Rõõmsad, erksad kaaned. Igal oma graafiline motiiv nagu disainikirjatarvetel. */
 const COVERS = [
-  { base: '#FFC23D', print: '#FFD873', motif: 'sun' },      // päikesekollane
-  { base: '#3D5BFF', print: '#6A82FF', motif: 'stripes' },  // koobalt
-  { base: '#FF5E4D', print: '#FF8A7D', motif: 'dots' },     // korall
-  { base: '#2FD39A', print: '#6CE5B9', motif: 'arc' },      // münt
-  { base: '#FF8CC8', print: '#FFB3DA', motif: 'sun' },      // roosa
+  { base: '#F2B544', print: '#F6CF7A', motif: 'sun' },      // päikesekollane
+  { base: '#3A5BC7', print: '#6C86D8', motif: 'stripes' },  // koobalt
+  { base: '#E8604C', print: '#EE8A7C', motif: 'dots' },     // korall
+  { base: '#3FB58A', print: '#7ACFAA', motif: 'arc' },      // münt
+  { base: '#E59AB8', print: '#EFBCD0', motif: 'sun' },      // roosa
   { base: '#F4F1EA', print: '#E4DED2', motif: 'stripes' },  // valge
-  { base: '#1E2A78', print: '#33419B', motif: 'arc' },      // öösinine (virna pealmine)
+  { base: '#1C3556', print: '#2C4A73', motif: 'arc' },      // öösinine (virna pealmine)
 ]
 const NAMES = [
   'Mari', 'Jaan', 'Kertu', 'Rasmus', 'Liisa', 'Karl', 'Eliise',
@@ -36,12 +36,12 @@ const SUBJECTS = ['Matemaatika', 'Eesti keel', 'Matemaatika', 'Loodusõpetus', '
 
 /** Hoiatuslipikud: vihiku indeks ja värv. Tekstid on HeroStory.jsx-is. */
 export const FLAGGED = [
-  { index: 2, color: '#FF3B30' },
-  { index: 7, color: '#FFB800' },
-  { index: 11, color: '#FFB800' },
+  { index: 2, color: '#E5483D' },
+  { index: 7, color: '#F0B23A' },
+  { index: 11, color: '#F0B23A' },
 ]
 
-const PEN_RED = '#FF3B30'
+const PEN_RED = '#E5483D'
 const BALLPOINT = '#2338A8'
 
 function seeded(seed) {
@@ -141,7 +141,7 @@ function paperTexture(seed, mark) {
   const w = c.width, h = c.height
   ctx.fillStyle = '#FFFFFF'
   ctx.fillRect(0, 0, w, h)
-  ctx.strokeStyle = 'rgba(61,91,255,0.16)'
+  ctx.strokeStyle = 'rgba(74,104,190,0.16)'
   ctx.lineWidth = 1.2
   for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke() }
   for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke() }
@@ -257,10 +257,10 @@ function makePen() {
 
 function makePencil() {
   const group = new THREE.Group()
-  const paint = new THREE.MeshPhysicalMaterial({ color: '#FFC23D', roughness: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.3 })
+  const paint = new THREE.MeshPhysicalMaterial({ color: '#F2B544', roughness: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.3 })
   const wood = new THREE.MeshStandardMaterial({ color: '#F2D3A8', roughness: 0.8 })
   const graphite = new THREE.MeshStandardMaterial({ color: '#2A2A35', roughness: 0.35, metalness: 0.3 })
-  const pink = new THREE.MeshStandardMaterial({ color: '#FF8CC8', roughness: 0.75 })
+  const pink = new THREE.MeshStandardMaterial({ color: '#E59AB8', roughness: 0.75 })
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), paint)
   const cone = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.2, 6), wood)
   cone.position.y = -0.65; cone.rotation.x = Math.PI
@@ -393,13 +393,13 @@ export async function createDeskScene(container, { reducedMotion = false, onFram
   }
 
   // Ainult vari: läbipaistev "maapind", mille peale vihikud maanduvad
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ color: '#0A0F3A', opacity: 0.32 }))
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ color: '#101B33', opacity: 0.32 }))
   ground.rotation.x = -Math.PI / 2
   ground.receiveShadow = true
   scene.add(ground)
 
   // Stuudiovalgus: valge võtmevalgus + värvilised servavalgused (korall paremalt, koobalt vasakult)
-  scene.add(new THREE.HemisphereLight('#FFFFFF', '#6C7BFF', 0.45))
+  scene.add(new THREE.HemisphereLight('#FFFFFF', '#7E8FC8', 0.45))
   const key = new THREE.DirectionalLight('#FFF6EA', 2.6)
   key.position.set(-3, 10, 5)
   key.castShadow = true
@@ -409,9 +409,9 @@ export async function createDeskScene(container, { reducedMotion = false, onFram
   key.shadow.bias = -0.0005
   Object.assign(key.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 30 })
   scene.add(key, key.target)
-  const rimWarm = new THREE.DirectionalLight('#FF7A5C', 1.8)
+  const rimWarm = new THREE.DirectionalLight('#F29A74', 1.8)
   rimWarm.position.set(7, 3, -5)
-  const rimCool = new THREE.DirectionalLight('#5D6BFF', 1.3)
+  const rimCool = new THREE.DirectionalLight('#6F86D6', 1.3)
   rimCool.position.set(-7, 2, -3)
   scene.add(rimWarm, rimCool)
 
