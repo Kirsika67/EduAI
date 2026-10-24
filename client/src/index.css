@@ -61,3 +61,39 @@ body { overscroll-behavior-y: none; }
   .app-main table { display: block; max-width: 100%; overflow-x: auto; touch-action: pan-x pan-y; }
   .app-main pre, .app-main .overflow-x-auto { max-width: 100%; touch-action: pan-x pan-y; }
 }
+
+/* ---------- Avaleht ---------- */
+/* Ruuduline paber nagu matemaatikavihikus */
+.paper-grid {
+  background-color: #FBFAF6;
+  background-image:
+    linear-gradient(rgba(80, 130, 190, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 130, 190, 0.11) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+/* Punase pliiatsi joon joonistub: pathLength=1, seega dash 1 → 0 */
+.pen-path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 900ms cubic-bezier(0.65, 0, 0.35, 1); }
+.pen-path.is-drawn { stroke-dashoffset: 0; }
+.scroll-hint-line { transform-origin: top; animation: scroll-hint 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+@keyframes scroll-hint { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+.pseudo-token { background: #EEEDFE; color: #3C3489; border-radius: 4px; padding: 0 4px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .pen-path { transition: none; stroke-dashoffset: 0; }
+  .scroll-hint-line { animation: none; }
+}
+
+/* Sisselogimise vihikuvirn: CSS-3D, liigub hiirega kaasa ainult kergelt (vt AuthShell.jsx) */
+.auth-stack { position: relative; width: 210px; height: 200px; margin-left: 90px; perspective: 900px; }
+.auth-notebook {
+  position: absolute; left: 0; width: 170px; height: 230px; border-radius: 3px;
+  bottom: calc(var(--i) * 9px);
+  transform: translateX(var(--shift)) rotateX(58deg) rotateZ(-24deg);
+  transform-origin: 50% 100%;
+  box-shadow: 0 2px 0 #F1EEE6, 0 3px 0 rgba(0,0,0,0.25), 0 30px 40px -18px rgba(0,0,0,0.6);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.auth-stack:hover .auth-notebook { transform: translateX(var(--shift)) translateY(calc(var(--i) * -5px)) rotateX(58deg) rotateZ(-24deg); }
+.auth-flag { position: absolute; right: -22px; top: 70px; width: 28px; height: 16px; border-radius: 0 2px 2px 0; }
+.auth-notebook:nth-child(4) .auth-flag { top: 120px; }
+.auth-label { position: absolute; left: 34px; top: 54px; width: 108px; padding: 8px 10px; background: #FBF9F4; border-radius: 2px; }
+@media (prefers-reduced-motion: reduce) { .auth-notebook { transition: none; } }
