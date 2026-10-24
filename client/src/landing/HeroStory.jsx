@@ -85,8 +85,9 @@ export default function HeroStory() {
         const show = a.visible && p > 0.66 + i * 0.04
         const cw = el.offsetWidth || 230
         const ch = el.offsetHeight || 56
-        const flip = a.x + 56 + cw > w - 16
-        const x = flip ? Math.max(16, a.x - cw - 56) : a.x + 56
+        // Hoia silt lipiku paremal pool; kitsal ekraanil nihuta vasakule, mitte üle virna
+        const flip = false
+        const x = Math.max(a.x + 18, Math.min(a.x + 56, w - cw - 16))
         const y = Math.max(a.y - ch / 2, floor + 10)
         floor = y + ch
         el.style.transform = `translate3d(${x}px, ${y}px, 0)`
@@ -187,7 +188,7 @@ export default function HeroStory() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#0F1A2E] text-white"
+      className="relative bg-[#0D1424] text-white"
       style={{ height: scrollStory ? '330vh' : 'auto' }}
     >
       <div
@@ -204,10 +205,13 @@ export default function HeroStory() {
           />
         )}
 
+        {/* Filmilik viimistlus: vinjett ja peen tera (ainult CSS, ei koorma GPU-d) */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_60%_45%,rgba(13,20,36,0)_45%,rgba(8,12,22,0.55)_100%)]" />
+        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay" />
         {/* Loetavus: teksti taga tumedam ala (laual vasakul, telefonis all) */}
-        <div className="pointer-events-none absolute inset-0 hidden md:block bg-[linear-gradient(90deg,#0F1A2E_0%,rgba(15,26,46,0.92)_30%,rgba(15,26,46,0.35)_55%,rgba(15,26,46,0)_70%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] md:hidden bg-[linear-gradient(0deg,#0F1A2E_0%,rgba(15,26,46,0.94)_55%,rgba(15,26,46,0)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(15,26,46,0.85),rgba(15,26,46,0))]" />
+        <div className="pointer-events-none absolute inset-0 hidden md:block bg-[linear-gradient(90deg,#0D1424_0%,rgba(13,20,36,0.92)_30%,rgba(13,20,36,0.35)_55%,rgba(13,20,36,0)_70%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] md:hidden bg-[linear-gradient(0deg,#0D1424_0%,rgba(13,20,36,0.94)_55%,rgba(13,20,36,0)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(13,20,36,0.85),rgba(13,20,36,0))]" />
 
         <header className="absolute inset-x-0 top-0 z-20">
           <div className="max-w-6xl mx-auto px-5 sm:px-8 py-5 flex items-center justify-between">

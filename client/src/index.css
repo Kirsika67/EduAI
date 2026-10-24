@@ -97,3 +97,6 @@ body { overscroll-behavior-y: none; }
 .auth-notebook:nth-child(4) .auth-flag { top: 120px; }
 .auth-label { position: absolute; left: 34px; top: 54px; width: 108px; padding: 8px 10px; background: #FBF9F4; border-radius: 2px; }
 @media (prefers-reduced-motion: reduce) { .auth-notebook { transition: none; } }
+.hero-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}

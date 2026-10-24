@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 
 /** Vihikuvirn ainult CSS-iga (3D kalle, lipikud), sama motiiv mis avalehe 3D-stseenis. */
 const STACK = [
-  { color: '#3D6AA3', name: 'Mari', shift: -6 },
-  { color: '#4C8558', name: 'Jaan', shift: 4 },
-  { color: '#D9A63A', name: 'Kertu', shift: -2, flag: '#D94A3F' },
-  { color: '#2F7F86', name: 'Oskar', shift: 6, flag: '#E5B23A' },
-  { color: '#C46B3A', name: 'Markus', shift: 0 },
+  { color: '#2C5A70', name: 'Mari', shift: -6 },
+  { color: '#5B7656', name: 'Jaan', shift: 4 },
+  { color: '#C7953C', name: 'Kertu', shift: -2, flag: '#D8433A' },
+  { color: '#363B46', name: 'Oskar', shift: 6, flag: '#E9B43C' },
+  { color: '#7A2C29', name: 'Markus', shift: 0 },
 ]
 
 function NotebookStack() {
@@ -36,11 +36,11 @@ function NotebookStack() {
 export default function AuthShell({ children }) {
   return (
     <div className="min-h-screen bg-[#FBFAF6] grid lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative overflow-hidden bg-[#0F1A2E] text-white px-8 py-10 lg:px-16 lg:py-14 flex flex-col justify-between">
+      <aside className="relative overflow-hidden bg-[#0D1424] text-white px-8 py-10 lg:px-16 lg:py-14 flex flex-col justify-between">
         <div className="pointer-events-none absolute -right-24 -top-24 w-[520px] h-[520px] rounded-full bg-[radial-gradient(closest-side,rgba(255,227,189,0.13),rgba(255,227,189,0))]" />
         <Link to="/avaleht" className="relative font-serif-brand text-2xl tracking-tight w-fit">EduAI</Link>
         <div className="relative my-10 lg:my-0 grid gap-12">
-          <div className="hidden lg:block"><NotebookStack /></div>
+          <div className="hidden lg:[@media(min-height:780px)]:block"><NotebookStack /></div>
           <div className="max-w-md">
             <h2 className="font-serif-brand text-3xl lg:text-5xl leading-[1.08] tracking-[-0.015em]">
               Esmaspäev võib alata rahulikult.
@@ -50,7 +50,7 @@ export default function AuthShell({ children }) {
             </p>
           </div>
         </div>
-        <ul className="relative hidden lg:block space-y-3 text-sm text-white/65">
+        <ul className="relative hidden lg:[@media(min-height:700px)]:block space-y-3 text-sm text-white/65">
           <li>Õpilaste nimed ei jõua AI-ni, need asendatakse enne märgistega.</li>
           <li>Andmed jäävad Euroopasse ja kooli piiridesse.</li>
           <li>AI teeb ettepanekud, sina kinnitad.</li>

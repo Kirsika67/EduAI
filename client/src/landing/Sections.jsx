@@ -334,7 +334,7 @@ export function MoreList() {
 export function FinalCta() {
   const [ref, drawn] = useInView({ threshold: 0.6 })
   return (
-    <section ref={ref} className="bg-[#0F1A2E] text-white">
+    <section ref={ref} className="bg-[#0D1424] text-white">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-32">
         <h2 className="font-serif-brand text-4xl md:text-7xl leading-[1.02] tracking-[-0.02em] max-w-4xl">
           Järgmine esmaspäev võib alata{' '}
