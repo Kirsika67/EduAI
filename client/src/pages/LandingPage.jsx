@@ -1,3 +1,7 @@
+import '@fontsource/newsreader/latin-500-italic.css'
+import '@fontsource/newsreader/latin-ext-500-italic.css'
+import '@fontsource/dm-sans/latin-800.css'
+import '@fontsource/dm-sans/latin-ext-800.css'
 import HeroStory from '../landing/HeroStory'
 import { DayTimeline, PrivacyDemo, MoreList, FinalCta } from '../landing/Sections'
 
@@ -7,7 +11,7 @@ import { DayTimeline, PrivacyDemo, MoreList, FinalCta } from '../landing/Section
  */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#FBFAF6] text-[#14213D]">
+    <div className="min-h-screen bg-white text-[#0E1450]">
       <HeroStory />
       <main>
         <DayTimeline />

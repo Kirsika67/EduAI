@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 
 /** Vihikuvirn ainult CSS-iga (3D kalle, lipikud), sama motiiv mis avalehe 3D-stseenis. */
 const STACK = [
-  { color: '#2C5A70', name: 'Mari', shift: -6 },
-  { color: '#5B7656', name: 'Jaan', shift: 4 },
-  { color: '#C7953C', name: 'Kertu', shift: -2, flag: '#D8433A' },
-  { color: '#363B46', name: 'Oskar', shift: 6, flag: '#E9B43C' },
-  { color: '#7A2C29', name: 'Markus', shift: 0 },
+  { color: '#3D5BFF', name: 'Mari', shift: -6 },
+  { color: '#2FD39A', name: 'Jaan', shift: 4 },
+  { color: '#FFC23D', name: 'Kertu', shift: -2, flag: '#FF3B30' },
+  { color: '#FF8CC8', name: 'Oskar', shift: 6, flag: '#FFB800' },
+  { color: '#FF5E4D', name: 'Markus', shift: 0 },
 ]
 
 function NotebookStack() {
@@ -35,22 +35,26 @@ function NotebookStack() {
 /** Ühine sisselogimise ja registreerimise raam: vasakul rahulik sõnum, paremal vorm. */
 export default function AuthShell({ children }) {
   return (
-    <div className="min-h-screen bg-[#FBFAF6] grid lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative overflow-hidden bg-[#0D1424] text-white px-8 py-10 lg:px-16 lg:py-14 flex flex-col justify-between">
-        <div className="pointer-events-none absolute -right-24 -top-24 w-[520px] h-[520px] rounded-full bg-[radial-gradient(closest-side,rgba(255,227,189,0.13),rgba(255,227,189,0))]" />
-        <Link to="/avaleht" className="relative font-serif-brand text-2xl tracking-tight w-fit">EduAI</Link>
+    <div className="min-h-screen bg-white grid lg:grid-cols-[1.05fr_1fr] lg:p-3 lg:gap-3">
+      <aside className="hero-sky relative overflow-hidden text-white px-8 py-10 lg:px-16 lg:py-14 flex flex-col justify-between lg:rounded-[34px]" style={{ '--p': 0.75 }}>
+        <div className="hero-sun pointer-events-none absolute inset-0" />
+        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-overlay" />
+                <Link to="/avaleht" className="relative flex items-center gap-2 text-xl font-bold tracking-[-0.03em] w-fit">
+          <span className="w-3 h-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FFE59A,#FF7A4D)] shadow-[0_0_18px_rgba(255,170,90,0.9)]" />
+          EduAI
+        </Link>
         <div className="relative my-10 lg:my-0 grid gap-12">
           <div className="hidden lg:[@media(min-height:780px)]:block"><NotebookStack /></div>
           <div className="max-w-md">
-            <h2 className="font-serif-brand text-3xl lg:text-5xl leading-[1.08] tracking-[-0.015em]">
-              Esmaspäev võib alata rahulikult.
+            <h2 className="font-sans font-bold text-3xl lg:text-[3.4rem] leading-[1.0] tracking-[-0.04em]">
+              Esmaspäev võib alata <em className="hero-accent font-serif-italic not-italic">rahulikult</em>.
             </h2>
-            <p className="text-white/70 mt-5 leading-relaxed">
+            <p className="text-white/85 mt-5 leading-relaxed">
               Päevik, hinded, materjalid ja planeerimine ühes kohas. AI aitab ettevalmistusega, aga otsused jäävad sinule.
             </p>
           </div>
         </div>
-        <ul className="relative hidden lg:[@media(min-height:700px)]:block space-y-3 text-sm text-white/65">
+        <ul className="relative hidden lg:[@media(min-height:700px)]:block space-y-3 text-sm text-white/80">
           <li>Õpilaste nimed ei jõua AI-ni, need asendatakse enne märgistega.</li>
           <li>Andmed jäävad Euroopasse ja kooli piiridesse.</li>
           <li>AI teeb ettepanekud, sina kinnitad.</li>

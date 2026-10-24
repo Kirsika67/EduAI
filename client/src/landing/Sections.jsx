@@ -2,23 +2,40 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PenMark, { useInView } from './PenMark'
 
+/** Pealkiri: paks sans + kaldkirjas serif-rõhk, sama keel mis hero's. */
+function Headline({ as: Tag = 'h2', id, children, accent, after, className = '' }) {
+  return (
+    <Tag id={id} className={`font-sans font-bold tracking-[-0.04em] leading-[1.0] ${className}`}>
+      {children}
+      {accent && <em className="hero-accent font-serif-italic not-italic">{accent}</em>}
+      {after}
+    </Tag>
+  )
+}
+
 /* ------------------------------------------------------------------ */
-/* Üks päev: neli hetke, igaühel päris rakenduse vaate järeleaimamine. */
+/* Üks päev: neli hetke, igaüks päris vaatena värvilisel "laval".      */
 /* ------------------------------------------------------------------ */
 
-function Moment({ time, title, text, children }) {
+const STAGES = {
+  sun: 'bg-[radial-gradient(90%_80%_at_80%_100%,#FFD36B_0%,#FF8A5B_45%,#FF5E8A_100%)]',
+  cobalt: 'bg-[radial-gradient(90%_90%_at_20%_0%,#7C8CFF_0%,#3D5BFF_45%,#1E2A9A_100%)]',
+  mint: 'bg-[radial-gradient(90%_90%_at_80%_10%,#B6F5D8_0%,#2FD39A_50%,#138A7A_100%)]',
+  pink: 'bg-[radial-gradient(90%_90%_at_20%_100%,#FFD1E8_0%,#FF8CC8_45%,#B35CFF_100%)]',
+}
+
+function Moment({ time, title, text, stage, children }) {
   const [ref, drawn] = useInView()
   return (
-    <li ref={ref} className="relative grid md:grid-cols-[180px_1fr] gap-6 md:gap-12 pb-20 md:pb-28 last:pb-0">
-      <div className="md:pt-1">
-        <p className="font-serif-brand text-5xl md:text-6xl text-[#14213D] tabular-nums leading-none">{time}</p>
+    <li ref={ref} className="grid lg:grid-cols-[0.85fr_1.15fr] gap-8 lg:gap-14 items-center pb-20 md:pb-28 last:pb-0">
+      <div className="max-w-md">
+        <p className="moment-time font-sans font-extrabold text-6xl md:text-7xl tracking-[-0.05em] tabular-nums leading-none">{time}</p>
+        <h3 className="mt-5 font-sans font-bold text-2xl md:text-[2rem] tracking-[-0.03em] leading-tight text-[#0E1450]">{title}</h3>
+        <p className="mt-3 text-[#0E1450]/70 leading-relaxed text-[17px]">{text}</p>
       </div>
-      <div className="grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-8 lg:gap-12 items-start">
-        <div className="max-w-md">
-          <h3 className="font-serif-brand text-2xl md:text-[1.9rem] leading-tight text-[#14213D]">{title}</h3>
-          <p className="mt-3 text-[#14213D]/70 leading-relaxed">{text}</p>
-        </div>
-        <div className="relative">{typeof children === 'function' ? children(drawn) : children}</div>
+      <div className={`relative rounded-[28px] p-5 sm:p-10 overflow-hidden ${STAGES[stage]}`}>
+        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay" />
+        <div className="relative">{children(drawn)}</div>
       </div>
     </li>
   )
@@ -26,12 +43,19 @@ function Moment({ time, title, text, children }) {
 
 function Frame({ label, ai, children }) {
   return (
-    <div className="bg-white rounded-xl border border-[#14213D]/10 shadow-[0_1px_2px_rgba(20,33,61,0.05),0_18px_40px_-18px_rgba(20,33,61,0.25)] overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#14213D]/10 bg-[#FBFAF6]">
-        <span className="text-xs font-medium text-[#14213D]/60">{label}</span>
-        {ai && <span className="text-[10px] font-semibold text-white bg-[#7F77DD] rounded px-1.5 py-0.5">AI</span>}
+    <div className="bg-white rounded-2xl shadow-[0_30px_60px_-24px_rgba(14,20,80,0.55)] overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#0E1450]/10">
+        <span className="flex items-center gap-2 text-xs font-semibold text-[#0E1450]/60">
+          <span className="flex gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#FF5E4D]" />
+            <span className="w-2 h-2 rounded-full bg-[#FFC23D]" />
+            <span className="w-2 h-2 rounded-full bg-[#2FD39A]" />
+          </span>
+          {label}
+        </span>
+        {ai && <span className="text-[10px] font-bold text-white bg-[#7F77DD] rounded px-1.5 py-0.5">AI</span>}
       </div>
-      <div className="p-4 sm:p-5 text-sm text-[#14213D]">{children}</div>
+      <div className="p-4 sm:p-5 text-sm text-[#0E1450]">{children}</div>
     </div>
   )
 }
@@ -46,13 +70,13 @@ const LESSONS = [
 function PaevikMock({ drawn }) {
   return (
     <Frame label="Päevik, esmaspäev">
-      <ul className="divide-y divide-[#14213D]/10">
+      <ul className="divide-y divide-[#0E1450]/10">
         {LESSONS.map(([t, subject, cls, tag]) => (
           <li key={t} className="relative flex items-center gap-3 py-2.5">
-            <span className="w-12 text-[#14213D]/50 tabular-nums">{t}</span>
-            <span className="flex-1 font-medium">{subject} <span className="font-normal text-[#14213D]/55">{cls}</span></span>
+            <span className="w-12 text-[#0E1450]/50 tabular-nums">{t}</span>
+            <span className="flex-1 font-semibold">{subject} <span className="font-normal text-[#0E1450]/55">{cls}</span></span>
             {tag && (
-              <span className={`relative text-xs rounded-full px-2.5 py-0.5 ${tag === 'Asendus' ? 'bg-[#FAEEDA] text-[#854F0B]' : 'bg-[#E6F1FB] text-[#185FA5]'}`}>
+              <span className={`relative text-xs font-semibold rounded-full px-2.5 py-0.5 ${tag === 'Asendus' ? 'bg-[#FFF1D6] text-[#B26A00]' : 'bg-[#E8ECFF] text-[#3D5BFF]'}`}>
                 {tag}
                 {tag === 'Asendus' && <PenMark type="circle" drawn={drawn} className="-inset-x-3 -inset-y-2 w-[calc(100%+24px)] h-[calc(100%+16px)]" />}
               </span>
@@ -60,7 +84,7 @@ function PaevikMock({ drawn }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-xs text-[#14213D]/55">2 kodutööd tähtajaga täna, 1 lapsevanema sõnum vastamata</p>
+      <p className="mt-3 text-xs text-[#0E1450]/55">2 kodutööd tähtajaga täna, 1 lapsevanema sõnum vastamata</p>
     </Frame>
   )
 }
@@ -69,10 +93,10 @@ function PlannerMock({ drawn }) {
   return (
     <Frame label="AI planeerija" ai>
       <div className="space-y-3">
-        <p className="ml-auto max-w-[85%] bg-[#14213D] text-white rounded-2xl rounded-br-md px-3.5 py-2.5 leading-snug">
+        <p className="ml-auto max-w-[85%] bg-[#3D5BFF] text-white rounded-2xl rounded-br-md px-3.5 py-2.5 leading-snug">
           Kontrolltöö murdudest 7.A-le, 45 minutit, kaks varianti.
         </p>
-        <div className="max-w-[90%] bg-[#F5F4FB] rounded-2xl rounded-bl-md px-3.5 py-2.5 leading-snug">
+        <div className="max-w-[90%] bg-[#F3F2FF] rounded-2xl rounded-bl-md px-3.5 py-2.5 leading-snug">
           Koostasin 8 ülesannet, A- ja B-variandi ning{' '}
           <span className="relative inline-block">
             vastused eraldi lehel
@@ -80,9 +104,9 @@ function PlannerMock({ drawn }) {
           </span>
           . Kas lisan ühe joonisega ülesande?
         </div>
-        <div className="flex items-center gap-2 border border-[#14213D]/10 rounded-lg px-3 py-2 w-fit">
-          <span className="w-6 h-7 rounded-sm bg-[#FBFAF6] border border-[#14213D]/15 grid place-items-center text-[9px] font-semibold text-[#14213D]/60">A4</span>
-          <span className="text-xs"><span className="font-medium">Kontrolltöö: murrud</span><span className="text-[#14213D]/55">, variandid A ja B</span></span>
+        <div className="flex items-center gap-2 border border-[#0E1450]/10 rounded-xl px-3 py-2 w-fit">
+          <span className="w-6 h-7 rounded-sm bg-[#FFF8E6] border border-[#0E1450]/15 grid place-items-center text-[9px] font-bold text-[#0E1450]/60">A4</span>
+          <span className="text-xs"><span className="font-semibold">Kontrolltöö: murrud</span><span className="text-[#0E1450]/55">, variandid A ja B</span></span>
         </div>
       </div>
     </Frame>
@@ -94,27 +118,27 @@ function EssayMock({ drawn }) {
     <Frame label="Esseede hindamine, eesti keel" ai>
       <p className="leading-[1.9] text-[15px]">
         Eile me{' '}
-        <span className="bg-[#FCEBEB] text-[#A32D2D] rounded px-1 line-through decoration-[#A32D2D]/60">käisme</span>{' '}
-        <span className="text-[#3B6D11] font-medium">käisime</span> muuseumis, kus oli palju huvitavaid{' '}
-        <span className="bg-[#FCEBEB] text-[#A32D2D] rounded px-1 line-through decoration-[#A32D2D]/60">asjad</span>{' '}
-        <span className="text-[#3B6D11] font-medium">asju</span>. Kõige rohkem meeldis mulle{' '}
-        <span className="bg-[#FAEEDA] text-[#854F0B] rounded px-1">vanad kaardid</span>.
+        <span className="bg-[#FFE5E2] text-[#D62F1F] rounded px-1 line-through decoration-[#D62F1F]/60">käisme</span>{' '}
+        <span className="text-[#0E8A5F] font-semibold">käisime</span> muuseumis, kus oli palju huvitavaid{' '}
+        <span className="bg-[#FFE5E2] text-[#D62F1F] rounded px-1 line-through decoration-[#D62F1F]/60">asjad</span>{' '}
+        <span className="text-[#0E8A5F] font-semibold">asju</span>. Kõige rohkem meeldis mulle{' '}
+        <span className="bg-[#FFF1D6] text-[#B26A00] rounded px-1">vanad kaardid</span>.
       </p>
-      <div className="mt-4 flex items-center justify-between border-t border-[#14213D]/10 pt-3">
-        <span className="text-xs text-[#14213D]/55">3 viga, selgitused juures</span>
-        <span className="relative font-serif-brand text-2xl px-2">
+      <div className="mt-4 flex items-center justify-between border-t border-[#0E1450]/10 pt-3">
+        <span className="text-xs text-[#0E1450]/55">3 viga, selgitused juures</span>
+        <span className="relative font-sans font-extrabold text-2xl px-2 tracking-tight">
           82%
           <PenMark type="circle" drawn={drawn} className="-inset-x-3 -inset-y-2 w-[calc(100%+24px)] h-[calc(100%+16px)]" />
         </span>
       </div>
-      <p className="mt-2 text-xs text-[#14213D]/55">Soovituslik hinne. Lõpliku hinde paned sina.</p>
+      <p className="mt-2 text-xs text-[#0E1450]/55">Soovituslik hinne. Lõpliku hinde paned sina.</p>
     </Frame>
   )
 }
 
 const RISKS = [
-  { name: 'Kertu', level: 'Tähelepanu', reason: '3 järjestikust hinnet alla 50%', tone: 'bg-[#D94A3F]' },
-  { name: 'Oskar', level: 'Tugi vajalik', reason: '2 puudumist 30 päeva jooksul (piir: 2)', tone: 'bg-[#E5B23A]' },
+  { name: 'Kertu', level: 'Tähelepanu', reason: '3 järjestikust hinnet alla 50%', tone: 'bg-[#FF3B30]' },
+  { name: 'Oskar', level: 'Tugi vajalik', reason: '2 puudumist 30 päeva jooksul (piir: 2)', tone: 'bg-[#FFB800]' },
 ]
 
 function RiskMock({ drawn }) {
@@ -124,12 +148,12 @@ function RiskMock({ drawn }) {
       <ul className="space-y-4">
         {RISKS.map((r, i) => (
           <li key={r.name}>
-            <p className="flex items-center gap-2 font-medium">
-              <span className={`w-2 h-2 rounded-full ${r.tone}`} />
+            <p className="flex items-center gap-2 font-semibold">
+              <span className={`w-2.5 h-2.5 rounded-full ${r.tone}`} />
               {r.name}
-              <span className="font-normal text-[#14213D]/55">{r.level}</span>
+              <span className="font-normal text-[#0E1450]/55">{r.level}</span>
             </p>
-            <p className="relative w-fit mt-0.5 text-[#14213D]/75">
+            <p className="relative w-fit mt-0.5 text-[#0E1450]/75">
               {r.reason}
               {i === 1 && <PenMark type="underline" drawn={drawn} className="left-0 -bottom-2 w-full h-3" />}
             </p>
@@ -140,10 +164,10 @@ function RiskMock({ drawn }) {
                   type="button"
                   aria-pressed={verdicts[r.name] === v}
                   onClick={() => setVerdicts((s) => ({ ...s, [r.name]: v }))}
-                  className={`text-xs rounded-lg px-3 py-1.5 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8322B] ${
+                  className={`text-xs font-semibold rounded-full px-3.5 py-1.5 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3D5BFF] ${
                     verdicts[r.name] === v
-                      ? 'bg-[#14213D] text-white border-[#14213D]'
-                      : 'border-[#14213D]/20 hover:bg-[#14213D]/5'
+                      ? 'bg-[#0E1450] text-white border-[#0E1450]'
+                      : 'border-[#0E1450]/20 hover:bg-[#0E1450]/5'
                   }`}
                 >
                   {label}
@@ -153,7 +177,7 @@ function RiskMock({ drawn }) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-xs text-[#14213D]/55" aria-live="polite">
+      <p className="mt-4 text-xs text-[#0E1450]/55" aria-live="polite">
         {Object.keys(verdicts).length
           ? 'Hinnang salvestatud. Nii näed hiljem, kui täpsed sinu piirid on.'
           : 'Proovi: kas see hoiatus vastab tõele?'}
@@ -164,42 +188,30 @@ function RiskMock({ drawn }) {
 
 export function DayTimeline() {
   return (
-    <section className="paper-grid border-t border-[#14213D]/10" aria-labelledby="paev">
+    <section className="bg-white" aria-labelledby="paev">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-32">
-        <h2 id="paev" className="font-serif-brand text-4xl md:text-6xl leading-[1.05] tracking-[-0.015em] text-[#14213D] max-w-3xl">
-          Üks tavaline päev, natuke kergemalt.
-        </h2>
-        <p className="mt-5 text-lg text-[#14213D]/70 max-w-xl leading-relaxed">
+        <Headline id="paev" className="text-[2.6rem] md:text-[4.2rem] text-[#0E1450] max-w-3xl" accent="kergemalt" after=".">
+          Üks tavaline päev, natuke{' '}
+        </Headline>
+        <p className="mt-6 text-lg text-[#0E1450]/70 max-w-xl leading-relaxed">
           Need on päris vaated rakendusest. Punane pliiats näitab, mida õpetaja tavaliselt kõige enne märkab.
         </p>
 
         <ol className="mt-20 md:mt-24">
-          <Moment
-            time="7.45"
-            title="Päev ühe pilguga"
-            text="Tänased tunnid, asendused, kontrolltööd ja tähtajad samal lehel. Ei pea viiest kohast kokku otsima."
-          >
+          <Moment stage="sun" time="7.45" title="Päev ühe pilguga"
+            text="Tänased tunnid, asendused, kontrolltööd ja tähtajad samal lehel. Ei pea viiest kohast kokku otsima.">
             {(drawn) => <PaevikMock drawn={drawn} />}
           </Moment>
-          <Moment
-            time="10.15"
-            title="Kontrolltöö vahetunniga"
-            text="Kirjelda või pildista eelmine töö. Planeerija küsib üle, koostab variandid, valemid ja joonised ning paneb vastused eraldi lehele."
-          >
+          <Moment stage="cobalt" time="10.15" title="Kontrolltöö vahetunniga"
+            text="Kirjelda või pildista eelmine töö. Planeerija küsib üle, koostab variandid, valemid ja joonised ning paneb vastused eraldi lehele.">
             {(drawn) => <PlannerMock drawn={drawn} />}
           </Moment>
-          <Moment
-            time="13.30"
-            title="Esseed eelhinnatud"
-            text="Eesti, inglise ja vene keeles. Vead on selgitatud ja hinne on soovitus, mille sina üle vaatad."
-          >
+          <Moment stage="mint" time="13.30" title="Esseed eelhinnatud"
+            text="Eesti, inglise ja vene keeles. Vead on selgitatud ja hinne on soovitus, mille sina üle vaatad.">
             {(drawn) => <EssayMock drawn={drawn} />}
           </Moment>
-          <Moment
-            time="16.00"
-            title="Keegi ei jää märkamata"
-            text="Kui õpilase hinded langevad või puudumisi koguneb, näed põhjust ja piiri, mille ise paika panid. Sinu hinnang teeb hoiatused aja jooksul täpsemaks."
-          >
+          <Moment stage="pink" time="16.00" title="Keegi ei jää märkamata"
+            text="Kui õpilase hinded langevad või puudumisi koguneb, näed põhjust ja piiri, mille ise paika panid. Sinu hinnang teeb hoiatused aja jooksul täpsemaks.">
             {(drawn) => <RiskMock drawn={drawn} />}
           </Moment>
         </ol>
@@ -250,50 +262,53 @@ export function PrivacyDemo() {
   const hidden = parts.filter((p) => p.token).length
 
   return (
-    <section className="bg-[#FBFAF6] border-t border-[#14213D]/10" aria-labelledby="nimed">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-32 grid lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
-        <div>
-          <h2 id="nimed" className="font-serif-brand text-4xl md:text-6xl leading-[1.05] tracking-[-0.015em] text-[#14213D]">
-            Lapse nimi ei lahku koolist.
-          </h2>
-          <p className="mt-6 text-lg text-[#14213D]/70 leading-relaxed max-w-md">
-            Enne kui midagi AI-le saadetakse, asendatakse õpilaste nimed märgistega. AI näeb hindeid ja teemasid,
-            aga mitte seda, kelle omad need on. Vastuses pannakse nimed tagasi.
-          </p>
-          <ul className="mt-8 space-y-3 text-[#14213D]/75 max-w-md">
-            <li className="border-t border-[#14213D]/15 pt-3">Andmed hoitakse Euroopas ja iga kasutaja näeb ainult oma kooli.</li>
-            <li className="border-t border-[#14213D]/15 pt-3">Lapsevanemale ei lähe midagi ilma sinu kinnituseta.</li>
-            <li className="border-t border-[#14213D]/15 pt-3">Iga tundlik vaatamine ja muutmine jääb logisse.</li>
-          </ul>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-[#14213D]/10 shadow-[0_24px_60px_-28px_rgba(20,33,61,0.35)] p-5 sm:p-7">
-          <label htmlFor="privacy-demo" className="text-sm font-medium text-[#14213D]">Sinu märkus</label>
-          <textarea
-            id="privacy-demo"
-            value={text}
-            onChange={(e) => setText(e.target.value.slice(0, 400))}
-            rows={3}
-            className="mt-2 w-full resize-none rounded-lg border border-[#14213D]/15 px-3.5 py-3 text-[15px] leading-relaxed text-[#14213D] outline-none focus:border-[#14213D]/40 focus:ring-2 focus:ring-[#C8322B]/20"
-          />
-          <p className="mt-2 text-xs text-[#14213D]/50">
-            Klassi nimekiri selles näites: {ROSTER.join(', ')}. Proovi kirjutada mõni neist nimedest, ka käändes.
-          </p>
-
-          <div className="mt-6 flex items-center gap-2">
-            <span className="text-sm font-medium text-[#14213D]">Mida AI näeb</span>
-            <span className="text-[10px] font-semibold text-white bg-[#7F77DD] rounded px-1.5 py-0.5">AI</span>
+    <section className="bg-white px-2 sm:px-3" aria-labelledby="nimed">
+      <div className="relative rounded-[28px] sm:rounded-[34px] overflow-hidden bg-[radial-gradient(70%_80%_at_85%_10%,#7C8CFF_0%,rgba(124,140,255,0)_70%),radial-gradient(60%_70%_at_10%_100%,#FF8CC8_0%,rgba(255,140,200,0)_70%),linear-gradient(160deg,#1E2A9A,#3D5BFF)] text-white">
+        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-overlay" />
+        <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-32 grid lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
+          <div>
+            <Headline id="nimed" className="text-[2.6rem] md:text-[4.2rem]" accent="koolist" after=".">
+              Lapse nimi ei lahku{' '}
+            </Headline>
+            <p className="mt-6 text-lg text-white/80 leading-relaxed max-w-md">
+              Enne kui midagi AI-le saadetakse, asendatakse õpilaste nimed märgistega. AI näeb hindeid ja teemasid,
+              aga mitte seda, kelle omad need on. Vastuses pannakse nimed tagasi.
+            </p>
+            <ul className="mt-8 space-y-3 text-white/85 max-w-md">
+              <li className="border-t border-white/20 pt-3">Andmed hoitakse Euroopas ja iga kasutaja näeb ainult oma kooli.</li>
+              <li className="border-t border-white/20 pt-3">Lapsevanemale ei lähe midagi ilma sinu kinnituseta.</li>
+              <li className="border-t border-white/20 pt-3">Iga tundlik vaatamine ja muutmine jääb logisse.</li>
+            </ul>
           </div>
-          <p className="mt-2 rounded-lg bg-[#F5F4FB] px-3.5 py-3 text-[15px] leading-[1.9] text-[#14213D] min-h-[5.5rem]" aria-live="polite">
-            {parts.map((p, i) =>
-              p.token
-                ? <span key={i} className="pseudo-token" title={`Peidetud: ${p.original}`}>{p.token}</span>
-                : <span key={i}>{p.text}</span>
-            )}
-          </p>
-          <p className="mt-3 text-xs text-[#14213D]/55">
-            {hidden ? `${hidden} nime peidetud.` : 'Selles tekstis pole klassi nimekirja nimesid.'}
-          </p>
+
+          <div className="bg-white text-[#0E1450] rounded-3xl shadow-[0_40px_80px_-30px_rgba(10,15,58,0.7)] p-5 sm:p-7">
+            <label htmlFor="privacy-demo" className="text-sm font-semibold">Sinu märkus</label>
+            <textarea
+              id="privacy-demo"
+              value={text}
+              onChange={(e) => setText(e.target.value.slice(0, 400))}
+              rows={3}
+              className="mt-2 w-full resize-none rounded-xl border border-[#0E1450]/15 px-3.5 py-3 text-[15px] leading-relaxed outline-none focus:border-[#3D5BFF] focus:ring-4 focus:ring-[#3D5BFF]/15"
+            />
+            <p className="mt-2 text-xs text-[#0E1450]/50">
+              Klassi nimekiri selles näites: {ROSTER.join(', ')}. Proovi kirjutada mõni neist nimedest, ka käändes.
+            </p>
+
+            <div className="mt-6 flex items-center gap-2">
+              <span className="text-sm font-semibold">Mida AI näeb</span>
+              <span className="text-[10px] font-bold text-white bg-[#7F77DD] rounded px-1.5 py-0.5">AI</span>
+            </div>
+            <p className="mt-2 rounded-xl bg-[#F3F2FF] px-3.5 py-3 text-[15px] leading-[1.9] min-h-[5.5rem]" aria-live="polite">
+              {parts.map((p, i) =>
+                p.token
+                  ? <span key={i} className="pseudo-token" title={`Peidetud: ${p.original}`}>{p.token}</span>
+                  : <span key={i}>{p.text}</span>
+              )}
+            </p>
+            <p className="mt-3 text-xs text-[#0E1450]/55">
+              {hidden ? `${hidden} nime peidetud.` : 'Selles tekstis pole klassi nimekirja nimesid.'}
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -303,26 +318,29 @@ export function PrivacyDemo() {
 /* ------------------------------------------------------------------ */
 
 const MORE = [
-  ['Materjalid', 'Teooria, tööleht ja kontrolltöö korralike valemite ja joonistega, valmis printimiseks.'],
-  ['Automatsioonid', 'Seadistad reegli ühe korra, näiteks tähtaja meeldetuletuse, ja server jälgib seda sinu eest.'],
-  ['Suhtlus', 'Sõnumid kolleegidele ja peredele ning teated klassile. AI aitab sõnastada, saadad sina.'],
-  ['Hinded ja tabelid', 'Impordi hinded CSV- või Exceli failist ja ekspordi need tagasi. Topeltsisestust jääb vähemaks.'],
-  ['Telefonis', 'Lisa avakuvale nagu rakendus. Tundide vahel on kõige tähtsam pöidla ulatuses.'],
-  ['Kool koos', 'Kolleegid liituvad kooli koodiga. Juhtkond näeb kokkuvõtet, klassid jäävad õpetaja omaks.'],
+  ['Materjalid', 'Teooria, tööleht ja kontrolltöö korralike valemite ja joonistega, valmis printimiseks.', '#FFC23D'],
+  ['Automatsioonid', 'Seadistad reegli ühe korra, näiteks tähtaja meeldetuletuse, ja server jälgib seda sinu eest.', '#3D5BFF'],
+  ['Suhtlus', 'Sõnumid kolleegidele ja peredele ning teated klassile. AI aitab sõnastada, saadad sina.', '#FF5E4D'],
+  ['Hinded ja tabelid', 'Impordi hinded CSV- või Exceli failist ja ekspordi need tagasi. Topeltsisestust jääb vähemaks.', '#2FD39A'],
+  ['Telefonis', 'Lisa avakuvale nagu rakendus. Tundide vahel on kõige tähtsam pöidla ulatuses.', '#FF8CC8'],
+  ['Kool koos', 'Kolleegid liituvad kooli koodiga. Juhtkond näeb kokkuvõtet, klassid jäävad õpetaja omaks.', '#0E1450'],
 ]
 
 export function MoreList() {
   return (
-    <section className="bg-[#FBFAF6] border-t border-[#14213D]/10" aria-labelledby="veel">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 md:py-28 grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-20">
-        <h2 id="veel" className="font-serif-brand text-3xl md:text-5xl leading-[1.08] text-[#14213D]">
-          Ja kõik see muu, mida päev nõuab.
-        </h2>
+    <section className="bg-white" aria-labelledby="veel">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-32 grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-20">
+        <Headline id="veel" className="text-[2.3rem] md:text-[3.4rem] text-[#0E1450]" accent="nõuab" after=".">
+          Ja kõik muu, mida päev{' '}
+        </Headline>
         <dl className="grid sm:grid-cols-2 gap-x-10">
-          {MORE.map(([term, desc]) => (
-            <div key={term} className="border-t border-[#14213D]/15 py-5">
-              <dt className="font-medium text-[#14213D]">{term}</dt>
-              <dd className="mt-1.5 text-[#14213D]/65 leading-relaxed text-[15px]">{desc}</dd>
+          {MORE.map(([term, desc, color]) => (
+            <div key={term} className="border-t border-[#0E1450]/10 py-5">
+              <dt className="flex items-center gap-2.5 font-bold text-[#0E1450]">
+                <span className="w-3 h-3 rounded-[4px] rotate-12" style={{ background: color }} />
+                {term}
+              </dt>
+              <dd className="mt-1.5 text-[#0E1450]/65 leading-relaxed text-[15px]">{desc}</dd>
             </div>
           ))}
         </dl>
@@ -334,34 +352,40 @@ export function MoreList() {
 export function FinalCta() {
   const [ref, drawn] = useInView({ threshold: 0.6 })
   return (
-    <section ref={ref} className="bg-[#0D1424] text-white">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-32">
-        <h2 className="font-serif-brand text-4xl md:text-7xl leading-[1.02] tracking-[-0.02em] max-w-4xl">
-          Järgmine esmaspäev võib alata{' '}
-          <span className="relative inline-block">
-            rahulikult
-            <PenMark type="underline" drawn={drawn} className="left-0 -bottom-3 w-full h-4" delay={200} />
-          </span>
-          .
-        </h2>
-        <div className="mt-12 flex flex-wrap items-center gap-6">
-          <Link to="/register" className="bg-[#C8322B] text-white rounded-full px-7 py-3.5 font-medium hover:bg-[#B02A24] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-            Proovi oma klassiga
-          </Link>
-          <p className="text-white/60 text-sm max-w-xs leading-relaxed">
-            Konto loomine võtab minuti. Kolleegid liituvad hiljem sinu kooli koodiga.
-          </p>
+    <section ref={ref} className="bg-white px-2 sm:px-3 pb-2 sm:pb-3">
+      <div className="relative rounded-[28px] sm:rounded-[34px] overflow-hidden text-white bg-[radial-gradient(60%_80%_at_80%_110%,#FFE7A0_0%,#FFB36B_25%,#FF6E5A_50%,rgba(255,94,77,0)_80%),radial-gradient(70%_70%_at_10%_0%,#3D5BFF_0%,rgba(61,91,255,0)_70%),linear-gradient(180deg,#0B1146,#2B2DB8)]">
+        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-overlay" />
+        <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-24 md:py-36">
+          <h2 className="font-sans font-bold text-[2.6rem] md:text-[5rem] leading-[0.98] tracking-[-0.045em] max-w-4xl">
+            Järgmine esmaspäev võib alata{' '}
+            <span className="relative inline-block font-serif-italic">
+              rahulikult
+              <PenMark type="underline" drawn={drawn} className="left-0 -bottom-3 w-full h-4" delay={200} />
+            </span>
+            .
+          </h2>
+          <div className="mt-12 flex flex-wrap items-center gap-6">
+            <Link to="/register" className="bg-white text-[#0E1450] rounded-full px-7 py-3.5 font-semibold shadow-[0_14px_40px_-10px_rgba(255,190,110,0.8)] hover:bg-[#FFF3DA] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+              Proovi oma klassiga
+            </Link>
+            <p className="text-white/80 text-sm max-w-xs leading-relaxed">
+              Konto loomine võtab minuti. Kolleegid liituvad hiljem sinu kooli koodiga.
+            </p>
+          </div>
         </div>
+        <footer className="relative border-t border-white/15">
+          <div className="max-w-6xl mx-auto px-5 sm:px-8 py-7 flex items-center justify-between text-sm text-white/70">
+            <span className="flex items-center gap-2 font-bold text-white tracking-[-0.03em]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FFE59A,#FF7A4D)]" />
+              EduAI
+            </span>
+            <nav className="flex gap-5">
+              <Link to="/login" className="hover:text-white">Logi sisse</Link>
+              <Link to="/register" className="hover:text-white">Loo konto</Link>
+            </nav>
+          </div>
+        </footer>
       </div>
-      <footer className="border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 flex items-center justify-between text-sm text-white/55">
-          <span className="font-serif-brand text-lg text-white">EduAI</span>
-          <nav className="flex gap-5">
-            <Link to="/login" className="hover:text-white">Logi sisse</Link>
-            <Link to="/register" className="hover:text-white">Loo konto</Link>
-          </nav>
-        </div>
-      </footer>
     </section>
   )
 }

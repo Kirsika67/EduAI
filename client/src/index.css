@@ -100,3 +100,30 @@ body { overscroll-behavior-y: none; }
 .hero-grain {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* ---------- Avaleht 2: päikesetõus ---------- */
+.font-serif-italic { font-family: 'Newsreader', Georgia, serif; font-style: italic; font-weight: 500; letter-spacing: -0.02em; }
+/* Öösinisest koobaltini; --p (0..1) tuleb kerimisest */
+.hero-sky {
+  background:
+    radial-gradient(70% 60% at 12% 8%, rgba(61, 91, 255, 0.55), rgba(61, 91, 255, 0) 70%),
+    radial-gradient(50% 50% at 8% 100%, rgba(255, 111, 181, 0.45), rgba(255, 111, 181, 0) 70%),
+    linear-gradient(180deg, #0B1146 0%, #17208A 55%, #2B2DB8 100%);
+}
+/* Päike tõuseb paremalt alt ja soojendab kogu taeva */
+.hero-sun {
+  background:
+    radial-gradient(42% 46% at 74% calc(118% - var(--p) * 52%), #FFE7A0 0%, #FFB36B 22%, #FF6E5A 48%, rgba(255, 94, 77, 0) 74%),
+    radial-gradient(80% 60% at 70% 110%, rgba(255, 140, 200, 0.55), rgba(255, 140, 200, 0) 70%);
+  opacity: calc(0.45 + var(--p) * 0.55);
+}
+.hero-accent {
+  background-image: linear-gradient(90deg, #FF5E4D, #FFC23D);
+  background-repeat: no-repeat;
+  background-size: 100% 0.09em;
+  background-position: 0 92%;
+  padding: 0 0.04em;
+}
+/* Kellaajad ajajoonel: päikesetõusu gradient tekstis */
+.moment-time { background: linear-gradient(100deg, #FF5E4D 0%, #FF8A5B 40%, #FFC23D 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pen-path { stroke: #FF3B30; }

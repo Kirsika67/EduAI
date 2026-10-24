@@ -11,17 +11,17 @@ const FLAGS = [
 const STEPS = [
   {
     kicker: 'Esmaspäev, 7.45',
-    title: 'Laud on juba täis.',
+    title: ['Laud on juba ', 'täis', '.'],
     body: 'Kolmkümmend vihikut parandada, kontrolltöö homseks, asendustund kolmandaks ja kolm lapsevanemat ootavad vastust.',
   },
   {
     kicker: 'Esmaspäev, 7.52',
-    title: 'EduAI paneb selle korda enne esimest kella.',
+    title: ['EduAI teeb sellest ', 'rahuliku hommiku', '.'],
     body: 'Päevik näitab tänast päeva, planeerija koostab kontrolltöö, esseed on eelhinnatud ja sõnumid sõnastatud. Sina vaatad üle ja kinnitad.',
   },
   {
     kicker: 'Esmaspäev, 7.55',
-    title: 'Ja ütleb, kes vajab sind täna.',
+    title: ['Ja ütleb, kes ', 'vajab sind', ' täna.'],
     body: 'Varajane hoiatus näitab põhjust ja piiri, mitte ainult värvi. Piirid paned sina ja sina otsustad, kas see oli päriselt risk.',
   },
 ]
@@ -50,8 +50,8 @@ function hasWebGL() {
 }
 
 const toneClass = {
-  red: 'bg-[#D94A3F]',
-  amber: 'bg-[#E5B23A]',
+  red: 'bg-[#FF3B30]',
+  amber: 'bg-[#FFB800]',
 }
 
 export default function HeroStory() {
@@ -64,7 +64,6 @@ export default function HeroStory() {
   const sceneRef = useRef(null)
   const [reduced] = useState(prefersReducedMotion)
   const [webgl] = useState(hasWebGL)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (!webgl) return undefined
@@ -108,6 +107,8 @@ export default function HeroStory() {
     }
 
     const updateText = (p) => {
+      // Päikesetõus: taust soojeneb ja päike tõuseb koos kerimisega
+      stage.style.setProperty('--p', reduced ? '1' : p.toFixed(3))
       WINDOWS.forEach((win, i) => {
         const el = stepRefs.current[i]
         if (!el) return
@@ -155,7 +156,6 @@ export default function HeroStory() {
         scene.setProgress(progress())
         scene.renderOnce()
         updateText(progress())
-        setReady(true)
         /** Arenduses: `__hero(0.7)` joonistab kindla oleku ka siis, kui vahekaart on taustal. */
         if (import.meta.env.DEV) {
           window.__hero = (p) => { updateText(p); scene.setProgress(p); scene.renderOnce() }
@@ -188,114 +188,121 @@ export default function HeroStory() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#0D1424] text-white"
+      className="relative bg-[#070A1F] text-white"
       style={{ height: scrollStory ? '330vh' : 'auto' }}
     >
-      <div
-        ref={stageRef}
-        onPointerMove={onPointerMove}
-        onPointerLeave={() => sceneRef.current?.clearPointer()}
-        className={`${scrollStory ? 'sticky top-0 h-[100svh]' : 'relative min-h-[100svh]'} overflow-hidden`}
-      >
-        {webgl && (
-          <canvas
-            ref={canvasRef}
-            aria-hidden="true"
-            className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
-          />
-        )}
+      <div className={`${scrollStory ? 'sticky top-0 h-[100svh]' : 'relative min-h-[100svh]'} p-2 sm:p-3`}>
+        <div
+          ref={stageRef}
+          onPointerMove={onPointerMove}
+          onPointerLeave={() => sceneRef.current?.clearPointer()}
+          className="hero-sky relative h-full min-h-[calc(100svh-1rem)] rounded-[24px] sm:rounded-[34px] overflow-hidden"
+          style={{ '--p': 0 }}
+        >
+          {/* Päikesetõusu kihid (CSS), 3D-lõuend on läbipaistev nende peal */}
+          <div className="hero-sun pointer-events-none absolute inset-0" />
+          <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-overlay" />
 
-        {/* Filmilik viimistlus: vinjett ja peen tera (ainult CSS, ei koorma GPU-d) */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_60%_45%,rgba(13,20,36,0)_45%,rgba(8,12,22,0.55)_100%)]" />
-        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay" />
-        {/* Loetavus: teksti taga tumedam ala (laual vasakul, telefonis all) */}
-        <div className="pointer-events-none absolute inset-0 hidden md:block bg-[linear-gradient(90deg,#0D1424_0%,rgba(13,20,36,0.92)_30%,rgba(13,20,36,0.35)_55%,rgba(13,20,36,0)_70%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] md:hidden bg-[linear-gradient(0deg,#0D1424_0%,rgba(13,20,36,0.94)_55%,rgba(13,20,36,0)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(13,20,36,0.85),rgba(13,20,36,0))]" />
+          {/* 3D-stseen lisab siia oma lõuendi (vt deskScene.js) */}
+          {webgl && <div ref={canvasRef} className="absolute inset-0" />}
 
-        <header className="absolute inset-x-0 top-0 z-20">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8 py-5 flex items-center justify-between">
-            <span className="font-serif-brand text-2xl tracking-tight">EduAI</span>
-            <nav className="flex items-center gap-4 sm:gap-6 text-sm">
-              <Link to="/login" className="text-white/80 hover:text-white">Logi sisse</Link>
-              <Link to="/register" className="bg-white text-[#14213D] rounded-full px-4 py-2 font-medium hover:bg-[#F3EFE6] transition-colors">
-                Loo konto
-              </Link>
-            </nav>
-          </div>
-        </header>
+          {/* Loetavus: pehme tumedam ala teksti taga */}
+          <div className="pointer-events-none absolute inset-0 hidden md:block bg-[linear-gradient(90deg,rgba(9,12,52,0.72)_0%,rgba(9,12,52,0.4)_38%,rgba(9,12,52,0)_60%)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] md:hidden bg-[linear-gradient(0deg,rgba(9,12,52,0.92)_0%,rgba(9,12,52,0.7)_55%,rgba(9,12,52,0)_100%)]" />
 
-        {/* Hoiatuslipikute sildid, mis järgivad 3D-lipikuid */}
-        {webgl && FLAGS.map((f, i) => (
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 z-10 bg-[linear-gradient(180deg,rgba(9,12,52,0.55),rgba(9,12,52,0))]" />
+          <header className="absolute inset-x-0 top-0 z-20">
+            <div className="max-w-6xl mx-auto px-5 sm:px-10 py-5 flex items-center justify-between">
+              <span className="flex items-center gap-2 text-xl font-bold tracking-[-0.03em]">
+                <span className="w-3 h-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FFE59A,#FF7A4D)] shadow-[0_0_18px_rgba(255,170,90,0.9)]" />
+                EduAI
+              </span>
+              <nav className="flex items-center gap-3 sm:gap-5 text-sm">
+                <Link to="/login" className="text-white/85 hover:text-white">Logi sisse</Link>
+                <Link to="/register" className="bg-white text-[#0E1450] rounded-full px-4 py-2 font-semibold hover:bg-[#FFF3DA] transition-colors">
+                  Loo konto
+                </Link>
+              </nav>
+            </div>
+          </header>
+
+          {/* Hoiatuslipikute sildid, mis järgivad 3D-lipikuid */}
+          {webgl && FLAGS.map((f, i) => (
+            <div
+              key={f.name}
+              ref={(el) => { calloutRefs.current[i] = el }}
+              className="hero-callout pointer-events-none absolute left-0 top-0 z-10 opacity-0 transition-opacity duration-300 hidden sm:block"
+            >
+              <span data-leader className="absolute left-0 top-0 h-[1.5px] origin-left bg-white/70" />
+              <div className="bg-white text-[#0E1450] rounded-2xl shadow-[0_18px_40px_-12px_rgba(10,15,58,0.55)] px-4 py-3 w-[200px] xl:w-[236px]">
+                <p className="flex items-center gap-2 text-[13px] font-bold">
+                  <span className={`w-2.5 h-2.5 rounded-full ${toneClass[f.tone]}`} />
+                  {f.name}
+                  <span className="font-medium text-[#0E1450]/50">{f.level}</span>
+                </p>
+                <p className="text-[12.5px] text-[#0E1450]/75 mt-0.5 leading-snug">{f.reason}</p>
+              </div>
+            </div>
+          ))}
+
           <div
-            key={f.name}
-            ref={(el) => { calloutRefs.current[i] = el }}
-            className="hero-callout pointer-events-none absolute left-0 top-0 z-10 opacity-0 transition-opacity duration-300 hidden sm:block"
+            className={`relative z-10 max-w-6xl mx-auto px-5 sm:px-10 ${
+              scrollStory ? 'h-full' : 'pt-28 pb-16'
+            } flex flex-col justify-end md:justify-center pb-10 md:pb-0`}
           >
-            <span data-leader className="absolute left-0 top-0 h-px origin-left bg-white/45" />
-            <div className="bg-[#FCFBF7] text-[#14213D] rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.35)] px-3.5 py-2.5 w-[230px]">
-              <p className="flex items-center gap-2 text-[13px] font-semibold">
-                <span className={`w-2 h-2 rounded-full ${toneClass[f.tone]}`} />
-                {f.name}
-                <span className="font-normal text-[#14213D]/55">{f.level}</span>
-              </p>
-              <p className="text-[12.5px] text-[#14213D]/75 mt-0.5 leading-snug">{f.reason}</p>
+            <div className={scrollStory ? 'relative h-[360px] sm:h-[400px] max-w-xl' : 'max-w-xl space-y-14 mt-[45vh] md:mt-0'}>
+              {STEPS.map((s, i) => {
+                const Heading = i === 0 ? 'h1' : 'h2'
+                return (
+                  <div
+                    key={s.kicker}
+                    ref={(el) => { stepRefs.current[i] = el }}
+                    className={scrollStory ? 'absolute inset-x-0 bottom-0 md:bottom-auto md:top-0 will-change-transform' : ''}
+                    style={scrollStory ? { opacity: i === 0 ? 1 : 0 } : undefined}
+                  >
+                    <p className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1 text-[13px] font-medium text-white/90">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFC23D]" />
+                      {s.kicker}
+                    </p>
+                    <Heading className="font-sans font-bold text-[2.7rem] sm:text-6xl lg:text-[4.6rem] leading-[0.98] tracking-[-0.04em] mt-4 text-white">
+                      {s.title[0]}
+                      <em className="hero-accent font-serif-italic not-italic">{s.title[1]}</em>
+                      {s.title[2]}
+                    </Heading>
+                    <p className="mt-5 text-white/80 text-base sm:text-lg leading-relaxed max-w-md">{s.body}</p>
+                    {i === 2 && webgl && (
+                      <ul className="sm:hidden mt-5 space-y-1.5 text-[13px] text-white/85">
+                        {FLAGS.map((f) => (
+                          <li key={f.name} className="flex items-baseline gap-2">
+                            <span className={`w-2 h-2 rounded-full shrink-0 translate-y-[-1px] ${toneClass[f.tone]}`} />
+                            <span><span className="font-semibold text-white">{f.name}</span>: {f.reason}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {(i === 0 || i === 2) && (
+                      <div className="mt-8 flex flex-wrap items-center gap-3">
+                        <Link to="/register" className="bg-white text-[#0E1450] rounded-full px-6 py-3 text-sm font-semibold shadow-[0_10px_30px_-8px_rgba(255,190,110,0.7)] hover:bg-[#FFF3DA] transition-colors">
+                          Proovi oma klassiga
+                        </Link>
+                        <Link to="/login" className="rounded-full px-5 py-3 text-sm font-medium text-white bg-white/10 border border-white/25 backdrop-blur-md hover:bg-white/20 transition-colors">
+                          Mul on konto
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
-        ))}
 
-        <div
-          className={`relative z-10 max-w-6xl mx-auto px-5 sm:px-8 ${
-            scrollStory ? 'h-full' : 'pt-28 pb-16'
-          } flex flex-col justify-end md:justify-center pb-14 md:pb-0`}
-        >
-          <div className={scrollStory ? 'relative h-[340px] sm:h-[380px] max-w-xl' : 'max-w-xl space-y-14 mt-[45vh] md:mt-0'}>
-            {STEPS.map((s, i) => {
-              const Heading = i === 0 ? 'h1' : 'h2'
-              return (
-                <div
-                  key={s.title}
-                  ref={(el) => { stepRefs.current[i] = el }}
-                  className={scrollStory ? 'absolute inset-x-0 bottom-0 md:bottom-auto md:top-0 will-change-transform' : ''}
-                  style={scrollStory ? { opacity: i === 0 ? 1 : 0 } : undefined}
-                >
-                  <p className="font-serif-brand text-[#E8B9A4] text-lg">{s.kicker}</p>
-                  <Heading className="font-serif-brand text-[2.6rem] sm:text-6xl lg:text-[4.4rem] leading-[1.02] tracking-[-0.02em] mt-3 text-white">
-                    {s.title}
-                  </Heading>
-                  <p className="mt-5 text-white/70 text-base sm:text-lg leading-relaxed max-w-md">{s.body}</p>
-                  {i === 2 && webgl && (
-                    <ul className="sm:hidden mt-5 space-y-1.5 text-[13px] text-white/80">
-                      {FLAGS.map((f) => (
-                        <li key={f.name} className="flex items-baseline gap-2">
-                          <span className={`w-2 h-2 rounded-full shrink-0 translate-y-[-1px] ${toneClass[f.tone]}`} />
-                          <span><span className="font-semibold text-white">{f.name}</span>: {f.reason}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {(i === 0 || i === 2) && (
-                    <div className="mt-8 flex flex-wrap items-center gap-5">
-                      <Link to="/register" className="bg-[#C8322B] text-white rounded-full px-6 py-3 text-sm font-medium hover:bg-[#B02A24] transition-colors">
-                        Proovi oma klassiga
-                      </Link>
-                      <Link to="/login" className="text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:decoration-white">
-                        Mul on konto
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+          {scrollStory && (
+            <div ref={hintRef} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-2 text-xs text-white/70">
+              Keri ja vaata, kuidas päev korda saab
+              <span className="scroll-hint-line block w-px h-10 bg-white/60" />
+            </div>
+          )}
         </div>
-
-        {scrollStory && (
-          <div ref={hintRef} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-2 text-xs text-white/55">
-            Keri ja vaata, kuidas laud korda saab
-            <span className="scroll-hint-line block w-px h-10 bg-white/40" />
-          </div>
-        )}
       </div>
     </section>
   )

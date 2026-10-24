@@ -17,7 +17,7 @@ Lisa see enne tööd läbi; `AGENTS.md` (ülal) kehtib endiselt.
 - **n8n webhook** (`services/webhook.js`, `docs/N8N.md`): SSRF-kaitse, õpilaste nimed vaikimisi ei lähe.
 - **Hinded**: CSV/Excel import (olemasolev endpoint), mall, CSV eksport; Õpilased: CSV eksport.
 - **Mobiil/PWA**: alumine menüü + "Veel" paneel (sõrmega järgiv), manifest, ikoonid, service worker (`public/sw.js`), iOS-i sisestusväljad 16px.
-- **Disain**: tinasinine (`#1C3556`/`#14213D`) põhinupud, soe paber taust (`#F7F4EE`), lilla (`#7F77DD`) ainult AI-märgistel, serif-pealkirjad (Newsreader, `font-serif-brand`), fondid self-hosted (`@fontsource`), avaleht `/avaleht` (3D-laud three.js-iga, `client/src/landing/`, laetakse eraldi tükina; arenduses `__hero(0..1)` konsoolis joonistab kindla oleku), login/register jagatud raam (`AuthShell.jsx`, CSS-3D vihikuvirn).
+- **Disain**: tinasinine (`#1C3556`/`#14213D`) põhinupud, soe paber taust (`#F7F4EE`), lilla (`#7F77DD`) ainult AI-märgistel, serif-pealkirjad (Newsreader, `font-serif-brand`), fondid self-hosted (`@fontsource`), avaleht `/avaleht` (erksa päikesetõusu gradiendi ja stiliseeritud 3D-vihikutega, three.js, `client/src/landing/`; avalehel oma erksam palett, rakenduse sees endiselt tinasinine, laetakse eraldi tükina; arenduses `__hero(0..1)` konsoolis joonistab kindla oleku), login/register jagatud raam (`AuthShell.jsx`, CSS-3D vihikuvirn).
 - **Kaitse**: parooli ja PII logi, pseudonümiseerimine (`services/pseudonymise.js`), turvapäised (`middleware/security.js`), audit_log.
 
 ## Reeglid (lisaks AGENTS.md-le)
