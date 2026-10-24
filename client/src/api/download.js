@@ -18,7 +18,8 @@ export async function downloadFile(path, fallbackName = 'fail.csv') {
   document.body.appendChild(a)
   a.click()
   a.remove()
-  URL.revokeObjectURL(url)
+  /** Safari avab blobi asünkroonselt — kohene revoke andis "Safari Can't Open the Page". */
+  setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
 
 /** Faili üleslaadimine (multipart): apiCall paneks Content-Type'i JSON-iks. */
