@@ -79,7 +79,6 @@ export default function LandingPage() {
       <footer className="border-t border-[#D9D4C7]">
         <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-sm text-[#14213D]/60">
           <span className="font-serif-brand text-lg text-[#14213D]">EduAI</span>
-          <span>Loovtöö 2026</span>
         </div>
       </footer>
     </div>
