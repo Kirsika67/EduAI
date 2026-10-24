@@ -11,7 +11,7 @@ import { DayTimeline, PrivacyDemo, MoreList, FinalCta } from '../landing/Section
  */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#F7F4EE] text-[#14213D]">
+    <div className="min-h-screen bg-white text-[#0E1450]">
       <HeroStory />
       <main>
         <DayTimeline />

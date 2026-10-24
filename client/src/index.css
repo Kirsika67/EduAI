@@ -106,24 +106,24 @@ body { overscroll-behavior-y: none; }
 /* Öösinisest koobaltini; --p (0..1) tuleb kerimisest */
 .hero-sky {
   background:
-    radial-gradient(70% 60% at 12% 8%, rgba(74, 104, 190, 0.4), rgba(74, 104, 190, 0) 70%),
-    radial-gradient(50% 50% at 8% 100%, rgba(226, 140, 120, 0.28), rgba(226, 140, 120, 0) 70%),
-    linear-gradient(180deg, #101B33 0%, #1C3556 55%, #2C4673 100%);
+    radial-gradient(70% 60% at 12% 8%, rgba(61, 91, 255, 0.55), rgba(61, 91, 255, 0) 70%),
+    radial-gradient(50% 50% at 8% 100%, rgba(255, 111, 181, 0.32), rgba(255, 111, 181, 0) 70%),
+    linear-gradient(180deg, #0B1146 0%, #17208A 55%, #2B2DB8 100%);
 }
 /* Päike tõuseb paremalt alt ja soojendab kogu taeva */
 .hero-sun {
   background:
-    radial-gradient(42% 46% at 74% calc(118% - var(--p) * 52%), #FBE3A8 0%, #F4B27A 22%, #E57A5F 48%, rgba(229, 122, 95, 0) 74%),
-    radial-gradient(80% 60% at 70% 110%, rgba(229, 154, 184, 0.3), rgba(229, 154, 184, 0) 70%);
-  opacity: calc(0.35 + var(--p) * 0.45);
+    radial-gradient(42% 46% at 74% calc(118% - var(--p) * 52%), #FFE7A0 0%, #FFB36B 22%, #FF6E5A 48%, rgba(255, 94, 77, 0) 74%),
+    radial-gradient(80% 60% at 70% 110%, rgba(255, 140, 200, 0.4), rgba(255, 140, 200, 0) 70%);
+  opacity: calc(0.4 + var(--p) * 0.5);
 }
 .hero-accent {
-  background-image: linear-gradient(90deg, #E8604C, #F2B544);
+  background-image: linear-gradient(90deg, #FF5E4D, #FFC23D);
   background-repeat: no-repeat;
   background-size: 100% 0.09em;
   background-position: 0 92%;
   padding: 0 0.04em;
 }
 /* Kellaajad ajajoonel: päikesetõusu gradient tekstis */
-.moment-time { background: linear-gradient(100deg, #E8604C 0%, #EE9466 40%, #F2B544 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.pen-path { stroke: #E5483D; }
+.moment-time { background: linear-gradient(100deg, #FF5E4D 0%, #FF8A5B 40%, #FFC23D 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pen-path { stroke: #FF3B30; }

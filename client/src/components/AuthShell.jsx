@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 
 /** Vihikuvirn ainult CSS-iga (3D kalle, lipikud), sama motiiv mis avalehe 3D-stseenis. */
 const STACK = [
-  { color: '#3A5BC7', name: 'Mari', shift: -6 },
-  { color: '#3FB58A', name: 'Jaan', shift: 4 },
-  { color: '#F2B544', name: 'Kertu', shift: -2, flag: '#E5483D' },
-  { color: '#E59AB8', name: 'Oskar', shift: 6, flag: '#F0B23A' },
-  { color: '#E8604C', name: 'Markus', shift: 0 },
+  { color: '#3D5BFF', name: 'Mari', shift: -6 },
+  { color: '#2FD39A', name: 'Jaan', shift: 4 },
+  { color: '#FFC23D', name: 'Kertu', shift: -2, flag: '#FF3B30' },
+  { color: '#FF8CC8', name: 'Oskar', shift: 6, flag: '#FFB800' },
+  { color: '#FF5E4D', name: 'Markus', shift: 0 },
 ]
 
 function NotebookStack() {
@@ -35,18 +35,18 @@ function NotebookStack() {
 /** Ühine sisselogimise ja registreerimise raam: vasakul rahulik sõnum, paremal vorm. */
 export default function AuthShell({ children }) {
   return (
-    <div className="min-h-screen bg-[#F7F4EE] grid lg:grid-cols-[1.05fr_1fr] lg:p-3 lg:gap-3">
+    <div className="min-h-screen bg-white grid lg:grid-cols-[1.05fr_1fr] lg:p-3 lg:gap-3">
       <aside className="hero-sky relative overflow-hidden text-white px-8 py-10 lg:px-16 lg:py-14 flex flex-col justify-between lg:rounded-[34px]" style={{ '--p': 0.75 }}>
         <div className="hero-sun pointer-events-none absolute inset-0" />
-        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.09] mix-blend-overlay" />
-                <Link to="/avaleht" className="relative flex items-center gap-2 font-serif-brand text-2xl tracking-tight w-fit">
-          <span className="w-3 h-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FBE3A8,#E8735A)] shadow-[0_0_18px_rgba(232,150,100,0.9)]" />
+        <div className="hero-grain pointer-events-none absolute inset-0 opacity-[0.11] mix-blend-overlay" />
+                <Link to="/avaleht" className="relative flex items-center gap-2 text-xl font-bold tracking-[-0.03em] w-fit">
+          <span className="w-3 h-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#FFE59A,#FF7A4D)] shadow-[0_0_18px_rgba(255,170,90,0.9)]" />
           EduAI
         </Link>
         <div className="relative my-10 lg:my-0 grid gap-12">
           <div className="hidden lg:[@media(min-height:780px)]:block"><NotebookStack /></div>
           <div className="max-w-md">
-            <h2 className="font-serif-brand text-3xl lg:text-[3.2rem] leading-[1.05] tracking-[-0.02em]">
+            <h2 className="font-sans font-bold text-3xl lg:text-[3.4rem] leading-[1.0] tracking-[-0.04em]">
               Esmaspäev võib alata <em className="hero-accent font-serif-italic not-italic">rahulikult</em>.
             </h2>
             <p className="text-white/85 mt-5 leading-relaxed">
