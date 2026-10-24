@@ -32,6 +32,7 @@ import messagesRoutes from "./routes/messages.js";
 import mentoringRoutes from "./routes/mentoring.js";
 import schoolRoutes from "./routes/school.js";
 import activitiesRoutes from "./routes/activities.js";
+import riskRoutes from "./routes/risk.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(__dirname, "..", "..", "client", "dist");
@@ -102,6 +103,7 @@ app.use("/api/notifications", notificationsRouter);
 app.use("/api/mentoring", mentoringRoutes);
 app.use("/api/school", schoolRoutes);
 app.use("/api/activities", activitiesRoutes);
+app.use("/api/risk", riskRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api", studentRoutes);
 app.use("/api", studentDetailRoutes);

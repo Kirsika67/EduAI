@@ -2,7 +2,7 @@ import { Router } from "express";
 import db from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { classTopicWeakAlerts } from "../services/alerts.js";
-import { abcForStudent } from "../services/abcRisk.js";
+import { abcForStudent, getRiskThresholds } from "../services/abcRisk.js";
 import { generateDashboardSummary } from "../services/aiOverview.js";
 
 const router = Router();
@@ -114,8 +114,9 @@ router.get("/overview", async (req, res) => {
   const studentAlerts = [];
   let needAttentionCount = 0;
 
+  const riskThresholds = getRiskThresholds(db, req.user.id);
   for (const st of students) {
-    const abc = abcForStudent(db, st.id);
+    const abc = abcForStudent(db, st.id, riskThresholds);
     if (abc.level === "red" || abc.level === "yellow") {
       needAttentionCount += 1;
     }

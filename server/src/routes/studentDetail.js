@@ -2,7 +2,7 @@ import { Router } from "express";
 import db from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { runStudentAiAnalysis } from "../services/studentAnalysis.js";
-import { abcForStudent } from "../services/abcRisk.js";
+import { abcForStudent, getRiskThresholds } from "../services/abcRisk.js";
 import { audit } from "../services/audit.js";
 
 const router = Router();
@@ -210,7 +210,7 @@ router.get("/classes/:classId/students/:studentId/detail", (req, res) => {
   res.json({
     student,
     class: klass,
-    abc: abcForStudent(db, studentId),
+    abc: abcForStudent(db, studentId, getRiskThresholds(db, req.user.id)),
     attendance,
     behavior,
     wellbeing,

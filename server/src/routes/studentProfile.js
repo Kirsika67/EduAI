@@ -1,7 +1,7 @@
 import { Router } from "express";
 import db from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { abcForStudent } from "../services/abcRisk.js";
+import { abcForStudent, getRiskThresholds } from "../services/abcRisk.js";
 import { audit } from "../services/audit.js";
 
 const router = Router();
@@ -44,11 +44,12 @@ router.get("/classes/:classId/abc-risks", (req, res) => {
     )
     .all(classId);
 
+  const riskThresholds = getRiskThresholds(db, req.teacherId);
   res.json({
     students: students.map((st) => ({
       studentId: st.id,
       studentName: st.name,
-      ...abcForStudent(db, st.id),
+      ...abcForStudent(db, st.id, riskThresholds),
     })),
   });
 });

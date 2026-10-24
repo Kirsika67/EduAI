@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { apiCall } from '../api/client'
 import { useClasses } from '../context/ClassContext'
 import Badge from '../components/Badge'
@@ -9,6 +9,7 @@ const attLabels = { present: 'Kohal', late: 'Hilines', absent: 'Puudus' }
 const behLabels = { positive: 'Tunnustus', concern: 'Mure', incident: 'Juhtum' }
 const moodLabels = { good: 'Hea', ok: 'Keskmine', hard: 'Raske' }
 const kindLabels = { academic: 'Akadeemiline', personal: 'Isiklik' }
+const levelLabels = { red: 'Tähelepanu', yellow: 'Tugi vajalik', green: 'Edasijõudnud', blue: 'Hea tase' }
 const compLabels = { ok: 'korras', high: 'kõrge', medium: 'keskmine', improving: 'tõus' }
 
 function Section({ title, hint, children }) {
@@ -29,6 +30,8 @@ export default function StudentDetailPage() {
   const [student, setStudent] = useState(null)
   const [grades, setGrades] = useState([])
   const [abc, setAbc] = useState(null)
+  const [riskFeedback, setRiskFeedback] = useState([])
+  const [fbSaving, setFbSaving] = useState(false)
   const [attendance, setAttendance] = useState([])
   const [behavior, setBehavior] = useState([])
   const [wellbeing, setWellbeing] = useState([])
@@ -71,8 +74,28 @@ export default function StudentDetailPage() {
         setAiAnalysis(s.lastAnalysis)
         setParentLetter(s.lastAnalysis.parentEmail || '')
       }
+      await loadRiskFeedback()
     } catch (err) { console.error(err) }
     finally { setLoading(false) }
+  }
+
+  const loadRiskFeedback = async () => {
+    try {
+      const f = await apiCall(`/api/risk/feedback/student/${studentId}`)
+      setRiskFeedback(f.feedback || [])
+    } catch { setRiskFeedback([]) }
+  }
+
+  const sendRiskFeedback = async (verdict) => {
+    setFbSaving(true)
+    try {
+      await apiCall('/api/risk/feedback', {
+        method: 'POST',
+        body: JSON.stringify({ studentId: Number(studentId), verdict }),
+      })
+      await loadRiskFeedback()
+    } catch (err) { alert(err.message) }
+    finally { setFbSaving(false) }
   }
 
   const runAI = async () => {
@@ -201,6 +224,36 @@ export default function StudentDetailPage() {
                 {abc.reasons.map((r, i) => <li key={i}>{r}</li>)}
               </ul>
             : <p className="text-sm text-gray-400">Hetkel pole hoiatuse põhjuseid.</p>}
+          <p className="text-[11px] text-gray-400 mt-3">
+            Põhjused tulenevad sinu hoiatuspiiridest.{' '}
+            <Link to="/seaded" className="text-[#534AB7] hover:underline">Muuda piire</Link>
+          </p>
+
+          <div className="border-t border-black/10 mt-4 pt-3">
+            <p className="text-xs font-semibold text-gray-700 mb-2">Kas see hoiatus vastab tõele?</p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => sendRiskFeedback('was_risk')} disabled={fbSaving}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 disabled:opacity-40">
+                Oli risk
+              </button>
+              <button onClick={() => sendRiskFeedback('not_risk')} disabled={fbSaving}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 disabled:opacity-40">
+                Ei olnud risk
+              </button>
+            </div>
+            {riskFeedback.length > 0 && (
+              <ul className="mt-3 space-y-1">
+                {riskFeedback.slice(0, 3).map(f => (
+                  <li key={f.id} className="text-xs text-gray-500">
+                    {f.createdAt?.slice(0, 10)} · tase "{levelLabels[f.level] || f.level}" ·{' '}
+                    <span className="font-medium text-gray-700">
+                      {f.verdict === 'was_risk' ? 'oli risk' : 'ei olnud risk'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
 

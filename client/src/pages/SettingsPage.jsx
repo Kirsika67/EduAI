@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { apiCall } from '../api/client'
 import Badge from '../components/Badge'
+import RiskSettings from '../components/RiskSettings'
 
 export default function SettingsPage() {
   const { teacher, school, role, applyAccount } = useAuth()
@@ -170,6 +171,8 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      <RiskSettings />
 
       <div className="bg-white rounded-xl border border-black/10 p-5">
         <h2 className="text-sm font-semibold text-gray-900 mb-3">

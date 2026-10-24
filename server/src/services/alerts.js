@@ -15,12 +15,14 @@ function parseDay(dateStr) {
  * Kolm järjestikust hindeid alla 50%.
  * @param {GradeRow[]} chronologicalAsc
  */
-export function hasRedStreak(chronologicalAsc) {
+export function hasRedStreak(chronologicalAsc, count = 3, below = 50) {
   const g = chronologicalAsc;
-  for (let i = 0; i <= g.length - 3; i++) {
-    if (g[i].score < 50 && g[i + 1].score < 50 && g[i + 2].score < 50) {
-      return true;
+  for (let i = 0; i <= g.length - count; i++) {
+    let all = true;
+    for (let j = 0; j < count; j++) {
+      if (!(g[i + j].score < below)) { all = false; break; }
     }
+    if (all) return true;
   }
   return false;
 }
@@ -29,7 +31,7 @@ export function hasRedStreak(chronologicalAsc) {
  * Viimase 30 päeva vs eelneva 30 päeva keskmine.
  * @returns {'yellow'|'green'|null}
  */
-export function monthWindowTrend(chronologicalAsc) {
+export function monthWindowTrend(chronologicalAsc, changePct = 15) {
   const now = Date.now();
   const day = 24 * 60 * 60 * 1000;
   const b30 = now - 30 * day;
@@ -49,8 +51,8 @@ export function monthWindowTrend(chronologicalAsc) {
   if (aNew === null || aOld === null) return null;
   if (prev30.length === 0 || last30.length === 0) return null;
 
-  if (aOld - aNew > 15) return "yellow";
-  if (aNew - aOld > 15) return "green";
+  if (aOld - aNew > changePct) return "yellow";
+  if (aNew - aOld > changePct) return "green";
   return null;
 }
 

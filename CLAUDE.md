@@ -31,7 +31,7 @@ Lisa see enne tööd läbi; `AGENTS.md` (ülal) kehtib endiselt.
 ## Teadaolevad piirid / pooleli
 - SQLite (üks kool). Mitme kooli jaoks PostgreSQL (vt `docs/ARHITEKTUUR_JA_PLAAN.md`).
 - Stuudiumi "Veel"-menüü ja täpne hinnete vorm pole näinud (vajab ekraanipilti).
-- Varajane hoiatus selgitatava põhjusega ja õpetaja tagasiside sellele (plaan `docs/STRATEEGIA.md`).
+- Varajane hoiatus: õpetaja piirid (`risk_settings`, Kool ja konto lehel) ja tagasiside "oli risk / ei olnud" (`risk_feedback`, õpilase lehel) on tehtud. Veel puudu: kooli/juhtkonna vaated (`schoolStats`) kasutavad vaikepiire; täpsuse analüüs vajab ~20+ hinnangut.
 - Lapsevanemale ja kolleegidele ei saadeta midagi automaatselt; AI ettepanek alati inimese kinnitusega.
 - AI joonised (SVG) ja valemid on tehisintellekti loodud — materjal tuleb enne printimist üle vaadata.
 

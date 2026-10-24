@@ -38,7 +38,7 @@ Alus: kriitiline analüüs (okt 2026), mida on siin **faktiliselt parandatud** v
 **Nädal 3–4: toode (mina ehitan)**
 - [ ] **Mobiil:** telefoni rakenduse kogemus (PWA: kodukuvale lisatav, alumine menüü, kiired tegevused).
 - [ ] **Import ja eksport:** CSV hinnete ja õpilaste import ning eksport, et topeltsisestust vähendada.
-- [ ] **Selgitatav varajane hoiatus:** õpetaja muudab piire, näeb põhjuseid (mis hinded, kui palju) ja saab märkida "tõesti oli risk / ei olnud", et saaksime tulemust hiljem võrrelda.
+- [x] **Selgitatav varajane hoiatus:** õpetaja muudab piire, näeb põhjuseid (mis hinded, kui palju) ja saab märkida "tõesti oli risk / ei olnud", et saaksime tulemust hiljem võrrelda.
 - [ ] **Eri vaated:** lihtne lapsevanema ja õpilase vaade ning juhtkonna kokkuvõte (olemas, vajab lihvi).
 
 **Kuu 2: esimene tasuv klient**
